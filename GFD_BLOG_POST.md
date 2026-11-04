@@ -58,6 +58,8 @@ This post walks through a clean reference architecture, sequence diagrams, and r
 * **Part 2 (Federated Connector auth in your UI):** How to wire up the two-step OAuth handshake ([`dataConnector:acquireAccessToken`](https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataConnector/acquireAccessToken) and [`dataConnector:acquireAndStoreRefreshToken`](https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataConnector/acquireAndStoreRefreshToken)) so users can connect Jira, ServiceNow, or Confluence directly from your custom UI.
 * **Part 3 (Individual tool auth for custom ADK agents):** Using a Root Router Agent and specialist subagents ([`tool_context.request_credential`](https://google.github.io/adk-docs/tools/authentication/)) so third-party login prompts appear in your custom UI on demand without failing on `:streamAssist`.
 
+![Figure 1: End-to-end authentication architecture for a custom enterprise UI calling Gemini Enterprise (:streamAssist)](docs/diagrams/fig1-end-to-end-identity-architecture.png)
+
 **Figure 1: End-to-end authentication architecture across user login (`:streamAssist`), Federated Connectors (`Keystore`), and custom ADK agents (`Vertex AI Agent Engine`).**
 
 ---
@@ -74,6 +76,8 @@ In enterprise environments, customer architectures fall into three user authenti
 | **Pattern 1B: Pure Workforce Identity (WIF)** | Microsoft Entra ID, Okta, or Ping | Workforce Identity (WIF) | [Google Security Token Service (`sts.googleapis.com/v1/token`)](https://cloud.google.com/iam/docs/reference/sts/rest/v1/TopLevel/token) | `principal://.../workforcePools/.../subject/user@company.com` | **Yes** |
 | **Pattern 1C: Hybrid (Entra/Okta UI + Google Identity GE)** | Microsoft Entra ID or Okta | Google Identity (or Google Workspace connectors) | [IAM Credentials API (`:signJwt`)](https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt) then `oauth2.googleapis.com/token` | `user@company.com` | **Yes** |
 | **Machine-Only: Workload Identity Federation** | Backend server (Azure, AWS, GKE) | Either mode (non-personalized bot) | Google STS (`workloadIdentityPools`) | `principal://.../workloadIdentityPools/...` (or shared SA) | **No** (Requires sharing agents with "All users") |
+
+![Figure 2: Comparing Patterns 1A, 1B, and 1C for authenticating users from a custom UI to :streamAssist](docs/diagrams/fig2-inbound-streamassist-scenarios.png)
 
 **Figure 2: Comparing Patterns 1A, 1B, and 1C for authenticating users from a custom UI to `:streamAssist`, plus why Workload Identity Federation is machine-only.**
 
@@ -138,6 +142,8 @@ Because Federated Connectors enforce user-level permissions in the third-party s
 
 **Figure 3** shows the vertical sequence across your Custom UI, App Backend, Discovery Engine (`dataConnector` and `Keystore`), and the third-party OAuth server:
 
+![Figure 3: Vertical sequence diagram for authenticating a Gemini Enterprise Federated Connector from a custom UI](docs/diagrams/fig3-federated-connector-3lo-flow.png)
+
 **Figure 3: Vertical sequence diagram for authenticating a Gemini Enterprise Federated Connector (`acquireAccessToken`, popup redirect, and `acquireAndStoreRefreshToken`) from a custom UI.**
 
 1. **Phase 1 (Check Keystore or Get `authUri`, Steps 1 to 3):** When the employee sends a query that uses a Federated Connector, your **App Backend** calls [`GET dataConnector:acquireAccessToken`](https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataConnector/acquireAccessToken) with the user's Part 1 Bearer token. If the user has authenticated before, Gemini Enterprise refreshes their token from the **Keystore** automatically. If no token exists yet, Discovery Engine returns `authUri` (`needs_oauth`).
@@ -162,6 +168,8 @@ However, when you call that agent from a **custom UI via `:streamAssist`**, atta
 ### The solution: Individual per-tool OAuth (`tool_context.request_credential`) rendered in your custom UI
 
 To make custom ADK agents work reliably over `:streamAssist` and prompt the user **only when a specific third-party tool is called**, do not attach `authorizationConfig` at the Gemini Enterprise registration level. Instead, manage OAuth individually inside each ADK tool using [`tool_context.request_credential()`](https://google.github.io/adk-docs/tools/authentication/) and [`tool_context.get_auth_response()`](https://google.github.io/adk-docs/tools/authentication/), as shown in the **Figure 4** sequence diagram:
+
+![Figure 4: Vertical sequence diagram for individual tool OAuth in a custom ADK agent invoked from a custom UI](docs/diagrams/fig4-adk-subagent-on-demand-3lo.png)
 
 **Figure 4: Vertical sequence diagram for individual tool OAuth (`adk_request_credential`) in a custom ADK agent invoked from a custom UI via `:streamAssist`.**
 

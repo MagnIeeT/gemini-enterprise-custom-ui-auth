@@ -1,0 +1,18 @@
+# Environment & credentials (never commit live tokens or project IDs)
+.env
+*.env.local
+*.key.json
+*credentials*.json
+
+# Python virtual environments & cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# OS & editor files
+.DS_Store
+.vscode/
+.idea/

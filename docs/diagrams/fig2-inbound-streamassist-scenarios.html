@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 1: Three Patterns to Authenticate Users from a Custom UI to :streamAssist · Google Cloud Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- fde-viewer-runtime:start v1 -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gcp-blue:       #1a73e8;
+    --gcp-blue-tint:  #e8f0fe;
+    --gcp-green:      #34a853;
+    --gcp-yellow:     #fbbc04;
+    --gcp-red:        #ea4335;
+
+    --color-paper:    #ffffff;
+    --color-subtle:   #f8f9fa;
+    --color-ink:      #202124;
+    --color-muted:    #5f6368;
+    --color-hairline: #dadce0;
+
+    --font-sans: 'Google Sans', 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Roboto Mono', ui-monospace, monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-subtle);
+    color: var(--color-ink);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2.5rem 1.5rem;
+  }
+
+  /* Container geometry is load-bearing: check_diagram.py derives DESKTOP_DIAGRAM_WIDTH
+     (1068px) from 1200 - 80 container padding - 2 border - 48 stage padding - 2 border.
+     Changing any of these five numbers means updating that constant and its test. */
+  .container {
+    max-width: 1200px; width: 100%;
+    background: var(--color-paper);
+    border: 1px solid var(--color-hairline);
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.08);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gcp-blue); margin-bottom: 0.5rem;
+  }
+  h1 { font-size: 1.75rem; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 0.5rem; }
+  .desc { font-size: 0.95rem; color: var(--color-muted); line-height: 1.5; max-width: 800px; }
+
+  /* --- Toolbar ------------------------------------------------------------------------- */
+  .toolbar { display: flex; flex-direction: column; gap: 0.5rem; margin: 1.5rem 0 0.75rem; }
+  .toolbar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  .toolbar-view { justify-content: flex-end; }
+
+  .find { position: relative; }
+  .find input {
+    font-family: var(--font-sans); font-size: 0.85rem;
+    padding: 0.4rem 0.7rem; width: 15rem;
+    border: 1px solid var(--color-hairline); border-radius: 6px;
+    background: var(--color-paper); color: var(--color-ink);
+  }
+  .find input:focus { outline: 2px solid var(--gcp-blue); outline-offset: -1px; }
+  .find-results {
+    position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: 22rem;
+    background: var(--color-paper); border: 1px solid var(--color-hairline);
+    border-radius: 8px; box-shadow: 0 4px 16px rgba(60,64,67,0.16);
+    max-height: 18rem; overflow-y: auto; padding: 0.25rem;
+  }
+  .find-results[hidden] { display: none; }
+  .find-results button {
+    display: block; width: 100%; text-align: left; border: 0; background: none;
+    font-family: var(--font-sans); font-size: 0.85rem; color: var(--color-ink);
+    padding: 0.4rem 0.55rem; border-radius: 5px; cursor: pointer;
+  }
+  .find-results button:hover, .find-results button:focus { background: var(--gcp-blue-tint); outline: none; }
+  .find-results .rr-sub { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-muted); }
+  .find-results .rr-empty { padding: 0.5rem 0.55rem; font-size: 0.82rem; color: var(--color-muted); }
+
+  .chip, .btn {
+    font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500;
+    padding: 0.35rem 0.7rem; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--color-hairline); background: var(--color-paper); color: var(--color-muted);
+  }
+  .btn { border-radius: 6px; }
+  .chip:hover, .btn:hover { background: var(--color-subtle); }
+  .chip[aria-pressed="true"] { background: var(--gcp-blue-tint); border-color: var(--gcp-blue); color: var(--gcp-blue); }
+  .chip:focus-visible, .btn:focus-visible { outline: 2px solid var(--gcp-blue); outline-offset: 1px; }
+  .zoom-level { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-muted); min-width: 3.2rem; text-align: center; }
+  #tier-chips, #chapter-buttons { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; }
+
+  /* --- Chapter rail ---------------------------------------------------------------------- */
+  .chapters {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+    margin-bottom: 0.75rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .chapters[hidden] { display: none; }
+  .chapters-label {
+    font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-muted);
+    margin-right: 0.15rem;
+  }
+  .chapter-actions { display: inline-flex; gap: 0.4rem; margin-left: auto; }
+  .chip[data-preview] {
+    border-style: dashed; border-color: var(--gcp-blue); color: var(--gcp-blue);
+  }
+
+  /* --- Stage --------------------------------------------------------------------------- */
+  .stage {
+    position: relative; width: 100%; overflow: hidden;
+    background: var(--color-paper);
+    border: 1px solid var(--color-hairline); border-radius: 8px;
+    padding: 1.5rem;
+    touch-action: none;
+  }
+  .stage[data-panning="true"] { cursor: grabbing; }
+  .canvas { transform-origin: 0 0; will-change: transform; }
+  .canvas svg { width: 100%; height: auto; display: block; }
+
+  .hint {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted);
+    margin-top: 0.5rem; letter-spacing: 0.02em;
+  }
+  .hint kbd {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    border: 1px solid var(--color-hairline); border-bottom-width: 2px;
+    border-radius: 3px; padding: 0 0.25rem; background: var(--color-subtle);
+  }
+
+  /* --- Interaction states -------------------------------------------------------------- */
+  /* Every rule below changes opacity or stroke only. Authored geometry, fills, icon colours
+     and the white paper are never touched, so the stage always matches the .svg deliverable. */
+  /* The .svg carries its own title block so it reads standalone. Here the page header already
+     states it, so a grouped header frame is hidden rather than duplicated. */
+  .canvas svg g[data-frame-kind="header"] { display: none; }
+
+  .canvas svg [data-frame-kind="node"] { cursor: pointer; }
+
+  .canvas svg [data-frame-kind="node"][data-hover] > rect:first-of-type,
+  .canvas svg [data-frame-kind="node"][data-focus-match="self"] > rect:first-of-type {
+    stroke: var(--gcp-blue); stroke-width: 2.4;
+  }
+
+  /* Three dim layers — focus, tier filter, chapter — compose: anything muted by any one of
+     them is muted. They are deliberately separate attributes so none has to know about the
+     others, and clearing one never resurrects what another is hiding. */
+  .canvas svg[data-focus] [data-frame-kind="node"]:not([data-focus-match]),
+  .canvas svg[data-dim-tier] [data-frame-kind="node"][data-tier-muted],
+  .canvas svg[data-chapter] [data-frame-kind="node"][data-chapter-muted] {
+    opacity: 0.22;
+  }
+  .canvas svg[data-focus] [data-edge-from]:not([data-focus-match]),
+  .canvas svg[data-focus] [data-label-for]:not([data-focus-match]),
+  .canvas svg[data-chapter] [data-edge-from][data-chapter-muted],
+  .canvas svg[data-chapter] [data-label-for][data-chapter-muted] {
+    opacity: 0.12;
+  }
+  .canvas svg[data-focus] [data-frame-kind="boundary"] { opacity: 0.45; }
+  .canvas svg [data-frame-kind="node"],
+  .canvas svg [data-edge-from],
+  .canvas svg [data-label-for],
+  .canvas svg [data-frame-kind="boundary"] { transition: opacity 120ms ease-out; }
+
+  .canvas svg [data-focus-match="self"] { opacity: 1; }
+  .canvas svg [data-frame-kind="node"]:focus-visible > rect:first-of-type {
+    stroke: var(--gcp-blue); stroke-width: 2.4; stroke-dasharray: 4 3;
+  }
+
+  .canvas svg [data-flow] {
+    fill: none; pointer-events: none; opacity: 0;
+    stroke: var(--gcp-blue); stroke-width: 2.2; stroke-linecap: round;
+    stroke-dasharray: 5 11;
+  }
+  .canvas svg [data-flow][data-flow-live] {
+    opacity: 0.9;
+    animation: fde-flow 900ms linear infinite;
+  }
+  @keyframes fde-flow { to { stroke-dashoffset: -16; } }
+
+  /* --- Detail panel -------------------------------------------------------------------- */
+  .panel {
+    margin-top: 1rem; border: 1px solid var(--gcp-blue);
+    border-radius: 8px; background: #fbfdff; padding: 1.1rem 1.25rem;
+  }
+  .panel[hidden] { display: none; }
+  .panel-head { display: flex; align-items: flex-start; gap: 0.75rem; }
+  .panel-title { font-size: 1.05rem; font-weight: 500; color: var(--gcp-blue); }
+  .panel-product { font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-muted); margin-top: 0.15rem; }
+  .panel-note { font-size: 0.88rem; color: var(--color-ink); line-height: 1.5; margin-top: 0.6rem; }
+  .panel-evidence { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-muted); margin-top: 0.4rem; }
+  .panel-rel { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 0.9rem; }
+  .panel-rel h3 {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--color-muted); margin-bottom: 0.35rem;
+  }
+  .panel-rel ul { list-style: none; font-size: 0.83rem; }
+  .panel-rel li { margin-bottom: 0.25rem; }
+  .panel-rel .rel-edge { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-muted); }
+  .panel-rel .rel-none { font-size: 0.83rem; color: var(--color-muted); }
+  .panel-rel button {
+    border: 0; background: none; padding: 0; cursor: pointer; text-align: left;
+    font-family: var(--font-sans); font-size: 0.83rem; color: var(--gcp-blue);
+  }
+  .panel-rel button:hover { text-decoration: underline; }
+  .panel-actions { display: flex; gap: 0.5rem; }
+
+  /* --- Review notes ------------------------------------------------------------------------ */
+  .canvas svg [data-note-marker] { display: none; pointer-events: none; }
+  body[data-review] .canvas svg [data-note-marker][data-note-count] { display: block; }
+  [data-note-marker] circle { fill: var(--gcp-yellow); stroke: #ffffff; stroke-width: 1.5; }
+  [data-note-marker] text {
+    font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+    fill: var(--color-ink); text-anchor: middle;
+  }
+
+  .panel-notes { margin-top: 0.9rem; border-top: 1px solid var(--color-hairline); padding-top: 0.8rem; }
+  .panel-notes[hidden] { display: none; }
+  .panel-notes h3 {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--color-muted); margin-bottom: 0.4rem;
+  }
+  .note-list { list-style: none; font-size: 0.85rem; }
+  .note-list li {
+    display: flex; gap: 0.5rem; align-items: baseline;
+    padding: 0.3rem 0; border-bottom: 1px solid var(--color-hairline);
+  }
+  .note-list li:last-child { border-bottom: 0; }
+  .note-list .note-text { flex: 1 1 auto; line-height: 1.45; }
+  .note-list .note-target {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted);
+    display: block; margin-bottom: 0.1rem;
+  }
+  .note-list .note-del {
+    border: 0; background: none; cursor: pointer; padding: 0 0.2rem;
+    font-family: var(--font-sans); font-size: 0.8rem; color: var(--color-muted);
+  }
+  .note-list .note-del:hover { color: var(--gcp-red); }
+  .note-form { display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 0.5rem; }
+  .note-form textarea {
+    flex: 1 1 auto; resize: vertical;
+    font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.45;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--color-hairline); border-radius: 6px;
+    background: var(--color-paper); color: var(--color-ink);
+  }
+  .note-form textarea:focus { outline: 2px solid var(--gcp-blue); outline-offset: -1px; }
+
+  .drawer {
+    margin-top: 1rem; border: 1px solid var(--gcp-yellow);
+    border-radius: 8px; background: #fffdf5; padding: 1.1rem 1.25rem;
+  }
+  .drawer[hidden] { display: none; }
+  .drawer-head { display: flex; align-items: flex-start; gap: 0.75rem; }
+  .drawer-title { flex: 1 1 auto; font-size: 1.05rem; font-weight: 500; }
+  .drawer-count { font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-muted); }
+  .drawer-warn { font-size: 0.82rem; color: var(--gcp-red); margin-top: 0.5rem; }
+  .drawer-warn[hidden] { display: none; }
+
+  /* --- Summary cards ------------------------------------------------------------------- */
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem; margin-top: 2rem;
+  }
+  .summary-card {
+    background: var(--color-subtle); border: 1px solid var(--color-hairline);
+    border-radius: 8px; padding: 1.25rem;
+  }
+  .summary-title {
+    font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--color-muted); margin-bottom: 0.75rem;
+  }
+  .summary-list { list-style: none; font-size: 0.88rem; }
+  .summary-list li {
+    margin-bottom: 0.4rem; padding-left: 0.8em; text-indent: -0.8em;
+    overflow-wrap: anywhere;
+  }
+  .summary-list li::before {
+    content: "•"; color: var(--gcp-blue); font-weight: bold;
+    display: inline-block; width: 0.8em; text-indent: 0;
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .canvas, .canvas svg * { transition: none !important; }
+    .canvas svg [data-flow][data-flow-live] {
+      animation: none; stroke-dasharray: none; opacity: 0.55;
+    }
+  }
+
+  /* Printing and PDF export take the canonical diagram: no viewer state, no chrome. */
+  @media print {
+    body { background: #ffffff; padding: 0; }
+    .container { border: 0; box-shadow: none; padding: 0; max-width: none; }
+    .toolbar, .panel, .hint, .chapters, .drawer { display: none !important; }
+    .stage { border: 0; padding: 0; overflow: visible; }
+    .canvas { transform: none !important; }
+    .canvas svg g[data-frame-kind="header"] { display: block; }
+    .canvas svg [data-frame-kind], .canvas svg [data-edge-from], .canvas svg [data-label-for] {
+      opacity: 1 !important;
+    }
+    .canvas svg [data-flow], .canvas svg [data-note-marker] { display: none !important; }
+  }
+</style>
+<!-- fde-viewer-runtime:end -->
+</head>
+<body>
+
+<main class="container">
+  <p class="eyebrow">Google Cloud Architecture · Gemini Enterprise &amp; ADK</p>
+  <h1>Part 1: Three Patterns to Authenticate Users from a Custom UI to :streamAssist</h1>
+  <p class="desc">Pattern 1A (Google Identity) · Pattern 1B (Workforce Identity + STS) · Pattern 1C (Hybrid Login + DWD :signJwt)</p>
+
+  <!-- fde-viewer-runtime:start v1 -->
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-row">
+      <div class="find">
+        <label class="sr-only" for="find-input">Find a component</label>
+        <input id="find-input" type="search" placeholder="Find a component…  /" autocomplete="off" spellcheck="false">
+        <div class="find-results" id="find-results" role="listbox" hidden></div>
+      </div>
+      <div id="tier-chips" role="group" aria-label="Filter by tier"></div>
+    </div>
+    <div class="toolbar-row toolbar-view">
+      <button class="btn" id="zoom-out" type="button" aria-label="Zoom out">−</button>
+      <span class="zoom-level" id="zoom-level" aria-live="off">100%</span>
+      <button class="btn" id="zoom-in" type="button" aria-label="Zoom in">+</button>
+      <button class="btn" id="reset" type="button">Reset view</button>
+      <button class="btn" id="export-png" type="button">PNG</button>
+      <button class="chip" id="review-toggle" type="button" aria-pressed="false">Notes</button>
+    </div>
+  </div>
+
+  <nav class="chapters" id="chapters" aria-label="Guided chapters" hidden>
+    <span class="chapters-label">Walkthrough</span>
+    <div id="chapter-buttons" role="group"></div>
+    <div class="chapter-actions">
+      <button class="btn" id="chapter-prev" type="button" aria-label="Previous chapter">←</button>
+      <button class="btn" id="chapter-next" type="button" aria-label="Next chapter">→</button>
+      <button class="btn" id="chapter-play" type="button" aria-pressed="false">▶ Play</button>
+    </div>
+  </nav>
+  <!-- fde-viewer-runtime:end -->
+
+  <div class="stage" id="stage">
+    <div class="canvas" id="canvas">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 620" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#202124" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1a73e8"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#9334e6"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e8e3e"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#e37400"/>
+    </marker>
+    <mask id="mask-edge-1a-1" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="620">
+      <rect width="1360" height="620" fill="white"/>
+      <rect x="276" y="209" width="112" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-1b-1" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="620">
+      <rect width="1360" height="620" fill="white"/>
+      <rect x="274" y="339" width="116" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-1c-1" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="620">
+      <rect width="1360" height="620" fill="white"/>
+      <rect x="272" y="469" width="120" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-1a-2" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="620">
+      <rect width="1360" height="620" fill="white"/>
+      <rect x="730" y="227" width="124" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-1b-2" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="620">
+      <rect width="1360" height="620" fill="white"/>
+      <rect x="724" y="357" width="136" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-1c-2" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="620">
+      <rect width="1360" height="620" fill="white"/>
+      <rect x="722" y="487" width="138" height="20" rx="10" fill="black"/>
+    </mask>
+    <!-- Official Google Gemini 2025 4-Color Icon Filters & Mask -->
+    <linearGradient id="gemini-grad" x1="18.447" y1="43.42" x2="52.153" y2="15.004" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4893FC"/>
+      <stop offset=".27" stop-color="#4893FC"/>
+      <stop offset=".777" stop-color="#969DFF"/>
+      <stop offset="1" stop-color="#BD99FE"/>
+    </linearGradient>
+    <mask id="gemini-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="65" height="65">
+      <path d="M32.447 0c.68 0 1.273.465 1.439 1.125a38.904 38.904 0 001.999 5.905c2.152 5 5.105 9.376 8.854 13.125 3.751 3.75 8.126 6.703 13.125 8.855a38.98 38.98 0 005.906 1.999c.66.166 1.124.758 1.124 1.438 0 .68-.464 1.273-1.125 1.439a38.902 38.902 0 00-5.905 1.999c-5 2.152-9.375 5.105-13.125 8.854-3.749 3.751-6.702 8.126-8.854 13.125a38.973 38.973 0 00-2 5.906 1.485 1.485 0 01-1.438 1.124c-.68 0-1.272-.464-1.438-1.125a38.913 38.913 0 00-2-5.905c-2.151-5-5.103-9.375-8.854-13.125-3.75-3.749-8.125-6.702-13.125-8.854a38.973 38.973 0 00-5.905-2A1.485 1.485 0 010 32.448c0-.68.465-1.272 1.125-1.438a38.903 38.903 0 005.905-2c5-2.151 9.376-5.104 13.125-8.854 3.75-3.749 6.703-8.125 8.855-13.125a38.972 38.972 0 001.999-5.905A1.485 1.485 0 0132.447 0z" fill="#000"/>
+      <path d="M32.447 0c.68 0 1.273.465 1.439 1.125a38.904 38.904 0 001.999 5.905c2.152 5 5.105 9.376 8.854 13.125 3.751 3.75 8.126 6.703 13.125 8.855a38.98 38.98 0 005.906 1.999c.66.166 1.124.758 1.124 1.438 0 .68-.464 1.273-1.125 1.439a38.902 38.902 0 00-5.905 1.999c-5 2.152-9.375 5.105-13.125 8.854-3.749 3.751-6.702 8.126-8.854 13.125a38.973 38.973 0 00-2 5.906 1.485 1.485 0 01-1.438 1.124c-.68 0-1.272-.464-1.438-1.125a38.913 38.913 0 00-2-5.905c-2.151-5-5.103-9.375-8.854-13.125-3.75-3.749-8.125-6.702-13.125-8.854a38.973 38.973 0 00-5.905-2A1.485 1.485 0 010 32.448c0-.68.465-1.272 1.125-1.438a38.903 38.903 0 005.905-2c5-2.151 9.376-5.104 13.125-8.854 3.75-3.749 6.703-8.125 8.855-13.125a38.972 38.972 0 001.999-5.905A1.485 1.485 0 0132.447 0z" fill="url(#gemini-grad)"/>
+    </mask>
+    <filter id="gem-f0" x="-19.824" y="13.152" width="39.274" height="43.217" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="2.46"/></filter>
+    <filter id="gem-f1" x="-15.001" y="-40.257" width="84.868" height="85.688" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="11.891"/></filter>
+    <filter id="gem-f2" x="-20.776" y="11.927" width="79.454" height="90.916" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="10.109"/></filter>
+    <filter id="gem-f4" x="-19.845" y="15.459" width="79.731" height="81.505" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="10.109"/></filter>
+    <filter id="gem-f5" x="29.832" y="-11.552" width="75.117" height="73.758" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="9.606"/></filter>
+    <filter id="gem-f6" x="-38.583" y="-16.253" width="78.135" height="78.758" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="8.706"/></filter>
+    <filter id="gem-f7" x="8.107" y="-5.966" width="78.877" height="77.539" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="7.775"/></filter>
+    <filter id="gem-f8" x="13.587" y="-18.488" width="56.272" height="51.81" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="6.957"/></filter>
+    <filter id="gem-f9" x="-15.526" y="-31.297" width="70.856" height="69.306" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="5.876"/></filter>
+    <filter id="gem-f10" x="-14.168" y="20.964" width="55.501" height="51.571" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="7.273"/></filter>
+
+    <!-- Official Google Cloud Mark -->
+    <symbol id="icon-google-cloud" viewBox="0 0 36 28">
+      <path fill="#ea4335" d="M21.85,7.41l1,0,2.85-2.85.14-1.21A12.81,12.81,0,0,0,5,9.6a1.55,1.55,0,0,1,1-.06l5.7-.94s.29-.48.44-.45a7.11,7.11,0,0,1,9.73-.74Z"/>
+      <path fill="#4285f4" d="M29.76,9.6a12.84,12.84,0,0,0-3.87-6.24l-4,4A7.11,7.11,0,0,1,24.5,13v.71a3.56,3.56,0,1,1,0,7.12H17.38l-.71.72v4.27l.71.71H24.5A9.26,9.26,0,0,0,29.76,9.6Z"/>
+      <path fill="#34a853" d="M10.25,26.49h7.12v-5.7H10.25a3.54,3.54,0,0,1-1.47-.32l-1,.31L4.91,23.63l-.25,1A9.21,9.21,0,0,0,10.25,26.49Z"/>
+      <path fill="#fbbc05" d="M10.25,8A9.26,9.26,0,0,0,4.66,24.6l4.13-4.13a3.56,3.56,0,1,1,4.71-4.71l4.13-4.13A9.25,9.25,0,0,0,10.25,8Z"/>
+    </symbol>
+
+    <!-- Official Google Gemini 4-Color Sparkle -->
+    <symbol id="icon-gemini" viewBox="0 0 65 65">
+      <g mask="url(#gemini-mask)">
+        <path d="M0 0h65v65H0z" fill="url(#gemini-grad)"/>
+        <g filter="url(#gem-f0)"><path d="M-5.859 50.734c7.498 2.663 16.116-2.33 19.249-11.152 3.133-8.821-.406-18.131-7.904-20.794-7.498-2.663-16.116 2.33-19.25 11.151-3.132 8.822.407 18.132 7.905 20.795z" fill="#FFE432"/></g>
+        <g filter="url(#gem-f1)"><path d="M27.433 21.649c10.3 0 18.651-8.535 18.651-19.062 0-10.528-8.35-19.062-18.651-19.062S8.78-7.94 8.78 2.587c0 10.527 8.35 19.062 18.652 19.062z" fill="#FC413D"/></g>
+        <g filter="url(#gem-f2)"><path d="M20.184 82.608c10.753-.525 18.918-12.244 18.237-26.174-.68-13.93-9.95-24.797-20.703-24.271C6.965 32.689-1.2 44.407-.519 58.337c.681 13.93 9.95 24.797 20.703 24.271z" fill="#00B95C"/></g>
+        <g filter="url(#gem-f4)"><path d="M30.954 74.181c9.014-5.485 11.427-17.976 5.389-27.9-6.038-9.925-18.241-13.524-27.256-8.04-9.015 5.486-11.428 17.977-5.39 27.902 6.04 9.924 18.242 13.523 27.257 8.038z" fill="#00B95C"/></g>
+        <g filter="url(#gem-f5)"><path d="M67.391 42.993c10.132 0 18.346-7.91 18.346-17.666 0-9.757-8.214-17.667-18.346-17.667s-18.346 7.91-18.346 17.667c0 9.757 8.214 17.666 18.346 17.666z" fill="#3186FF"/></g>
+        <g filter="url(#gem-f6)"><path d="M-13.065 40.944c9.33 7.094 22.959 4.869 30.442-4.972 7.483-9.84 5.987-23.569-3.343-30.663C4.704-1.786-8.924.439-16.408 10.28c-7.483 9.84-5.986 23.57 3.343 30.664z" fill="#FBBC04"/></g>
+        <g filter="url(#gem-f7)"><path d="M34.74 51.43c11.135 7.656 25.896 5.524 32.968-4.764 7.073-10.287 3.779-24.832-7.357-32.488C49.215 6.52 34.455 8.654 27.382 18.94c-7.072 10.288-3.779 24.833 7.357 32.49z" fill="#3186FF"/></g>
+        <g filter="url(#gem-f8)"><path d="M54.984-2.336c2.833 3.852-.808 11.34-8.131 16.727-7.324 5.387-15.557 6.631-18.39 2.78-2.833-3.853.807-11.342 8.13-16.728 7.324-5.387 15.558-6.631 18.39-2.78z" fill="#749BFF"/></g>
+        <g filter="url(#gem-f9)"><path d="M31.727 16.104C43.053 5.598 46.94-8.626 40.41-15.666c-6.53-7.04-21.006-4.232-32.332 6.274s-15.214 24.73-8.683 31.77c6.53 7.04 21.006 4.232 32.332-6.274z" fill="#FC413D"/></g>
+        <g filter="url(#gem-f10)"><path d="M8.51 53.838c6.732 4.818 14.46 5.55 17.262 1.636 2.802-3.915-.384-10.994-7.116-15.812-6.731-4.818-14.46-5.55-17.261-1.636-2.802 3.915.383 10.994 7.115 15.812z" fill="#FFEE48"/></g>
+      </g>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 512 512">
+  <circle cx="256" cy="176" r="72" fill="#f1f3f4" stroke="#5f6368" stroke-width="28"/>
+  <path d="M112,400c0-79.5,64.5-144,144-144s144,64.5,144,144" fill="none" stroke="#5f6368" stroke-width="28" stroke-linecap="round"/>
+</symbol>
+    <symbol id="icon-security" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M256.004,287.542c-43.08,0-78.128-35.065-78.128-78.167s35.048-78.167,78.128-78.167,78.129,35.065,78.129,78.167-35.049,78.167-78.129,78.167ZM256.004,163.208c-25.435,0-46.128,20.71-46.128,46.167s20.693,46.167,46.128,46.167,46.129-20.71,46.129-46.167-20.693-46.167-46.129-46.167h0Z" fill="#4285f4"/>
+    <path d="M153.505,376.416c-.752,0-1.511-.053-2.276-.162-8.748-1.245-14.83-9.347-13.584-18.096,4.021-28.244,18.11-54.191,39.672-73.062,21.776-19.059,49.72-29.555,78.682-29.555,8.837,0,16,7.163,16,16s-7.163,16-16,16c-21.207,0-41.666,7.684-57.607,21.636-15.801,13.828-26.123,32.825-29.066,53.492-1.137,7.982-7.983,13.746-15.819,13.746h-.002Z" fill="#9aa0a6"/>
+    <path d="M358.493,376.427c-7.838,0-14.685-5.764-15.82-13.748-2.94-20.669-13.262-39.668-29.063-53.499-15.941-13.953-36.401-21.638-57.61-21.638-8.837,0-16-7.163-16-16s7.163-16,16-16c28.964,0,56.909,10.497,78.687,29.559,21.562,18.873,35.65,44.823,39.669,73.07,1.244,8.749-4.839,16.85-13.587,18.095-.765.108-1.523.161-2.274.161h-.002Z" fill="#4285f4"/>
+    <path d="M256.004,287.542c-43.08,0-78.128-35.065-78.128-78.167s35.048-78.167,78.128-78.167v32c-25.435,0-46.128,20.71-46.128,46.167s20.693,46.167,46.128,46.167v32Z" fill="#9aa0a6"/>
+    <path d="M437.95,151.09c-.01-.13-.03-.26-.04-.39-.02-.18-.04-.37-.07-.55-.05-.37-.12-.74-.19-1.1-.08-.36-.17-.72-.27-1.07-.15-.53-.33-1.05-.54-1.56-.06-.15-.12-.3-.18-.44-.23-.55-.5-1.08-.8-1.59-.08-.14-.16-.28-.25-.42-.19-.31-.4-.61-.61-.91-.21-.29-.42-.57-.65-.85l-.02-.02c-.23-.28-.47-.55-.72-.81-.01-.01-.02-.02-.02-.02-.19-.21-.39-.41-.6-.6-.27-.26-.55-.5-.83-.73-.13-.11-.26-.21-.39-.31-.14-.11-.28-.22-.42-.31-.13-.1-.25-.19-.38-.28-.33-.22-.67-.43-1.02-.62-.21-.13-.41-.24-.63-.35-.13-.07-.25-.13-.38-.19l-137.13-68.47-.07-.03-28.59-14.28c-4.17-2.09-9.03-2.24-13.3-.46-.33.14-.66.29-1,.46l-166,82.88c-5.42,2.71-8.85,8.26-8.85,14.32v103.13c0,44.24,21.16,86.5,56.59,113.04l98.72,73.94v.01l17.1,12.8c1.43,1.07,2.99,1.87,4.6,2.39.61.21,1.23.37,1.85.49.78.16,1.57.25,2.35.29.28.01.55.02.8.02.3,0,.59-.01.89-.03.21-.01.41-.02.62-.04.42-.04.85-.1,1.27-.18.25-.04.5-.09.74-.15.07-.01.15-.03.22-.04.01,0,.02-.01.02-.01.24-.06.48-.12.71-.19.26-.07.52-.15.78-.25.3-.11.61-.22.91-.35h.01c.28-.11.55-.24.82-.37.59-.28,1.17-.61,1.73-.99.18-.11.37-.23.54-.36.11-.07.21-.15.32-.23l115.82-86.75c35.43-26.54,56.59-68.8,56.59-113.04v-103.13c0-.44-.02-.87-.05-1.3h0ZM406,255.52c0,34.21-16.37,66.9-43.78,87.43l-106.22,79.56-106.22-79.56c-27.41-20.53-43.78-53.22-43.78-87.43v-93.24l150-74.9,150,74.9v93.24h0Z" fill="#9aa0a6"/>
+    <path d="M268.81,452.09c-.94,1.25-2.03,2.33-3.22,3.22-.11.08-.21.16-.32.23-.17.13-.36.25-.54.36-.56.38-1.14.71-1.73.99-.27.13-.54.26-.82.37h-.01c-.3.13-.61.24-.91.35-.26.09-.52.17-.78.25-.23.07-.47.13-.71.19,0,0-.01.01-.02.01-.07.01-.15.03-.22.04-.24.06-.49.11-.74.15-.42.08-.85.14-1.27.18-.21.02-.41.03-.62.04-.3.02-.59.03-.89.03-.25,0-.52-.01-.8-.02-.78-.04-1.57-.13-2.35-.29-.62-.12-1.24-.28-1.85-.49-1.61-.52-3.17-1.32-4.6-2.39l-17.1-12.8v-.01l-98.72-73.94c-35.43-26.54-56.59-68.8-56.59-113.04v-103.13c0-6.06,3.43-11.61,8.85-14.32L248.85,55.19c.34-.17.67-.32,1-.46,4.27-1.78,9.13-1.63,13.3.46l28.59,14.28.07.03-35.81,17.88-150,74.9v93.24c0,34.21,16.37,66.9,43.78,87.43l106.22,79.56,9.59,7.18c7.07,5.3,8.51,15.33,3.22,22.4h0Z" fill="#4285f4"/>
+    <path d="M438,152.39v103.13c0,44.24-21.16,86.5-56.59,113.04l-115.82,86.75c-.11.08-.21.16-.32.23-.17.13-.36.25-.54.36-.56.38-1.14.71-1.73.99-.27.13-.54.26-.82.37h-.01c-.3.13-.61.24-.91.35-.26.1-.52.18-.78.25-.23.07-.47.13-.71.19,0,0-.01.01-.02.01-.32.07-.64.14-.96.19-.42.08-.85.14-1.27.18-.21.02-.41.03-.62.04-.3.02-.59.03-.89.03-.25,0-.52-.01-.8-.02-.78-.04-1.57-.13-2.35-.29-.62-.12-1.24-.28-1.85-.49-1.61-.52-3.17-1.32-4.6-2.39l-17.1-12.8v-.01l26.69-19.99,106.22-79.56c27.41-20.53,43.78-53.22,43.78-87.43v-103.13c0-8.84,7.16-16,16-16,2.49,0,4.84.57,6.94,1.58.13.06.25.12.38.19.22.11.42.22.63.35.35.19.69.4,1.02.62.13.09.25.18.38.28.14.09.28.2.42.31.13.1.26.2.39.31.28.23.56.47.83.73.21.19.41.39.6.6,0,0,.01.01.02.02.25.26.49.53.72.81l.02.02c.23.28.44.56.65.85.21.3.42.6.61.91.09.14.17.28.25.42.3.51.57,1.04.8,1.59.06.14.12.29.18.44.21.51.39,1.03.54,1.56.1.35.19.71.27,1.07.07.36.14.73.19,1.1.03.18.05.37.07.55.01.13.03.26.04.39.03.43.05.86.05,1.3h0Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+    <symbol id="icon-agents" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M256.083,438.958h-.025c-6.531-.01-12.403-3.982-14.831-10.046-.21-.521-21.989-53.918-63.233-94.966-41.269-41.072-94.336-62.688-94.867-62.902-6.066-2.438-10.046-8.326-10.039-14.865.007-6.537,3.983-12.415,10.053-14.842.964-.39,53.504-21.883,94.854-63.036,41.476-41.278,63-94.697,63.213-95.231,2.422-6.092,8.316-10.098,14.871-10.098h.017c6.562.007,12.456,4.012,14.867,10.113.206.521,21.716,53.924,63.206,95.216,41.538,41.341,94.333,62.827,94.861,63.039,6.064,2.436,10.045,8.316,10.045,14.852s-3.969,12.416-10.033,14.851c-.52.209-53.737,21.965-94.874,62.904-41.11,40.916-63.029,94.463-63.245,94.999-2.444,6.048-8.317,10.013-14.838,10.013h-.002ZM125.551,256.183c21.069,11.566,49.712,29.899,75.016,55.082,25.399,25.278,43.886,54.093,55.524,75.267,11.659-21.198,30.162-50.046,55.502-75.267,25.252-25.131,53.939-43.484,75.035-55.069-21.021-11.563-49.611-29.911-75.035-55.213-25.47-25.349-43.907-54.14-55.514-75.348-11.608,21.21-30.048,50.005-55.512,75.348-25.409,25.288-53.996,43.635-75.017,55.2h0Z" fill="#4285f4"/>
+    <path d="M394.5,181c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.249,16.379-6.249,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h-.001ZM369.627,117.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#9aa0a6"/>
+    <path d="M117.5,181c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.249,16.379-6.249,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h0ZM92.627,117.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#4285f4"/>
+    <path d="M394.5,458c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.248,16.379-6.248,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h-.001ZM369.627,394.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#4285f4"/>
+    <path d="M117.5,458c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.248,16.379-6.248,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h0ZM92.627,394.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#9aa0a6"/>
+    <path d="M334.166,333.946c41.137-40.94,94.354-62.695,94.874-62.904,6.064-2.435,10.032-8.315,10.033-14.851,0-6.535-3.98-12.416-10.045-14.851-.528-.212-53.323-21.698-94.861-63.039-.072-.071-.15-.131-.223-.2l-22.604,22.604c.087.091.163.189.253.278,25.424,25.302,54.015,43.649,75.035,55.213-21.096,11.585-49.783,29.939-75.035,55.069-25.34,25.221-43.843,54.068-55.502,75.267-11.622-21.144-30.074-49.907-55.418-75.16l-22.628,22.628c41.21,41.041,62.971,94.392,63.181,94.913,2.428,6.064,8.3,10.035,14.831,10.046h.025c6.521,0,12.393-3.966,14.838-10.013.216-.536,22.135-54.083,63.245-94.999h.001Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+    <symbol id="icon-vertex-ai" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M128,244.99c-8.84,0-16-7.16-16-16v-95.97c0-8.84,7.16-16,16-16s16,7.16,16,16v95.97c0,8.84-7.16,16-16,16Z" fill="#ea4335"/>
+    <path d="M256,458c-2.98,0-5.97-.83-8.59-2.5l-186-122c-7.46-4.74-9.65-14.63-4.91-22.09,4.75-7.46,14.64-9.65,22.09-4.91l177.41,116.53,177.41-116.53c7.45-4.74,17.34-2.55,22.09,4.91,4.74,7.46,2.55,17.34-4.91,22.09l-186,122c-2.62,1.67-5.61,2.5-8.59,2.5Z" fill="#fbbc04"/>
+    <path d="M256,388.03c-8.84,0-16-7.16-16-16v-73.06c0-8.84,7.16-16,16-16s16,7.16,16,16v73.06c0,8.84-7.16,16-16,16Z" fill="#34a853"/>
+    <circle cx="128" cy="70" r="16" fill="#ea4335"/>
+    <circle cx="128" cy="292" r="16" fill="#ea4335"/>
+    <path d="M384.23,308.01c-8.82,0-15.98-7.14-16-15.97l-.23-94.01c-.02-8.84,7.13-16.02,15.97-16.03h.04c8.82,0,15.98,7.14,16,15.97l.23,94.01c.02,8.84-7.13,16.02-15.97,16.03h-.04Z" fill="#4285f4"/>
+    <circle cx="384" cy="70" r="16" fill="#4285f4"/>
+    <circle cx="384" cy="134" r="16" fill="#4285f4"/>
+    <path d="M320,220.36c-8.84,0-16-7.16-16-16v-103.02c0-8.84,7.16-16,16-16s16,7.16,16,16v103.02c0,8.84-7.16,16-16,16Z" fill="#fbbc04"/>
+    <circle cx="256" cy="171" r="16" fill="#34a853"/>
+    <circle cx="256" cy="235" r="16" fill="#34a853"/>
+    <circle cx="320" cy="265" r="16" fill="#fbbc04"/>
+    <circle cx="320" cy="329" r="16" fill="#fbbc04"/>
+    <path d="M192,217.36c-8.84,0-16-7.16-16-16v-100.02c0-8.84,7.16-16,16-16s16,7.16,16,16v100.02c0,8.84-7.16,16-16,16Z" fill="#fbbc04"/>
+    <circle cx="192" cy="265" r="16" fill="#fbbc04"/>
+    <circle cx="192" cy="329" r="16" fill="#fbbc04"/>
+    </g>
+  </symbol>
+    <symbol id="icon-integration-services" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M346.683,112.611l-.039-75.171c-.005-8.834-7.167-15.992-16-15.992h-.008c-8.837.004-15.997,7.172-15.992,16.008l.039,75.155H118c-17.673,0-32,14.327-32,32v111.865c0,89.085,76.262,161.562,170,161.562s170-72.477,170-161.562v-111.865c0-17.673-14.327-32-32-32h-47.317ZM394,256.477c0,71.44-61.906,129.562-138,129.562s-138-58.121-138-129.562v-111.865h276v111.865Z" fill="#4285f4"/>
+    <path d="M314.644,144.611v-32h-117.294l-.039-75.171c-.005-8.834-7.167-15.992-16-15.992h-.008c-8.837.004-15.997,7.172-15.992,16.008l.039,75.155h-47.35c-17.673,0-32,14.327-32,32v111.865c0,83.959,67.741,153.155,154.007,160.841v56.679c0,8.616,6.621,16.029,15.228,16.433,9.188.432,16.772-6.889,16.772-15.982v-89.277c-6.594.627-8.014.652-16,.867h-.007c-76.094,0-138-58.121-138-129.562v-111.865h196.644,0Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+    <symbol id="icon-external-api" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="160" fill="#f1f3f4" stroke="#5f6368" stroke-width="28"/>
+  <path d="M96,256h320M256,96c48,48,80,112,80,160s-32,112-80,160M256,96c-48,48-80,112-80,160s32,112,80,160" fill="none" stroke="#5f6368" stroke-width="20"/>
+</symbol>
+    <symbol id="icon-cloud-run" viewBox="0 0 512 512">
+    <g id="art">
+    <path fill="#fbbc04" d="M144.4,272c-6.4,0-12.4-3.8-14.9-10.1L55.4,75.9c-3.3-8.2.7-17.5,8.9-20.8,8.2-3.3,17.5.7,20.8,8.9l74.2,186c3.3,8.2-.7,17.5-8.9,20.8-1.9.8-3.9,1.1-5.9,1.1h-.1Z"/>
+    <g id="b">
+    <path fill="#ea4335" d="M256,272c-6.4,0-12.4-3.8-14.9-10.1l-74.1-186c-2.6-6.6-.6-14.1,5-18.5s13.4-4.5,19.2-.4l260.1,186c7.2,5.1,8.9,15.1,3.7,22.3s-15.1,8.9-22.3,3.7L216.9,114.7l54,135.3c3.3,8.2-.7,17.5-8.9,20.8-1.9.8-4,1.1-5.9,1.1h-.1Z"/>
+    </g>
+    <path fill="#34a853" d="M127.2,256l-72,180c-3.3,8.2.7,17.5,8.9,20.8,3.1,1.2,4,1.1,5.9,1.1,6.3,0,12.4-3.8,14.9-10.1l74.4-186c.8-2,1.1-4,1.1-5.9h-33.2Z"/>
+    <path fill="#4285f4" d="M414.5,256l-197.7,141.2,54.1-135.3c.8-2,1.1-4,1.1-5.9h-33.2l-72,180c-2.6,6.6-.6,14.1,5,18.5,2.9,2.3,6.4,3.4,9.9,3.4s6.5-1,9.3-3l260.4-186c4.4-3.1,6.7-8,6.7-13h-43.6Z"/>
+    </g>
+  </symbol>
+    <symbol id="icon-networking" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M331.66,331.66l-22.627-22.627c29.242-29.243,29.242-76.823,0-106.066l22.627-22.627c41.72,41.719,41.72,109.602,0,151.32h0Z" fill="#9aa0a6"/>
+    <path d="M180.34,331.66c-41.72-41.719-41.72-109.602,0-151.32l22.627,22.627c-29.242,29.243-29.242,76.823,0,106.066l-22.627,22.627Z" fill="#9aa0a6"/>
+    <path d="M309.033,202.967c-29.242-29.242-76.824-29.242-106.066,0l-22.627-22.627c20.21-20.21,47.08-31.34,75.66-31.34s55.45,11.13,75.66,31.34l-22.627,22.627h0Z" fill="#4285f4"/>
+    <path d="M256,363c-28.58,0-55.45-11.13-75.66-31.34l22.627-22.627c29.242,29.242,76.824,29.242,106.066,0l22.627,22.627c-20.21,20.21-47.08,31.34-75.66,31.34Z" fill="#4285f4"/>
+    <path d="M170.229,147.603c5.406-9.256,8.521-20.007,8.521-31.478,0-34.531-28.094-62.625-62.625-62.625s-62.625,28.094-62.625,62.625,28.094,62.625,62.625,62.625c11.471,0,22.222-3.114,31.478-8.52l45.281,45.281c5.831-9.07,13.557-16.796,22.627-22.627l-45.281-45.281h-.001ZM116.125,146.75c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#4285f4"/>
+    <path d="M215.51,319.117c-9.07-5.831-16.796-13.557-22.627-22.627l-45.281,45.281c-9.256-5.406-20.007-8.52-31.478-8.52-34.531,0-62.625,28.094-62.625,62.625s28.094,62.625,62.625,62.625,62.625-28.094,62.625-62.625c0-11.471-3.114-22.222-8.521-31.478l45.281-45.281h0ZM116.125,426.5c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#9aa0a6"/>
+    <path d="M395.875,333.25c-11.471,0-22.222,3.114-31.478,8.52l-45.281-45.281c-5.831,9.07-13.557,16.796-22.627,22.627l45.281,45.281c-5.406,9.256-8.521,20.007-8.521,31.478,0,34.531,28.094,62.625,62.625,62.625s62.625-28.094,62.625-62.625-28.094-62.625-62.625-62.625h.001ZM395.875,426.5c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#4285f4"/>
+    <path d="M395.875,53.5c-34.531,0-62.625,28.094-62.625,62.625,0,11.645,3.205,22.551,8.764,31.902l-45.118,45.118c9.03,5.887,16.707,13.663,22.481,22.773l45.444-45.444c9.16,5.255,19.758,8.276,31.054,8.276,34.531,0,62.625-28.094,62.625-62.625s-28.094-62.625-62.625-62.625ZM395.875,146.75c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+  </defs>
+
+  <metadata id="diagram-model">{
+  "title": "Part 1: Three Patterns to Authenticate Users from a Custom UI to :streamAssist",
+  "subtitle": "Scenario 1A (Google Identity) \u00b7 Scenario 1B (WIF + Google STS) \u00b7 Scenario 1C (Hybrid WIF + Google Identity via Keyless DWD)",
+  "nodes": [
+    {
+      "id": "node-1a-user",
+      "name": "Scenario 1A: Google Workspace User",
+      "product": "Google Sign-In / OAuth 2.0",
+      "tier": "client",
+      "description": "Employee signs into custom UI directly with Google Workspace or Cloud Identity.",
+      "evidence": "Scenario 1A: Pure Google Identity"
+    },
+    {
+      "id": "node-1b-user",
+      "name": "Scenario 1B: External IdP User (WIF Mode)",
+      "product": "Microsoft Entra ID / Okta OIDC",
+      "tier": "client",
+      "description": "Employee signs in with Entra ID or Okta when Gemini Enterprise is in WIF mode.",
+      "evidence": "Step 1.2: USER_ENTRA_OIDC_ID_TOKEN"
+    },
+    {
+      "id": "node-1c-user",
+      "name": "Scenario 1C: Hybrid External IdP User",
+      "product": "Entra/Okta Login + Google Identity GE",
+      "tier": "client",
+      "description": "Employee signs into portal with Entra/Okta while Gemini Enterprise uses Google Identity.",
+      "evidence": "main.py (Entra MSAL + Google Identity GE)"
+    },
+    {
+      "id": "node-1a-oauth",
+      "name": "Direct Google OAuth 2.0 Token",
+      "product": "Google Identity OAuth 2.0",
+      "tier": "security",
+      "description": "Standard 3LO access token representing the Google Workspace user directly.",
+      "evidence": "Scenario 1A: Direct Bearer token"
+    },
+    {
+      "id": "node-1b-sts",
+      "name": "Workforce Identity Federation (WIF + STS)",
+      "product": "Google Security Token Service",
+      "tier": "security",
+      "focal": true,
+      "description": "Exchanges the user's Entra/Okta OIDC token for a Google Federated Workforce token.",
+      "evidence": "Step 1.2: sts.googleapis.com/v1/token"
+    },
+    {
+      "id": "node-1c-dwd",
+      "name": "Keyless Domain-Wide Delegation (:signJwt)",
+      "product": "IAM Credentials API + OAuth2 Token",
+      "tier": "security",
+      "focal": true,
+      "description": "Maps verified Entra/Okta email to Google Workspace user via Keyless DWD :signJwt.",
+      "evidence": "main.py (IAMCredentialsSignJwtSigner)"
+    },
+    {
+      "id": "node-ge-assist",
+      "name": "Gemini Enterprise (:streamAssist)",
+      "product": "Discovery Engine v1alpha",
+      "tier": "ai",
+      "description": "Receives the user-scoped Bearer token and enforces per-user ACLs across all connected data stores.",
+      "evidence": "assistants/default_assistant:streamAssist"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1a-1",
+      "from": "node-1a-user",
+      "to": "node-1a-oauth",
+      "label": "1A. Google OAuth",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-1b-1",
+      "from": "node-1b-user",
+      "to": "node-1b-sts",
+      "label": "1B. OIDC id_token",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-1c-1",
+      "from": "node-1c-user",
+      "to": "node-1c-dwd",
+      "label": "1C. Verified Email",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-1a-2",
+      "from": "node-1a-oauth",
+      "to": "node-ge-assist",
+      "label": "Google User Token",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-1b-2",
+      "from": "node-1b-sts",
+      "to": "node-ge-assist",
+      "label": "WIF STS Bearer Token",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-1c-2",
+      "from": "node-1c-dwd",
+      "to": "node-ge-assist",
+      "label": "DWD Workspace Token",
+      "kind": "sync"
+    }
+  ],
+  "views": [
+    {
+      "id": "scenario-1a",
+      "title": "1A: Pure Google Identity",
+      "summary": "Direct Google OAuth 2.0 user token when both the UI and Gemini Enterprise use Google Identity.",
+      "nodes": [
+        "node-1a-user",
+        "node-1a-oauth",
+        "node-ge-assist"
+      ],
+      "edges": [
+        "edge-1a-1",
+        "edge-1a-2"
+      ]
+    },
+    {
+      "id": "scenario-1b",
+      "title": "1B: Pure WIF + STS",
+      "summary": "Exchanges Entra/Okta OIDC id_token at Google STS when Gemini Enterprise uses Workforce Identity.",
+      "nodes": [
+        "node-1b-user",
+        "node-1b-sts",
+        "node-ge-assist"
+      ],
+      "edges": [
+        "edge-1b-1",
+        "edge-1b-2"
+      ]
+    },
+    {
+      "id": "scenario-1c",
+      "title": "1C: Hybrid WIF + Keyless DWD",
+      "summary": "Bridges Entra/Okta portal login to Google Identity Gemini Enterprise using IAM :signJwt DWD.",
+      "nodes": [
+        "node-1c-user",
+        "node-1c-dwd",
+        "node-ge-assist"
+      ],
+      "edges": [
+        "edge-1c-1",
+        "edge-1c-2"
+      ]
+    }
+  ]
+}</metadata>
+
+  <g id="layer-header" data-frame-id="header-main" data-frame-kind="header">
+    <rect x="24" y="14" width="1312" height="54" fill="none"/>
+    <text x="24" y="38" font-size="19" font-weight="600" fill="#202124">Part 1: Three Patterns to Authenticate Users from a Custom UI to :streamAssist</text>
+    <text x="24" y="58" font-size="12.5" fill="#5f6368">Pattern 1A (Google Identity) · Pattern 1B (Workforce Identity + STS) · Pattern 1C (Hybrid Login + DWD :signJwt)</text>
+    <g transform="translate(836, 18)">
+      <rect width="500" height="44" rx="8" fill="#f8f9fa" stroke="#dadce0" stroke-width="1"/>
+      <line x1="16" y1="22" x2="42" y2="22" stroke="#1e8e3e" stroke-width="2"/>
+      <polygon points="40,18 48,22 40,26" fill="#1e8e3e"/>
+      <text x="54" y="26" font-size="10" font-weight="500" fill="#3c4043">1A: Pure Google Identity</text>
+      <line x1="171" y1="22" x2="197" y2="22" stroke="#1a73e8" stroke-width="2"/>
+      <polygon points="195,18 203,22 195,26" fill="#1a73e8"/>
+      <text x="209" y="26" font-size="10" font-weight="500" fill="#3c4043">1B: Pure WIF + STS</text>
+      <line x1="326" y1="22" x2="352" y2="22" stroke="#9334e6" stroke-width="2" stroke-dasharray="5,4"/>
+      <polygon points="350,18 358,22 350,26" fill="#9334e6"/>
+      <text x="364" y="26" font-size="10" font-weight="500" fill="#3c4043">1C: Hybrid WIF + DWD</text>
+    </g>
+  </g>
+
+  <g id="layer-boundaries">
+    <g class="boundary" id="boundary-gcp" data-frame-id="boundary-gcp" data-frame-kind="boundary">
+      <rect x="300" y="84" width="1036" height="512" rx="16" ry="16" fill="#f8f9fa" stroke="#bdc1c6" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <use href="#icon-google-cloud" x="320" y="100" width="24" height="19"/>
+      <text x="350" y="114" font-size="12" font-weight="600" fill="#3c4043">Google Cloud</text>
+    </g>
+    <g class="boundary" id="boundary-token-plane" data-frame-id="boundary-token-plane" data-frame-kind="boundary">
+      <rect x="328" y="132" width="560" height="440" rx="14" ry="14" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1.5"/>
+      <use href="#icon-security" x="348" y="148" width="18" height="18"/>
+      <text x="372" y="162" font-size="12" font-weight="600" fill="#174ea6">User Identity &amp; Token Exchange Plane</text>
+      <text x="372" y="177" font-size="10.5" fill="#5f6368">Zero Static Service Account JSON Keys (iam.disableServiceAccountKeyCreation)</text>
+    </g>
+    <g class="boundary" id="boundary-ge-target" data-frame-id="boundary-ge-target" data-frame-kind="boundary">
+      <rect x="920" y="132" width="392" height="440" rx="14" ry="14" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1.5"/>
+      <use href="#icon-gemini" x="940" y="148" width="18" height="18"/>
+      <text x="964" y="162" font-size="12" font-weight="600" fill="#137333">Gemini Enterprise Orchestrator</text>
+      <text x="964" y="177" font-size="10.5" fill="#5f6368">Per-User Document ACLs &amp; Conversation Isolation</text>
+    </g>
+  </g>
+
+  <g id="layer-edges">
+    <path id="edge-1a-1" class="edge" data-edge-id="edge-1a-1" data-edge-from="node-1a-user" data-edge-to="node-1a-oauth" data-edge-label="1A. Google OAuth" data-edge-kind="sync"
+          d="M 256 237 H 420" fill="none" stroke="#1e8e3e" stroke-width="2.2" marker-end="url(#arrow-green)" mask="url(#mask-edge-1a-1)"/>
+    <path id="edge-1b-1" class="edge" data-edge-id="edge-1b-1" data-edge-from="node-1b-user" data-edge-to="node-1b-sts" data-edge-label="1B. OIDC id_token" data-edge-kind="sync"
+          d="M 256 367 H 420" fill="none" stroke="#1a73e8" stroke-width="2.2" marker-end="url(#arrow-primary)" mask="url(#mask-edge-1b-1)"/>
+    <path id="edge-1c-1" class="edge" data-edge-id="edge-1c-1" data-edge-from="node-1c-user" data-edge-to="node-1c-dwd" data-edge-label="1C. Verified Email" data-edge-kind="sync"
+          d="M 256 497 H 420" fill="none" stroke="#9334e6" stroke-width="2.2" stroke-dasharray="5,4" marker-end="url(#arrow-purple)" mask="url(#mask-edge-1c-1)"/>
+    <path id="edge-1a-2" class="edge" data-edge-id="edge-1a-2" data-edge-from="node-1a-oauth" data-edge-to="node-ge-assist" data-edge-label="Google User Token" data-edge-kind="sync"
+          d="M 688 237 H 900 Q 908 237 908 245 V 336 Q 908 344 916 344 H 980" fill="none" stroke="#1e8e3e" stroke-width="2.2" marker-end="url(#arrow-green)" mask="url(#mask-edge-1a-2)"/>
+    <path id="edge-1b-2" class="edge" data-edge-id="edge-1b-2" data-edge-from="node-1b-sts" data-edge-to="node-ge-assist" data-edge-label="WIF STS Bearer Token" data-edge-kind="sync"
+          d="M 688 367 H 980" fill="none" stroke="#1a73e8" stroke-width="2.2" marker-end="url(#arrow-primary)" mask="url(#mask-edge-1b-2)"/>
+    <path id="edge-1c-2" class="edge" data-edge-id="edge-1c-2" data-edge-from="node-1c-dwd" data-edge-to="node-ge-assist" data-edge-label="DWD Workspace Token" data-edge-kind="sync"
+          d="M 688 497 H 900 Q 908 497 908 489 V 398 Q 908 390 916 390 H 980" fill="none" stroke="#9334e6" stroke-width="2.2" stroke-dasharray="5,4" marker-end="url(#arrow-purple)" mask="url(#mask-edge-1c-2)"/>
+  </g>
+
+  <g id="layer-nodes">
+    <g class="node" id="node-1a-user" data-frame-id="node-1a-user" data-frame-kind="node" transform="translate(24, 196)" filter="url(#card-shadow)">
+      <rect width="232" height="82" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-user" x="14" y="24" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">1A: Google Login UI</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">Google Workspace / Cloud ID</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">OAuth 2.0 User Session</text>
+    </g>
+    <g class="node" id="node-1b-user" data-frame-id="node-1b-user" data-frame-kind="node" transform="translate(24, 326)" filter="url(#card-shadow)">
+      <rect width="232" height="82" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-user" x="14" y="24" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">1B: External IdP UI</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">Microsoft Entra ID / Okta</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">OIDC id_token (JWT)</text>
+    </g>
+    <g class="node" id="node-1c-user" data-frame-id="node-1c-user" data-frame-kind="node" transform="translate(24, 456)" filter="url(#card-shadow)">
+      <rect width="232" height="82" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-user" x="14" y="24" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">1C: Hybrid Portal UI</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">Entra / Okta SSO Login</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">GE Uses Google Identity</text>
+    </g>
+    <g class="node" id="node-1a-oauth" data-frame-id="node-1a-oauth" data-frame-kind="node" transform="translate(420, 196)" filter="url(#card-shadow)">
+      <rect width="268" height="82" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-security" x="14" y="24" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Direct Google OAuth 2.0</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">scope: cloud-platform</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Caller: user@company.com</text>
+    </g>
+    <g class="node" id="node-1b-sts" data-frame-id="node-1b-sts" data-frame-kind="node" data-focal="true" transform="translate(420, 326)" filter="url(#card-shadow)">
+      <rect width="268" height="82" rx="10" ry="10" fill="#f8fafd" stroke="#1a73e8" stroke-width="2"/>
+      <use href="#icon-security" x="14" y="24" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#174ea6">Workforce Identity + STS</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">sts.googleapis.com/v1/token</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">principal://.../workforcePools/...</text>
+    </g>
+    <g class="node" id="node-1c-dwd" data-frame-id="node-1c-dwd" data-frame-kind="node" data-focal="true" transform="translate(420, 456)" filter="url(#card-shadow)">
+      <rect width="268" height="82" rx="10" ry="10" fill="#f8fafd" stroke="#1a73e8" stroke-width="2"/>
+      <use href="#icon-security" x="14" y="24" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#174ea6">WIF + Keyless DWD Bridge</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">iamcredentials :signJwt</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Mints sub: user@company.com</text>
+    </g>
+    <g class="node" id="node-ge-assist" data-frame-id="node-ge-assist" data-frame-kind="node" transform="translate(980, 316)" filter="url(#card-shadow)">
+      <rect width="272" height="102" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-gemini" x="14" y="34" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Gemini Enterprise</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">default_assistant:streamAssist</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">Enforces Per-User Search ACLs</text>
+      <text x="56" y="81" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Isolates User Chat Sessions</text>
+    </g>
+  </g>
+
+  <g id="layer-labels">
+    <g class="edge-label" id="label-edge-1a-1">
+      <rect x="276" y="209" width="112" height="20" rx="10" data-label-for="edge-1a-1" fill="#ffffff" stroke="#ceead6" stroke-width="1"/>
+      <text x="332.0" y="223" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1e8e3e">1A. Google OAuth</text>
+    </g>
+    <g class="edge-label" id="label-edge-1b-1">
+      <rect x="274" y="339" width="116" height="20" rx="10" data-label-for="edge-1b-1" fill="#ffffff" stroke="#d2e3fc" stroke-width="1"/>
+      <text x="332.0" y="353" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1a73e8">1B. OIDC id_token</text>
+    </g>
+    <g class="edge-label" id="label-edge-1c-1">
+      <rect x="272" y="469" width="120" height="20" rx="10" data-label-for="edge-1c-1" fill="#ffffff" stroke="#e9d2fd" stroke-width="1"/>
+      <text x="332.0" y="483" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#9334e6">1C. Verified Email</text>
+    </g>
+    <g class="edge-label" id="label-edge-1a-2">
+      <rect x="730" y="227" width="124" height="20" rx="10" data-label-for="edge-1a-2" fill="#ffffff" stroke="#ceead6" stroke-width="1"/>
+      <text x="792.0" y="241" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1e8e3e">Google User Token</text>
+    </g>
+    <g class="edge-label" id="label-edge-1b-2">
+      <rect x="724" y="357" width="136" height="20" rx="10" data-label-for="edge-1b-2" fill="#ffffff" stroke="#d2e3fc" stroke-width="1"/>
+      <text x="792.0" y="371" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1a73e8">WIF STS Bearer Token</text>
+    </g>
+    <g class="edge-label" id="label-edge-1c-2">
+      <rect x="722" y="487" width="138" height="20" rx="10" data-label-for="edge-1c-2" fill="#ffffff" stroke="#e9d2fd" stroke-width="1"/>
+      <text x="791.0" y="501" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#9334e6">DWD Workspace Token</text>
+    </g>
+  </g>
+</svg>
+
+    </div>
+  </div>
+
+  <!-- fde-viewer-runtime:start v1 -->
+  <p class="hint">
+    Hover a component to see what flows through it · click to trace it ·
+    <kbd>/</kbd> find · <kbd>C</kbd> note · <kbd>Esc</kbd> clear · drag to pan<span id="hint-chapters" hidden> ·
+    <kbd>←</kbd>/<kbd>→</kbd> step the walkthrough · <kbd>P</kbd> play it</span>
+  </p>
+
+  <aside class="panel" id="panel" hidden aria-live="polite">
+    <div class="panel-head">
+      <div style="flex:1 1 auto">
+        <div class="panel-title" id="panel-title"></div>
+        <div class="panel-product" id="panel-product"></div>
+      </div>
+      <div class="panel-actions">
+        <button class="btn" id="panel-link" type="button">Copy link</button>
+        <button class="btn" id="panel-close" type="button" aria-label="Close details">Close</button>
+      </div>
+    </div>
+    <p class="panel-note" id="panel-note"></p>
+    <p class="panel-evidence" id="panel-evidence"></p>
+    <div class="panel-rel">
+      <div><h3>Upstream</h3><ul id="panel-up"></ul></div>
+      <div><h3>Downstream</h3><ul id="panel-down"></ul></div>
+    </div>
+    <div class="panel-notes" id="panel-notes" hidden>
+      <h3>Notes</h3>
+      <ul class="note-list" id="panel-note-list"></ul>
+      <form class="note-form" id="panel-note-form">
+        <label class="sr-only" for="panel-note-input">Note about this component</label>
+        <textarea id="panel-note-input" rows="2"
+                  placeholder="Notes about this component?"></textarea>
+        <button class="btn" type="submit">Add</button>
+      </form>
+    </div>
+  </aside>
+
+  <aside class="drawer" id="notes-drawer" hidden>
+    <div class="drawer-head">
+      <div class="drawer-title">Review notes <span class="drawer-count" id="notes-count"></span></div>
+      <div class="panel-actions">
+        <button class="btn" id="notes-copy" type="button">Copy</button>
+        <button class="btn" id="notes-download" type="button">Download .md</button>
+        <button class="btn" id="notes-clear" type="button">Clear all</button>
+      </div>
+    </div>
+    <p class="drawer-warn" id="notes-warn" hidden>
+      This browser is not saving notes. Export before you close the tab.
+    </p>
+    <form class="note-form" id="drawer-note-form">
+      <label class="sr-only" for="drawer-note-input">Note about the whole diagram</label>
+      <textarea id="drawer-note-input" rows="2"
+                placeholder="A note about the diagram as a whole…"></textarea>
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <ul class="note-list" id="drawer-note-list"></ul>
+  </aside>
+  <!-- fde-viewer-runtime:end -->
+
+  <section class="summary-grid">
+
+    <div class="summary-card">
+      <h3>1. Keyless Inbound Identity</h3>
+      <p>Propagates corporate user identity into Gemini Enterprise (<code>:streamAssist</code>) via WIF STS or Keyless DWD without static JSON keys.</p>
+    </div>
+    <div class="summary-card">
+      <h3>2. Native Connector Keystore</h3>
+      <p>Out-of-the-box connectors use a two-attempt 3LO pattern and store refresh tokens in Gemini Enterprise's managed Keystore.</p>
+    </div>
+    <div class="summary-card">
+      <h3>3. On-Demand Subagent 3LO</h3>
+      <p>High-code ADK agents use a Root Router and specialist subagents so OAuth popups only fire when a specific tool is invoked.</p>
+    </div>
+    
+  </section>
+</main>
+
+<!-- fde-viewer-runtime:start v1 -->
+<script>
+(function () {
+  "use strict";
+
+  var svg = document.querySelector("#canvas svg");
+  if (!svg) return;
+
+  var stage = document.getElementById("stage");
+  var canvas = document.getElementById("canvas");
+  var panel = document.getElementById("panel");
+
+  // --- Graph, read from the markup contract -------------------------------------------
+  var nodeEls = Array.prototype.slice.call(svg.querySelectorAll('[data-frame-kind="node"][data-frame-id]'));
+  var edgeEls = Array.prototype.slice.call(svg.querySelectorAll("[data-edge-from][data-edge-to]"));
+  var maskEls = Array.prototype.slice.call(svg.querySelectorAll("[data-label-for]"));
+
+  var nodeById = {};
+  nodeEls.forEach(function (el) { nodeById[el.getAttribute("data-frame-id")] = el; });
+
+  var edges = edgeEls.map(function (el) {
+    return {
+      el: el,
+      id: el.getAttribute("data-edge-id") || "",
+      from: el.getAttribute("data-edge-from"),
+      to: el.getAttribute("data-edge-to"),
+      label: el.getAttribute("data-edge-label") || ""
+    };
+  });
+
+  // --- Optional model island ------------------------------------------------------------
+  var model = null;
+  var islandEl = svg.querySelector("#diagram-model");
+  if (islandEl) {
+    try { model = JSON.parse(islandEl.textContent); } catch (err) { model = null; }
+  }
+  var factsById = {};
+  if (model && Array.isArray(model.nodes)) {
+    model.nodes.forEach(function (n) { if (n && n.id) factsById[n.id] = n; });
+  }
+
+  function cardText(el) {
+    var texts = Array.prototype.slice.call(el.querySelectorAll("text"));
+    return texts.map(function (t) { return (t.textContent || "").trim(); }).filter(Boolean);
+  }
+  function nameOf(id) {
+    var f = factsById[id];
+    if (f && f.name) return f.name;
+    var el = nodeById[id];
+    var lines = el ? cardText(el) : [];
+    return lines[0] || id;
+  }
+  function productOf(id) {
+    var f = factsById[id];
+    if (f) {
+      return [f.product, f.region].filter(Boolean).join(" · ");
+    }
+    var el = nodeById[id];
+    var lines = el ? cardText(el) : [];
+    return lines.slice(1).join(" · ");
+  }
+
+  Object.keys(factsById).forEach(function (id) {
+    var el = nodeById[id];
+    if (el && factsById[id].tier) el.setAttribute("data-tier", factsById[id].tier);
+  });
+
+  var GEOMETRY_ATTRS = { d: 1, points: 1, transform: 1, x1: 1, y1: 1, x2: 1, y2: 1 };
+
+  edges.forEach(function (e) {
+    var twin = e.el.cloneNode(false);
+    Array.prototype.slice.call(twin.attributes).forEach(function (a) {
+      if (!GEOMETRY_ATTRS[a.name]) twin.removeAttribute(a.name);
+    });
+    twin.setAttribute("data-flow", "");
+    e.twin = twin;
+    e.el.parentNode.insertBefore(twin, e.el.nextSibling);
+  });
+
+  var flowId = null;
+
+  function stopFlow() {
+    if (!flowId) return;
+    flowId = null;
+    edges.forEach(function (e) { e.twin.removeAttribute("data-flow-live"); });
+  }
+
+  function startFlow(id) {
+    flowId = id;
+    edges.forEach(function (e) {
+      var touches = e.from === id || e.to === id;
+      var hidden = (svg.hasAttribute("data-focus") && !e.el.hasAttribute("data-focus-match")) ||
+                   (svg.hasAttribute("data-chapter") && e.el.hasAttribute("data-chapter-muted"));
+      if (touches && !hidden) e.twin.setAttribute("data-flow-live", "");
+      else e.twin.removeAttribute("data-flow-live");
+    });
+  }
+
+  function refreshFlow() { if (flowId) startFlow(flowId); }
+
+  // --- Focus ---------------------------------------------------------------------------
+  var focusId = null;
+
+  function clearMarks() {
+    nodeEls.forEach(function (el) { el.removeAttribute("data-focus-match"); });
+    edges.forEach(function (e) { e.el.removeAttribute("data-focus-match"); });
+    maskEls.forEach(function (el) { el.removeAttribute("data-focus-match"); });
+  }
+
+  function relationsOf(id) {
+    var up = [], down = [];
+    edges.forEach(function (e) {
+      if (e.to === id && e.from !== id) up.push({ other: e.from, label: e.label });
+      if (e.from === id && e.to !== id) down.push({ other: e.to, label: e.label });
+    });
+    return { up: up, down: down };
+  }
+
+  function renderRelList(ul, items, emptyText) {
+    ul.textContent = "";
+    if (!items.length) {
+      var li = document.createElement("li");
+      li.className = "rel-none";
+      li.textContent = emptyText;
+      ul.appendChild(li);
+      return;
+    }
+    items.forEach(function (item) {
+      var li = document.createElement("li");
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = nameOf(item.other);
+      btn.addEventListener("click", function () { focus(item.other, true); });
+      li.appendChild(btn);
+      if (item.label) {
+        var span = document.createElement("span");
+        span.className = "rel-edge";
+        span.textContent = "  " + item.label;
+        li.appendChild(span);
+      }
+      ul.appendChild(li);
+    });
+  }
+
+  function focus(id, updateHash) {
+    if (!nodeById[id]) return;
+    focusId = id;
+    clearMarks();
+
+    nodeById[id].setAttribute("data-focus-match", "self");
+    var rel = relationsOf(id);
+    rel.up.concat(rel.down).forEach(function (r) {
+      if (nodeById[r.other]) nodeById[r.other].setAttribute("data-focus-match", "neighbor");
+    });
+    edges.forEach(function (e) {
+      if (e.from === id || e.to === id) {
+        e.el.setAttribute("data-focus-match", "edge");
+        if (e.id) {
+          maskEls.forEach(function (m) {
+            if (m.getAttribute("data-label-for") === e.id) m.setAttribute("data-focus-match", "edge");
+          });
+        }
+      }
+    });
+    svg.setAttribute("data-focus", id);
+    refreshFlow();
+
+    var facts = factsById[id] || {};
+    document.getElementById("panel-title").textContent = nameOf(id);
+    document.getElementById("panel-product").textContent = productOf(id);
+    var noteEl = document.getElementById("panel-note");
+    noteEl.textContent = facts.note || "";
+    noteEl.hidden = !facts.note;
+    var evEl = document.getElementById("panel-evidence");
+    evEl.textContent = facts.evidence ? "Source: " + facts.evidence : "";
+    evEl.hidden = !facts.evidence;
+    renderRelList(document.getElementById("panel-up"), rel.up, "No inbound connection drawn.");
+    renderRelList(document.getElementById("panel-down"), rel.down, "No outbound connection drawn.");
+    renderPanelNotes();
+    panel.hidden = false;
+
+    var around = [id];
+    rel.up.concat(rel.down).forEach(function (r) { around.push(r.other); });
+    frameNodes(around, 1.8);
+
+    if (updateHash) writeHash();
+  }
+
+  function clearFocus() {
+    focusId = null;
+    clearMarks();
+    svg.removeAttribute("data-focus");
+    refreshFlow();
+    panel.hidden = true;
+    restoreCamera();
+    writeHash();
+  }
+
+  function writeHash() {
+    var parts = [];
+    if (chapterIndex >= 0) parts.push("chapter=" + encodeURIComponent(chapterIds[chapterIndex]));
+    if (focusId) parts.push("focus=" + encodeURIComponent(focusId));
+    var url = location.pathname + location.search + (parts.length ? "#" + parts.join("&") : "");
+    try { history.replaceState(null, "", url); } catch (err) {}
+  }
+
+  nodeEls.forEach(function (el) {
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    var id = el.getAttribute("data-frame-id");
+    el.setAttribute("aria-label", nameOf(id) + ". Show connections.");
+    el.addEventListener("mouseenter", function () { el.setAttribute("data-hover", ""); startFlow(id); });
+    el.addEventListener("mouseleave", function () { el.removeAttribute("data-hover"); stopFlow(); });
+    el.addEventListener("focus", function () { startFlow(id); });
+    el.addEventListener("blur", stopFlow);
+    el.addEventListener("click", function (ev) { ev.stopPropagation(); focus(id, true); });
+    el.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); focus(id, true); }
+    });
+  });
+
+  document.getElementById("panel-close").addEventListener("click", clearFocus);
+  document.getElementById("panel-link").addEventListener("click", function () {
+    var btn = this;
+    var url = location.href;
+    var done = function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy link"; }, 1400); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, function () {});
+    }
+  });
+
+  // --- Tier filter -----------------------------------------------------------------------
+  var activeTiers = {};
+  var tiers = [];
+  Object.keys(factsById).forEach(function (id) {
+    var t = factsById[id].tier;
+    if (t && tiers.indexOf(t) === -1) tiers.push(t);
+  });
+
+  function applyTiers() {
+    var on = Object.keys(activeTiers).filter(function (t) { return activeTiers[t]; });
+    if (!on.length) {
+      svg.removeAttribute("data-dim-tier");
+      nodeEls.forEach(function (el) { el.removeAttribute("data-tier-muted"); });
+      return;
+    }
+    svg.setAttribute("data-dim-tier", "");
+    nodeEls.forEach(function (el) {
+      var t = el.getAttribute("data-tier");
+      if (t && on.indexOf(t) !== -1) el.removeAttribute("data-tier-muted");
+      else el.setAttribute("data-tier-muted", "");
+    });
+  }
+
+  var chipHost = document.getElementById("tier-chips");
+  tiers.forEach(function (t) {
+    var chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = t;
+    chip.setAttribute("aria-pressed", "false");
+    chip.addEventListener("click", function () {
+      activeTiers[t] = !activeTiers[t];
+      chip.setAttribute("aria-pressed", activeTiers[t] ? "true" : "false");
+      applyTiers();
+    });
+    chipHost.appendChild(chip);
+  });
+
+  // --- Camera ------------------------------------------------------------------------------
+  var scale = 1, panX = 0, panY = 0;
+  var MIN_SCALE = 0.5, MAX_SCALE = 4;
+  var stillMedia = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  var cameraFrame = 0;
+
+  function applyTransform() {
+    canvas.style.transform = "translate(" + panX + "px, " + panY + "px) scale(" + scale + ")";
+    document.getElementById("zoom-level").textContent = Math.round(scale * 100) + "%";
+  }
+  function stopCamera() {
+    if (cameraFrame) { cancelAnimationFrame(cameraFrame); cameraFrame = 0; }
+  }
+  function zoomTo(next, originX, originY) {
+    stopCamera();
+    stopPlaying();
+    next = Math.min(MAX_SCALE, Math.max(MIN_SCALE, next));
+    var ratio = next / scale;
+    panX = originX - ratio * (originX - panX);
+    panY = originY - ratio * (originY - panY);
+    scale = next;
+    applyTransform();
+  }
+  function moveCamera(target) {
+    stopCamera();
+    if (stillMedia && stillMedia.matches) {
+      scale = target.scale; panX = target.x; panY = target.y;
+      applyTransform();
+      return;
+    }
+    var from = { scale: scale, x: panX, y: panY }, startedAt = 0;
+    var step = function (now) {
+      if (!startedAt) startedAt = now;
+      var t = Math.min(1, (now - startedAt) / 420);
+      var eased = 1 - Math.pow(1 - t, 3);
+      scale = from.scale + (target.scale - from.scale) * eased;
+      panX = from.x + (target.x - from.x) * eased;
+      panY = from.y + (target.y - from.y) * eased;
+      applyTransform();
+      cameraFrame = t < 1 ? requestAnimationFrame(step) : 0;
+    };
+    cameraFrame = requestAnimationFrame(step);
+  }
+  function resetView() { moveCamera({ scale: 1, x: 0, y: 0 }); }
+
+  function frameNodes(ids, maxScale) {
+    var box = canvas.getBoundingClientRect();
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    ids.forEach(function (id) {
+      var el = nodeById[id];
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      minX = Math.min(minX, (r.left - box.left) / scale);
+      minY = Math.min(minY, (r.top - box.top) / scale);
+      maxX = Math.max(maxX, (r.right - box.left) / scale);
+      maxY = Math.max(maxY, (r.bottom - box.top) / scale);
+    });
+    var vw = canvas.offsetWidth, vh = canvas.offsetHeight;
+    var bw = maxX - minX, bh = maxY - minY;
+    if (!isFinite(bw) || bw <= 0 || bh <= 0 || vw <= 0 || vh <= 0) return;
+
+    var pad = 36;
+    var fit = Math.min((vw - pad * 2) / bw, (vh - pad * 2) / bh);
+    var target = Math.max(1, Math.min(maxScale || 2.2, fit));
+    if (target < 1.08) target = 1;
+    moveCamera({
+      scale: target,
+      x: (vw - bw * target) / 2 - minX * target,
+      y: (vh - bh * target) / 2 - minY * target
+    });
+  }
+
+  // --- Guided chapters ---------------------------------------------------------------------
+  var views = (model && Array.isArray(model.views) ? model.views : []).filter(function (v) {
+    return v && v.title && Array.isArray(v.nodes) && v.nodes.length;
+  }).slice(0, 5);
+
+  var chapterIds = views.map(function (v, i) {
+    return v.id || v.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || String(i + 1);
+  });
+
+  var chapterIndex = -1;   // the chapter you chose
+  var previewIndex = -1;   // the chapter you are only hovering
+  var isPlaying = false;
+  var playTimer = 0;
+  var chapterNav = document.getElementById("chapters");
+  var chapterHost = document.getElementById("chapter-buttons");
+  var playBtn = document.getElementById("chapter-play");
+  var chapterButtons = [];
+
+  function dimToChapter(index) {
+    if (index < 0) {
+      svg.removeAttribute("data-chapter");
+      nodeEls.forEach(function (el) { el.removeAttribute("data-chapter-muted"); });
+      edges.forEach(function (e) { e.el.removeAttribute("data-chapter-muted"); });
+      maskEls.forEach(function (el) { el.removeAttribute("data-chapter-muted"); });
+      refreshFlow();
+      return;
+    }
+    var view = views[index];
+    var inView = {};
+    view.nodes.forEach(function (id) { inView[id] = true; });
+
+    svg.setAttribute("data-chapter", String(index));
+    nodeEls.forEach(function (el) {
+      var id = el.getAttribute("data-frame-id");
+      if (inView[id]) el.removeAttribute("data-chapter-muted");
+      else el.setAttribute("data-chapter-muted", "");
+    });
+    var liveEdgeIds = {};
+    edges.forEach(function (e) {
+      if (inView[e.from] && inView[e.to]) {
+        e.el.removeAttribute("data-chapter-muted");
+        if (e.id) liveEdgeIds[e.id] = true;
+      } else {
+        e.el.setAttribute("data-chapter-muted", "");
+      }
+    });
+    maskEls.forEach(function (el) {
+      if (liveEdgeIds[el.getAttribute("data-label-for")]) el.removeAttribute("data-chapter-muted");
+      else el.setAttribute("data-chapter-muted", "");
+    });
+    refreshFlow();
+  }
+
+  function applyChapter() {
+    chapterButtons.forEach(function (b, i) {
+      b.setAttribute("aria-pressed", i === chapterIndex ? "true" : "false");
+      if (i === previewIndex) b.setAttribute("data-preview", "");
+      else b.removeAttribute("data-preview");
+    });
+    dimToChapter(previewIndex >= 0 ? previewIndex : chapterIndex);
+  }
+
+  function goToChapter(i) {
+    chapterIndex = i;
+    previewIndex = -1;
+    applyChapter();
+    if (i >= 0) frameNodes(views[i].nodes, 2.2);
+    else resetView();
+    writeHash();
+  }
+
+  function restoreCamera() {
+    if (chapterIndex >= 0) frameNodes(views[chapterIndex].nodes, 2.2);
+    else resetView();
+  }
+
+  function stopPlaying() {
+    if (!isPlaying) return;
+    isPlaying = false;
+    clearTimeout(playTimer);
+    playBtn.setAttribute("aria-pressed", "false");
+    playBtn.textContent = "▶ Play";
+  }
+
+  function queueNextChapter() {
+    playTimer = setTimeout(function () {
+      if (chapterIndex >= views.length - 1) { stopPlaying(); return; }
+      goToChapter(chapterIndex + 1);
+      queueNextChapter();
+    }, 4200);
+  }
+
+  function startPlaying() {
+    isPlaying = true;
+    playBtn.setAttribute("aria-pressed", "true");
+    playBtn.textContent = "❚❚ Pause";
+    goToChapter(chapterIndex >= views.length - 1 ? 0 : Math.max(0, chapterIndex));
+    queueNextChapter();
+  }
+
+  function stepChapter(delta) {
+    stopPlaying();
+    var next = chapterIndex < 0 ? (delta > 0 ? 0 : views.length - 1) : chapterIndex + delta;
+    goToChapter(next < 0 ? views.length - 1 : (next >= views.length ? 0 : next));
+  }
+
+  if (views.length) {
+    chapterNav.hidden = false;
+    document.getElementById("hint-chapters").hidden = false;
+    views.forEach(function (view, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = (i + 1) + ". " + view.title;
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () {
+        stopPlaying();
+        goToChapter(i === chapterIndex ? -1 : i);
+      });
+      var preview = function () {
+        if (isPlaying || i === chapterIndex || previewIndex === i) return;
+        previewIndex = i;
+        applyChapter();
+      };
+      var endPreview = function () {
+        if (previewIndex < 0) return;
+        previewIndex = -1;
+        applyChapter();
+      };
+      b.addEventListener("mouseenter", preview);
+      b.addEventListener("mouseleave", endPreview);
+      b.addEventListener("focus", preview);
+      b.addEventListener("blur", endPreview);
+      chapterButtons.push(b);
+      chapterHost.appendChild(b);
+    });
+    document.getElementById("chapter-prev").addEventListener("click", function () { stepChapter(-1); });
+    document.getElementById("chapter-next").addEventListener("click", function () { stepChapter(1); });
+    playBtn.addEventListener("click", function () {
+      if (isPlaying) stopPlaying();
+      else startPlaying();
+    });
+  }
+
+  // --- Find ------------------------------------------------------------------------------
+  var findInput = document.getElementById("find-input");
+  var findResults = document.getElementById("find-results");
+
+  function runFind() {
+    var q = findInput.value.trim().toLowerCase();
+    findResults.textContent = "";
+    if (!q) { findResults.hidden = true; return; }
+    var hits = nodeEls.filter(function (el) {
+      var id = el.getAttribute("data-frame-id");
+      return (id + " " + nameOf(id) + " " + productOf(id)).toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 12);
+    if (!hits.length) {
+      var none = document.createElement("div");
+      none.className = "rr-empty";
+      none.textContent = "No component matches “" + findInput.value.trim() + "”.";
+      findResults.appendChild(none);
+    }
+    hits.forEach(function (el) {
+      var id = el.getAttribute("data-frame-id");
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.appendChild(document.createTextNode(nameOf(id)));
+      var sub = document.createElement("div");
+      sub.className = "rr-sub";
+      sub.textContent = productOf(id) || id;
+      btn.appendChild(sub);
+      btn.addEventListener("click", function () {
+        focus(id, true);
+        findResults.hidden = true;
+        findInput.value = "";
+      });
+      findResults.appendChild(btn);
+    });
+    findResults.hidden = false;
+  }
+
+  findInput.addEventListener("input", runFind);
+  findInput.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") { findInput.value = ""; findResults.hidden = true; findInput.blur(); }
+    if (ev.key === "Enter") {
+      var first = findResults.querySelector("button");
+      if (first) first.click();
+    }
+  });
+  document.addEventListener("click", function (ev) {
+    if (!findResults.hidden && !findResults.contains(ev.target) && ev.target !== findInput) {
+      findResults.hidden = true;
+    }
+  });
+
+  // --- Review notes -------------------------------------------------------------------------
+  var NOTES_V = 1;
+
+  function hash32(text) {
+    var h = 2166136261;
+    for (var i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+    }
+    return ("0000000" + h.toString(16)).slice(-8);
+  }
+
+  var systemName = (model && model.system) || "";
+  var notesKey = "fde-diagram-notes/" + hash32(systemName + "|" + document.title);
+  var notes = [];
+  var notesPersist = true;
+
+  try {
+    var rawNotes = localStorage.getItem(notesKey);
+    var storedNotes = rawNotes ? JSON.parse(rawNotes) : null;
+    if (storedNotes && storedNotes.v === NOTES_V && Array.isArray(storedNotes.notes)) {
+      notes = storedNotes.notes;
+    }
+  } catch (err) { notesPersist = false; }
+
+  function saveNotes() {
+    try {
+      localStorage.setItem(notesKey, JSON.stringify({
+        v: NOTES_V,
+        diagram: systemName || document.title,
+        updated: new Date().toISOString(),
+        notes: notes
+      }));
+    } catch (err) { notesPersist = false; }
+  }
+
+  function notesFor(target) {
+    return notes.filter(function (n) { return n.target === target; });
+  }
+
+  function addNote(target, text) {
+    text = (text || "").trim();
+    if (!text) return false;
+    notes.push({
+      id: "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      target: target,
+      text: text,
+      at: new Date().toISOString()
+    });
+    saveNotes();
+    renderNotes();
+    return true;
+  }
+
+  function removeNote(id) {
+    notes = notes.filter(function (n) { return n.id !== id; });
+    saveNotes();
+    renderNotes();
+  }
+
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var markerByNode = {};
+
+  nodeEls.forEach(function (el) {
+    var rect = el.querySelector("rect");
+    if (!rect) return;
+    var rx = parseFloat(rect.getAttribute("x") || "0");
+    var ry = parseFloat(rect.getAttribute("y") || "0");
+    var rw = parseFloat(rect.getAttribute("width") || "0");
+    var g = document.createElementNS(SVG_NS, "g");
+    g.setAttribute("data-note-marker", "");
+    g.setAttribute("transform", "translate(" + (rx + rw - 7) + ", " + (ry + 7) + ")");
+    var circle = document.createElementNS(SVG_NS, "circle");
+    circle.setAttribute("r", "8");
+    var count = document.createElementNS(SVG_NS, "text");
+    count.setAttribute("y", "3");
+    g.appendChild(circle);
+    g.appendChild(count);
+    el.appendChild(g);
+    markerByNode[el.getAttribute("data-frame-id")] = { g: g, text: count };
+  });
+
+  function renderMarkers() {
+    Object.keys(markerByNode).forEach(function (id) {
+      var m = markerByNode[id];
+      var count = notesFor(id).length;
+      if (count) m.g.setAttribute("data-note-count", String(count));
+      else m.g.removeAttribute("data-note-count");
+      m.text.textContent = String(count);
+    });
+  }
+
+  var reviewOn = false;
+  var reviewBtn = document.getElementById("review-toggle");
+
+  function setReview(on) {
+    reviewOn = on;
+    if (on) document.body.setAttribute("data-review", "");
+    else document.body.removeAttribute("data-review");
+    reviewBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    renderNotes();
+  }
+
+  reviewBtn.addEventListener("click", function () { setReview(!reviewOn); });
+
+  var panelNotes = document.getElementById("panel-notes");
+  var panelNoteList = document.getElementById("panel-note-list");
+  var panelNoteInput = document.getElementById("panel-note-input");
+
+  function renderNoteList(ul, items, withTarget) {
+    ul.textContent = "";
+    items.forEach(function (n) {
+      var li = document.createElement("li");
+      var body = document.createElement("div");
+      body.className = "note-text";
+      if (withTarget) {
+        var where = document.createElement("span");
+        where.className = "note-target";
+        where.textContent = n.target ? nameOf(n.target) : "Whole diagram";
+        body.appendChild(where);
+      }
+      body.appendChild(document.createTextNode(n.text));
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "note-del";
+      del.setAttribute("aria-label", "Delete note");
+      del.textContent = "✕";
+      del.addEventListener("click", function () { removeNote(n.id); });
+      li.appendChild(body);
+      li.appendChild(del);
+      ul.appendChild(li);
+    });
+  }
+
+  function renderPanelNotes() {
+    panelNotes.hidden = !reviewOn || !focusId;
+    if (panelNotes.hidden) return;
+    renderNoteList(panelNoteList, notesFor(focusId), false);
+  }
+
+  function submitPanelNote() {
+    if (addNote(focusId, panelNoteInput.value)) panelNoteInput.value = "";
+    panelNoteInput.focus();
+  }
+
+  document.getElementById("panel-note-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    submitPanelNote();
+  });
+
+  panelNoteInput.addEventListener("keydown", function (ev) {
+    ev.stopPropagation();
+    if (ev.key === "Escape") { panelNoteInput.value = ""; panelNoteInput.blur(); }
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); submitPanelNote(); }
+  });
+
+  var drawer = document.getElementById("notes-drawer");
+  var drawerNoteList = document.getElementById("drawer-note-list");
+  var drawerNoteInput = document.getElementById("drawer-note-input");
+  var notesCount = document.getElementById("notes-count");
+
+  function renderNotes() {
+    drawer.hidden = !reviewOn;
+    notesCount.textContent = notes.length
+      ? "· " + notes.length + (notes.length === 1 ? " note" : " notes")
+      : "· none yet";
+    document.getElementById("notes-warn").hidden = notesPersist;
+    renderNoteList(drawerNoteList, notes, true);
+    renderPanelNotes();
+    renderMarkers();
+  }
+
+  function submitDrawerNote() {
+    if (addNote(null, drawerNoteInput.value)) drawerNoteInput.value = "";
+    drawerNoteInput.focus();
+  }
+
+  document.getElementById("drawer-note-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    submitDrawerNote();
+  });
+
+  drawerNoteInput.addEventListener("keydown", function (ev) {
+    ev.stopPropagation();
+    if (ev.key === "Escape") { drawerNoteInput.value = ""; drawerNoteInput.blur(); }
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); submitDrawerNote(); }
+  });
+
+  function notesMarkdown() {
+    var lines = ["# Review notes — " + (systemName || document.title), ""];
+    lines.push("Captured " + new Date().toISOString().slice(0, 10) + " · " +
+               notes.length + (notes.length === 1 ? " note" : " notes"));
+    lines.push("");
+
+    var general = notesFor(null);
+    if (general.length) {
+      lines.push("## Whole diagram");
+      general.forEach(function (n) { lines.push("- " + n.text); });
+      lines.push("");
+    }
+    nodeEls.forEach(function (el) {
+      var id = el.getAttribute("data-frame-id");
+      var mine = notesFor(id);
+      if (!mine.length) return;
+      var product = productOf(id);
+      lines.push("## " + nameOf(id) + " — `" + id + "`" + (product ? " (" + product + ")" : ""));
+      mine.forEach(function (n) { lines.push("- " + n.text); });
+      lines.push("");
+    });
+    return lines.join("\n");
+  }
+
+  function flashButton(btn, label) {
+    var original = btn.textContent;
+    btn.textContent = label;
+    setTimeout(function () { btn.textContent = original; }, 1400);
+  }
+
+  function fallbackCopy(text, done) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+
+  document.getElementById("notes-copy").addEventListener("click", function () {
+    var btn = this, text = notesMarkdown();
+    var done = function () { flashButton(btn, "Copied"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  });
+
+  document.getElementById("notes-download").addEventListener("click", function () {
+    var blob = new Blob([notesMarkdown()], { type: "text/markdown;charset=utf-8" });
+    var href = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = href;
+    a.download = slug(systemName || document.title.split("·")[0]) + "-review-notes.md";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(href); }, 1000);
+  });
+
+  document.getElementById("notes-clear").addEventListener("click", function () {
+    if (!notes.length) return;
+    if (!window.confirm("Delete all " + notes.length + " notes for this diagram?")) return;
+    notes = [];
+    saveNotes();
+    renderNotes();
+  });
+
+  renderNotes();
+
+  // --- Manual pan and zoom -------------------------------------------------------------------
+  document.getElementById("zoom-in").addEventListener("click", function () {
+    var r = stage.getBoundingClientRect();
+    zoomTo(scale * 1.25, r.width / 2, r.height / 2);
+  });
+  document.getElementById("zoom-out").addEventListener("click", function () {
+    var r = stage.getBoundingClientRect();
+    zoomTo(scale / 1.25, r.width / 2, r.height / 2);
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    stopPlaying();
+    chapterIndex = -1;
+    previewIndex = -1;
+    applyChapter();
+    clearFocus();
+  });
+
+  var VIEWER_STATE_ATTRS = [
+    "data-focus", "data-dim-tier", "data-chapter", "data-focus-match",
+    "data-tier-muted", "data-chapter-muted", "data-hover", "data-tier",
+    "tabindex", "role", "aria-label"
+  ];
+
+  function canonicalSvg() {
+    var clone = svg.cloneNode(true);
+    // Flow twins and note markers are viewer chrome painted over the drawing. The export is
+    // the drawing — and a customer's remark must never leave in an image.
+    Array.prototype.forEach.call(clone.querySelectorAll("[data-flow], [data-note-marker]"),
+      function (el) { el.parentNode.removeChild(el); });
+    VIEWER_STATE_ATTRS.forEach(function (attr) {
+      if (clone.hasAttribute(attr)) clone.removeAttribute(attr);
+      Array.prototype.forEach.call(clone.querySelectorAll("[" + attr + "]"), function (el) {
+        el.removeAttribute(attr);
+      });
+    });
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return clone;
+  }
+
+  function viewBoxSize() {
+    var vb = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(parseFloat);
+    if (vb.length === 4 && vb[2] > 0 && vb[3] > 0) return { w: vb[2], h: vb[3] };
+    var r = svg.getBoundingClientRect();
+    return { w: r.width || 1120, h: r.height || 620 };
+  }
+
+  function slug(text) {
+    return (text || "architecture").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  var exportBtn = document.getElementById("export-png");
+  exportBtn.addEventListener("click", function () {
+    var size = viewBoxSize();
+    var pixelScale = 2;  // 2x so the PNG survives a full-width slide
+    var clone = canonicalSvg();
+    clone.setAttribute("width", String(size.w));
+    clone.setAttribute("height", String(size.h));
+
+    var markup = new XMLSerializer().serializeToString(clone);
+    var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(markup);
+    var img = new Image();
+    var label = exportBtn.textContent;
+
+    img.onload = function () {
+      var c = document.createElement("canvas");
+      c.width = Math.round(size.w * pixelScale);
+      c.height = Math.round(size.h * pixelScale);
+      var ctx = c.getContext("2d");
+      ctx.fillStyle = "#ffffff";           // the paper, not a transparent void
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function (blob) {
+        if (!blob) { exportBtn.textContent = "PNG failed"; return; }
+        var href = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = href;
+        a.download = slug(document.title.split("·")[0]) + "-architecture.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(href); }, 1000);
+        exportBtn.textContent = label;
+      }, "image/png");
+    };
+    img.onerror = function () { exportBtn.textContent = "PNG failed"; };
+    exportBtn.textContent = "Rendering…";
+    img.src = url;
+  });
+
+  var dragging = false, moved = false, startX = 0, startY = 0, originPanX = 0, originPanY = 0;
+  stage.addEventListener("pointerdown", function (ev) {
+    if (ev.button !== 0) return;
+    dragging = true; moved = false;
+    startX = ev.clientX; startY = ev.clientY;
+    originPanX = panX; originPanY = panY;
+  });
+  stage.addEventListener("pointermove", function (ev) {
+    if (!dragging) return;
+    var dx = ev.clientX - startX, dy = ev.clientY - startY;
+    if (!moved && Math.abs(dx) + Math.abs(dy) > 4) {
+      moved = true;
+      stopPlaying();
+      stopCamera();
+      stage.setAttribute("data-panning", "true");
+      stage.setPointerCapture(ev.pointerId);
+    }
+    if (!moved) return;
+    panX = originPanX + dx; panY = originPanY + dy;
+    applyTransform();
+  });
+  function endDrag(ev) {
+    if (!dragging) return;
+    dragging = false;
+    stage.removeAttribute("data-panning");
+    if (ev && ev.pointerId !== undefined && stage.hasPointerCapture && stage.hasPointerCapture(ev.pointerId)) {
+      stage.releasePointerCapture(ev.pointerId);
+    }
+  }
+  stage.addEventListener("pointerup", endDrag);
+  stage.addEventListener("pointercancel", endDrag);
+
+  stage.addEventListener("click", function (ev) {
+    if (moved) { moved = false; return; }
+    if (!ev.target.closest('[data-frame-kind="node"]')) clearFocus();
+  });
+
+  // --- Keyboard ------------------------------------------------------------------------------
+  document.addEventListener("keydown", function (ev) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName);
+    if (ev.key === "Escape") {
+      stopPlaying();
+      if (focusId) clearFocus();
+      else if (chapterIndex >= 0) goToChapter(-1);
+      return;
+    }
+    if (typing) return;
+    if (ev.key === "c" || ev.key === "C") {
+      ev.preventDefault();
+      if (!reviewOn) setReview(true);
+      (focusId ? panelNoteInput : drawerNoteInput).focus();
+      return;
+    }
+    if (ev.key === "/") { ev.preventDefault(); findInput.focus(); return; }
+    if (views.length && (ev.key === "ArrowRight" || ev.key === "ArrowLeft")) {
+      ev.preventDefault();
+      stepChapter(ev.key === "ArrowRight" ? 1 : -1);
+      return;
+    }
+    if (views.length && (ev.key === "p" || ev.key === "P")) {
+      if (isPlaying) stopPlaying(); else startPlaying();
+      return;
+    }
+    if (ev.key === "0") { resetView(); return; }
+    if (ev.key === "+" || ev.key === "=") { var a = stage.getBoundingClientRect(); zoomTo(scale * 1.25, a.width / 2, a.height / 2); }
+    if (ev.key === "-") { var b = stage.getBoundingClientRect(); zoomTo(scale / 1.25, b.width / 2, b.height / 2); }
+  });
+
+  // --- Deep link -------------------------------------------------------------------------------
+  function applyHash() {
+    stopPlaying();
+    var chapterMatch = /(?:^|[#&])chapter=([^&]+)/.exec(location.hash);
+    var wantChapter = chapterMatch ? chapterIds.indexOf(decodeURIComponent(chapterMatch[1])) : -1;
+    if (wantChapter !== chapterIndex) {
+      chapterIndex = wantChapter;
+      previewIndex = -1;
+      applyChapter();
+      restoreCamera();
+    }
+
+    var match = /(?:^|[#&])focus=([^&]+)/.exec(location.hash);
+    if (!match) { if (focusId) clearFocus(); return; }
+    var target = decodeURIComponent(match[1]);
+    // Focus frames last, and deliberately: it is the more specific thing the link asked for.
+    if (nodeById[target] && target !== focusId) focus(target, false);
+  }
+  applyHash();
+  window.addEventListener("hashchange", applyHash);
+
+  applyTransform();
+})();
+</script>
+<!-- fde-viewer-runtime:end -->
+
+</body>
+</html>

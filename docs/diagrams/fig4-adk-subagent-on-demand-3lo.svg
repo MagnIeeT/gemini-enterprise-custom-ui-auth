@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1077" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: "Google Sans", "Roboto", sans-serif; font-size: 20px; font-weight: 700; fill: #202124; }
+      .subtitle { font-family: "Google Sans", "Roboto", sans-serif; font-size: 13px; font-weight: 400; fill: #5F6368; }
+      .actor-title { font-family: "Google Sans", "Roboto", sans-serif; font-size: 12.5px; font-weight: 700; fill: #202124; text-anchor: middle; }
+      .actor-sub { font-family: "Roboto Mono", monospace; font-size: 10px; font-weight: 500; fill: #1A73E8; text-anchor: middle; }
+      .step-label { font-family: "Google Sans", "Roboto", sans-serif; font-size: 12px; font-weight: 600; fill: #202124; text-anchor: middle; }
+      .step-sub { font-family: "Roboto Mono", monospace; font-size: 10.5px; font-weight: 500; fill: #5F6368; text-anchor: middle; }
+      .phase-text { font-family: "Google Sans", "Roboto", sans-serif; font-size: 12px; font-weight: 700; fill: #174EA6; text-anchor: middle; }
+    </style>
+    <marker id="arrow-solid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#202124"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1A73E8"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#9334E6"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1E8E3E"/>
+    </marker>
+  </defs>
+  <rect width="1320" height="1077" fill="#FFFFFF"/>
+  <text x="32" y="42" class="title">Part 3 Sequence: Individual Tool OAuth for ADK Agents in a Custom UI</text>
+  <text x="32" y="64" class="subtitle">How Root Router + Specialist Subagent streams adk_request_credential to a Custom UI without failing on :streamAssist</text>
+  <line x1="100" y1="159" x2="100" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
+  <line x1="285" y1="159" x2="285" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
+  <line x1="510" y1="159" x2="510" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
+  <line x1="755" y1="159" x2="755" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
+  <line x1="990" y1="159" x2="990" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
+  <line x1="1210" y1="159" x2="1210" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
+  <rect x="32.5" y="115" width="135" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
+  <text x="100" y="134" class="actor-title">Employee</text>
+  <text x="100" y="149" class="actor-sub">Browser User</text>
+  <rect x="207.5" y="115" width="155" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
+  <text x="285" y="134" class="actor-title">Custom UI</text>
+  <text x="285" y="149" class="actor-sub">Web Frontend</text>
+  <rect x="407.5" y="115" width="205" height="44" rx="6" fill="#E8F0FE" stroke="#1A73E8" stroke-width="1.75"/>
+  <text x="510" y="134" class="actor-title">Gemini Enterprise</text>
+  <text x="510" y="149" class="actor-sub">default_assistant:streamAssist</text>
+  <rect x="660.0" y="115" width="190" height="44" rx="6" fill="#FEF7E0" stroke="#F29900" stroke-width="1.75"/>
+  <text x="755" y="134" class="actor-title">ADK Root Router</text>
+  <text x="755" y="149" class="actor-sub">Vertex AI Agent Engine</text>
+  <rect x="895.0" y="115" width="190" height="44" rx="6" fill="#FEF7E0" stroke="#F29900" stroke-width="1.75"/>
+  <text x="990" y="134" class="actor-title">ServiceNow Subagent</text>
+  <text x="990" y="149" class="actor-sub">ADK Specialist Tool</text>
+  <rect x="1127.5" y="115" width="165" height="44" rx="6" fill="#E6F4EA" stroke="#1E8E3E" stroke-width="1.75"/>
+  <text x="1210" y="134" class="actor-title">ServiceNow API</text>
+  <text x="1210" y="149" class="actor-sub">OAuth &amp; Incident REST</text>
+  <rect x="32.5" y="1005" width="135" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
+  <text x="100" y="1024" class="actor-title">Employee</text>
+  <text x="100" y="1039" class="actor-sub">Browser User</text>
+  <rect x="207.5" y="1005" width="155" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
+  <text x="285" y="1024" class="actor-title">Custom UI</text>
+  <text x="285" y="1039" class="actor-sub">Web Frontend</text>
+  <rect x="407.5" y="1005" width="205" height="44" rx="6" fill="#E8F0FE" stroke="#1A73E8" stroke-width="1.75"/>
+  <text x="510" y="1024" class="actor-title">Gemini Enterprise</text>
+  <text x="510" y="1039" class="actor-sub">default_assistant:streamAssist</text>
+  <rect x="660.0" y="1005" width="190" height="44" rx="6" fill="#FEF7E0" stroke="#F29900" stroke-width="1.75"/>
+  <text x="755" y="1024" class="actor-title">ADK Root Router</text>
+  <text x="755" y="1039" class="actor-sub">Vertex AI Agent Engine</text>
+  <rect x="895.0" y="1005" width="190" height="44" rx="6" fill="#FEF7E0" stroke="#F29900" stroke-width="1.75"/>
+  <text x="990" y="1024" class="actor-title">ServiceNow Subagent</text>
+  <text x="990" y="1039" class="actor-sub">ADK Specialist Tool</text>
+  <rect x="1127.5" y="1005" width="165" height="44" rx="6" fill="#E6F4EA" stroke="#1E8E3E" stroke-width="1.75"/>
+  <text x="1210" y="1024" class="actor-title">ServiceNow API</text>
+  <text x="1210" y="1039" class="actor-sub">OAuth &amp; Incident REST</text>
+  <rect x="56" y="181" width="978" height="30" rx="4" fill="#E8F0FE" stroke="#1A73E8" stroke-width="1.5"/>
+  <text x="545.0" y="201" class="phase-text" style="fill:#174EA6">Phase 1: Intent Routing via Root Router (Zero Upfront OAuth Popups)</text>
+  <rect x="9.099999999999994" y="220" width="366.8" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="192.5" y="233" class="step-label" style="fill:#202124">1. Sends query: 'List my open ServiceNow incidents'</text>
+  <line x1="100" y1="241" x2="282" y2="241" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
+  <rect x="203.9" y="266" width="387.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="397.5" y="279" class="step-label" style="fill:#1A73E8">2. POST :streamAssist (with Layer 1 User Bearer token)</text>
+  <line x1="285" y1="287" x2="507" y2="287" stroke="#1A73E8" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
+  <rect x="408.3" y="312" width="448.4" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="632.5" y="325" class="step-label" style="fill:#1A73E8">3. Invokes ADK Root Router Agent (no GE-level authConfig block)</text>
+  <line x1="510" y1="333" x2="752" y2="333" stroke="#1A73E8" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
+  <rect x="644.9" y="358" width="455.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="872.5" y="371" class="step-label" style="fill:#202124">4. Delegates turn to ServiceNow Subagent (Jira/Box stay dormant)</text>
+  <line x1="755" y1="379" x2="987" y2="379" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
+  <rect x="241" y="411" width="793" height="30" rx="4" fill="#F3E8FD" stroke="#9334E6" stroke-width="1.5"/>
+  <text x="637.5" y="431" class="phase-text" style="fill:#681DA8">Phase 2: Individual Tool OAuth Challenge Streamed to Custom UI</text>
+  <rect x="780" y="467" width="420" height="30" rx="4" fill="#FFFFFF" stroke="#9334E6" stroke-width="1.5"/>
+  <text x="990" y="486" class="step-label" style="fill:#681DA8">5. No token in tool_context.state -&gt; calls request_credential()</text>
+  <rect x="570.0" y="504" width="360.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="750.0" y="517" class="step-label" style="fill:#9334E6">6. Emits adk_request_credential FunctionCall event</text>
+  <line x1="990" y1="525" x2="513" y2="525" stroke="#9334E6" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-purple)"/>
+  <rect x="169.9" y="550" width="455.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="397.5" y="563" class="step-label" style="fill:#9334E6">7. Streams adk_request_credential (authUri + state) to Custom UI</text>
+  <line x1="510" y1="571" x2="288" y2="571" stroke="#9334E6" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-purple)"/>
+  <rect x="-18.099999999999994" y="596" width="421.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="192.5" y="609" class="step-label" style="fill:#9334E6">8. Renders inline 'Connect to ServiceNow' button in chat UI</text>
+  <line x1="285" y1="617" x2="103" y2="617" stroke="#9334E6" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-purple)"/>
+  <rect x="56" y="649" width="1198" height="30" rx="4" fill="#E6F4EA" stroke="#1E8E3E" stroke-width="1.5"/>
+  <text x="655.0" y="669" class="phase-text" style="fill:#137333">Phase 3: User Completes OAuth Popup &amp; Subagent Executes Tool Call</text>
+  <rect x="413.8" y="688" width="482.4" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="655.0" y="701" class="step-label" style="fill:#1E8E3E">9. Approves ServiceNow OAuth popup -&gt; returns callback URL with code</text>
+  <line x1="100" y1="709" x2="1207" y2="709" stroke="#1E8E3E" stroke-width="1.75" marker-end="url(#arrow-green)"/>
+  <rect x="193.70000000000002" y="734" width="407.59999999999997" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="397.5" y="747" class="step-label" style="fill:#202124">10. Resumes :streamAssist session with OAuth callback URL</text>
+  <line x1="285" y1="755" x2="507" y2="755" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
+  <rect x="536.0" y="780" width="428.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="750.0" y="793" class="step-label" style="fill:#202124">11. Passes auth response to tool_context.get_auth_response()</text>
+  <line x1="510" y1="801" x2="987" y2="801" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
+  <rect x="848.6" y="826" width="502.8" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="1100.0" y="839" class="step-label" style="fill:#1E8E3E">12. Exchanges code for Bearer token &amp; calls GET /api/now/table/incident</text>
+  <line x1="990" y1="847" x2="1207" y2="847" stroke="#1E8E3E" stroke-width="1.75" marker-end="url(#arrow-green)"/>
+  <rect x="923.4" y="872" width="353.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="1100.0" y="885" class="step-label" style="fill:#1E8E3E">13. Returns user-scoped ServiceNow incidents JSON</text>
+  <line x1="1210" y1="893" x2="993" y2="893" stroke="#1E8E3E" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-green)"/>
+  <rect x="413.3" y="918" width="448.4" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+  <text x="637.5" y="931" class="step-label" style="fill:#1E8E3E">14. Synthesizes final answer &amp; streams events back to Custom UI</text>
+  <line x1="990" y1="939" x2="288" y2="939" stroke="#1E8E3E" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-green)"/>
+</svg>

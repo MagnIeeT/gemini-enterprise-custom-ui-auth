@@ -1,0 +1,476 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 560" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#202124" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1a73e8"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#9334e6"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e8e3e"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#e37400"/>
+    </marker>
+    <mask id="mask-edge-1" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="208" y="214" width="64" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-2" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="506" y="214" width="52" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-3" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="628" y="326" width="96" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-4" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="794" y="214" width="52" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-5" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="910" y="326" width="96" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-6" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="1110" y="490" width="110" height="20" rx="10" fill="black"/>
+    </mask>
+    <mask id="mask-edge-7" maskUnits="userSpaceOnUse" x="0" y="0" width="1360" height="560">
+      <rect width="1360" height="560" fill="white"/>
+      <rect x="1070" y="400" width="58" height="20" rx="10" fill="black"/>
+    </mask>
+    <!-- Official Google Gemini 2025 4-Color Icon Filters & Mask -->
+    <linearGradient id="gemini-grad" x1="18.447" y1="43.42" x2="52.153" y2="15.004" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4893FC"/>
+      <stop offset=".27" stop-color="#4893FC"/>
+      <stop offset=".777" stop-color="#969DFF"/>
+      <stop offset="1" stop-color="#BD99FE"/>
+    </linearGradient>
+    <mask id="gemini-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="65" height="65">
+      <path d="M32.447 0c.68 0 1.273.465 1.439 1.125a38.904 38.904 0 001.999 5.905c2.152 5 5.105 9.376 8.854 13.125 3.751 3.75 8.126 6.703 13.125 8.855a38.98 38.98 0 005.906 1.999c.66.166 1.124.758 1.124 1.438 0 .68-.464 1.273-1.125 1.439a38.902 38.902 0 00-5.905 1.999c-5 2.152-9.375 5.105-13.125 8.854-3.749 3.751-6.702 8.126-8.854 13.125a38.973 38.973 0 00-2 5.906 1.485 1.485 0 01-1.438 1.124c-.68 0-1.272-.464-1.438-1.125a38.913 38.913 0 00-2-5.905c-2.151-5-5.103-9.375-8.854-13.125-3.75-3.749-8.125-6.702-13.125-8.854a38.973 38.973 0 00-5.905-2A1.485 1.485 0 010 32.448c0-.68.465-1.272 1.125-1.438a38.903 38.903 0 005.905-2c5-2.151 9.376-5.104 13.125-8.854 3.75-3.749 6.703-8.125 8.855-13.125a38.972 38.972 0 001.999-5.905A1.485 1.485 0 0132.447 0z" fill="#000"/>
+      <path d="M32.447 0c.68 0 1.273.465 1.439 1.125a38.904 38.904 0 001.999 5.905c2.152 5 5.105 9.376 8.854 13.125 3.751 3.75 8.126 6.703 13.125 8.855a38.98 38.98 0 005.906 1.999c.66.166 1.124.758 1.124 1.438 0 .68-.464 1.273-1.125 1.439a38.902 38.902 0 00-5.905 1.999c-5 2.152-9.375 5.105-13.125 8.854-3.749 3.751-6.702 8.126-8.854 13.125a38.973 38.973 0 00-2 5.906 1.485 1.485 0 01-1.438 1.124c-.68 0-1.272-.464-1.438-1.125a38.913 38.913 0 00-2-5.905c-2.151-5-5.103-9.375-8.854-13.125-3.75-3.749-8.125-6.702-13.125-8.854a38.973 38.973 0 00-5.905-2A1.485 1.485 0 010 32.448c0-.68.465-1.272 1.125-1.438a38.903 38.903 0 005.905-2c5-2.151 9.376-5.104 13.125-8.854 3.75-3.749 6.703-8.125 8.855-13.125a38.972 38.972 0 001.999-5.905A1.485 1.485 0 0132.447 0z" fill="url(#gemini-grad)"/>
+    </mask>
+    <filter id="gem-f0" x="-19.824" y="13.152" width="39.274" height="43.217" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="2.46"/></filter>
+    <filter id="gem-f1" x="-15.001" y="-40.257" width="84.868" height="85.688" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="11.891"/></filter>
+    <filter id="gem-f2" x="-20.776" y="11.927" width="79.454" height="90.916" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="10.109"/></filter>
+    <filter id="gem-f4" x="-19.845" y="15.459" width="79.731" height="81.505" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="10.109"/></filter>
+    <filter id="gem-f5" x="29.832" y="-11.552" width="75.117" height="73.758" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="9.606"/></filter>
+    <filter id="gem-f6" x="-38.583" y="-16.253" width="78.135" height="78.758" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="8.706"/></filter>
+    <filter id="gem-f7" x="8.107" y="-5.966" width="78.877" height="77.539" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="7.775"/></filter>
+    <filter id="gem-f8" x="13.587" y="-18.488" width="56.272" height="51.81" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="6.957"/></filter>
+    <filter id="gem-f9" x="-15.526" y="-31.297" width="70.856" height="69.306" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="5.876"/></filter>
+    <filter id="gem-f10" x="-14.168" y="20.964" width="55.501" height="51.571" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="7.273"/></filter>
+
+    <!-- Official Google Cloud Mark -->
+    <symbol id="icon-google-cloud" viewBox="0 0 36 28">
+      <path fill="#ea4335" d="M21.85,7.41l1,0,2.85-2.85.14-1.21A12.81,12.81,0,0,0,5,9.6a1.55,1.55,0,0,1,1-.06l5.7-.94s.29-.48.44-.45a7.11,7.11,0,0,1,9.73-.74Z"/>
+      <path fill="#4285f4" d="M29.76,9.6a12.84,12.84,0,0,0-3.87-6.24l-4,4A7.11,7.11,0,0,1,24.5,13v.71a3.56,3.56,0,1,1,0,7.12H17.38l-.71.72v4.27l.71.71H24.5A9.26,9.26,0,0,0,29.76,9.6Z"/>
+      <path fill="#34a853" d="M10.25,26.49h7.12v-5.7H10.25a3.54,3.54,0,0,1-1.47-.32l-1,.31L4.91,23.63l-.25,1A9.21,9.21,0,0,0,10.25,26.49Z"/>
+      <path fill="#fbbc05" d="M10.25,8A9.26,9.26,0,0,0,4.66,24.6l4.13-4.13a3.56,3.56,0,1,1,4.71-4.71l4.13-4.13A9.25,9.25,0,0,0,10.25,8Z"/>
+    </symbol>
+
+    <!-- Official Google Gemini 4-Color Sparkle -->
+    <symbol id="icon-gemini" viewBox="0 0 65 65">
+      <g mask="url(#gemini-mask)">
+        <path d="M0 0h65v65H0z" fill="url(#gemini-grad)"/>
+        <g filter="url(#gem-f0)"><path d="M-5.859 50.734c7.498 2.663 16.116-2.33 19.249-11.152 3.133-8.821-.406-18.131-7.904-20.794-7.498-2.663-16.116 2.33-19.25 11.151-3.132 8.822.407 18.132 7.905 20.795z" fill="#FFE432"/></g>
+        <g filter="url(#gem-f1)"><path d="M27.433 21.649c10.3 0 18.651-8.535 18.651-19.062 0-10.528-8.35-19.062-18.651-19.062S8.78-7.94 8.78 2.587c0 10.527 8.35 19.062 18.652 19.062z" fill="#FC413D"/></g>
+        <g filter="url(#gem-f2)"><path d="M20.184 82.608c10.753-.525 18.918-12.244 18.237-26.174-.68-13.93-9.95-24.797-20.703-24.271C6.965 32.689-1.2 44.407-.519 58.337c.681 13.93 9.95 24.797 20.703 24.271z" fill="#00B95C"/></g>
+        <g filter="url(#gem-f4)"><path d="M30.954 74.181c9.014-5.485 11.427-17.976 5.389-27.9-6.038-9.925-18.241-13.524-27.256-8.04-9.015 5.486-11.428 17.977-5.39 27.902 6.04 9.924 18.242 13.523 27.257 8.038z" fill="#00B95C"/></g>
+        <g filter="url(#gem-f5)"><path d="M67.391 42.993c10.132 0 18.346-7.91 18.346-17.666 0-9.757-8.214-17.667-18.346-17.667s-18.346 7.91-18.346 17.667c0 9.757 8.214 17.666 18.346 17.666z" fill="#3186FF"/></g>
+        <g filter="url(#gem-f6)"><path d="M-13.065 40.944c9.33 7.094 22.959 4.869 30.442-4.972 7.483-9.84 5.987-23.569-3.343-30.663C4.704-1.786-8.924.439-16.408 10.28c-7.483 9.84-5.986 23.57 3.343 30.664z" fill="#FBBC04"/></g>
+        <g filter="url(#gem-f7)"><path d="M34.74 51.43c11.135 7.656 25.896 5.524 32.968-4.764 7.073-10.287 3.779-24.832-7.357-32.488C49.215 6.52 34.455 8.654 27.382 18.94c-7.072 10.288-3.779 24.833 7.357 32.49z" fill="#3186FF"/></g>
+        <g filter="url(#gem-f8)"><path d="M54.984-2.336c2.833 3.852-.808 11.34-8.131 16.727-7.324 5.387-15.557 6.631-18.39 2.78-2.833-3.853.807-11.342 8.13-16.728 7.324-5.387 15.558-6.631 18.39-2.78z" fill="#749BFF"/></g>
+        <g filter="url(#gem-f9)"><path d="M31.727 16.104C43.053 5.598 46.94-8.626 40.41-15.666c-6.53-7.04-21.006-4.232-32.332 6.274s-15.214 24.73-8.683 31.77c6.53 7.04 21.006 4.232 32.332-6.274z" fill="#FC413D"/></g>
+        <g filter="url(#gem-f10)"><path d="M8.51 53.838c6.732 4.818 14.46 5.55 17.262 1.636 2.802-3.915-.384-10.994-7.116-15.812-6.731-4.818-14.46-5.55-17.261-1.636-2.802 3.915.383 10.994 7.115 15.812z" fill="#FFEE48"/></g>
+      </g>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 512 512">
+  <circle cx="256" cy="176" r="72" fill="#f1f3f4" stroke="#5f6368" stroke-width="28"/>
+  <path d="M112,400c0-79.5,64.5-144,144-144s144,64.5,144,144" fill="none" stroke="#5f6368" stroke-width="28" stroke-linecap="round"/>
+</symbol>
+    <symbol id="icon-security" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M256.004,287.542c-43.08,0-78.128-35.065-78.128-78.167s35.048-78.167,78.128-78.167,78.129,35.065,78.129,78.167-35.049,78.167-78.129,78.167ZM256.004,163.208c-25.435,0-46.128,20.71-46.128,46.167s20.693,46.167,46.128,46.167,46.129-20.71,46.129-46.167-20.693-46.167-46.129-46.167h0Z" fill="#4285f4"/>
+    <path d="M153.505,376.416c-.752,0-1.511-.053-2.276-.162-8.748-1.245-14.83-9.347-13.584-18.096,4.021-28.244,18.11-54.191,39.672-73.062,21.776-19.059,49.72-29.555,78.682-29.555,8.837,0,16,7.163,16,16s-7.163,16-16,16c-21.207,0-41.666,7.684-57.607,21.636-15.801,13.828-26.123,32.825-29.066,53.492-1.137,7.982-7.983,13.746-15.819,13.746h-.002Z" fill="#9aa0a6"/>
+    <path d="M358.493,376.427c-7.838,0-14.685-5.764-15.82-13.748-2.94-20.669-13.262-39.668-29.063-53.499-15.941-13.953-36.401-21.638-57.61-21.638-8.837,0-16-7.163-16-16s7.163-16,16-16c28.964,0,56.909,10.497,78.687,29.559,21.562,18.873,35.65,44.823,39.669,73.07,1.244,8.749-4.839,16.85-13.587,18.095-.765.108-1.523.161-2.274.161h-.002Z" fill="#4285f4"/>
+    <path d="M256.004,287.542c-43.08,0-78.128-35.065-78.128-78.167s35.048-78.167,78.128-78.167v32c-25.435,0-46.128,20.71-46.128,46.167s20.693,46.167,46.128,46.167v32Z" fill="#9aa0a6"/>
+    <path d="M437.95,151.09c-.01-.13-.03-.26-.04-.39-.02-.18-.04-.37-.07-.55-.05-.37-.12-.74-.19-1.1-.08-.36-.17-.72-.27-1.07-.15-.53-.33-1.05-.54-1.56-.06-.15-.12-.3-.18-.44-.23-.55-.5-1.08-.8-1.59-.08-.14-.16-.28-.25-.42-.19-.31-.4-.61-.61-.91-.21-.29-.42-.57-.65-.85l-.02-.02c-.23-.28-.47-.55-.72-.81-.01-.01-.02-.02-.02-.02-.19-.21-.39-.41-.6-.6-.27-.26-.55-.5-.83-.73-.13-.11-.26-.21-.39-.31-.14-.11-.28-.22-.42-.31-.13-.1-.25-.19-.38-.28-.33-.22-.67-.43-1.02-.62-.21-.13-.41-.24-.63-.35-.13-.07-.25-.13-.38-.19l-137.13-68.47-.07-.03-28.59-14.28c-4.17-2.09-9.03-2.24-13.3-.46-.33.14-.66.29-1,.46l-166,82.88c-5.42,2.71-8.85,8.26-8.85,14.32v103.13c0,44.24,21.16,86.5,56.59,113.04l98.72,73.94v.01l17.1,12.8c1.43,1.07,2.99,1.87,4.6,2.39.61.21,1.23.37,1.85.49.78.16,1.57.25,2.35.29.28.01.55.02.8.02.3,0,.59-.01.89-.03.21-.01.41-.02.62-.04.42-.04.85-.1,1.27-.18.25-.04.5-.09.74-.15.07-.01.15-.03.22-.04.01,0,.02-.01.02-.01.24-.06.48-.12.71-.19.26-.07.52-.15.78-.25.3-.11.61-.22.91-.35h.01c.28-.11.55-.24.82-.37.59-.28,1.17-.61,1.73-.99.18-.11.37-.23.54-.36.11-.07.21-.15.32-.23l115.82-86.75c35.43-26.54,56.59-68.8,56.59-113.04v-103.13c0-.44-.02-.87-.05-1.3h0ZM406,255.52c0,34.21-16.37,66.9-43.78,87.43l-106.22,79.56-106.22-79.56c-27.41-20.53-43.78-53.22-43.78-87.43v-93.24l150-74.9,150,74.9v93.24h0Z" fill="#9aa0a6"/>
+    <path d="M268.81,452.09c-.94,1.25-2.03,2.33-3.22,3.22-.11.08-.21.16-.32.23-.17.13-.36.25-.54.36-.56.38-1.14.71-1.73.99-.27.13-.54.26-.82.37h-.01c-.3.13-.61.24-.91.35-.26.09-.52.17-.78.25-.23.07-.47.13-.71.19,0,0-.01.01-.02.01-.07.01-.15.03-.22.04-.24.06-.49.11-.74.15-.42.08-.85.14-1.27.18-.21.02-.41.03-.62.04-.3.02-.59.03-.89.03-.25,0-.52-.01-.8-.02-.78-.04-1.57-.13-2.35-.29-.62-.12-1.24-.28-1.85-.49-1.61-.52-3.17-1.32-4.6-2.39l-17.1-12.8v-.01l-98.72-73.94c-35.43-26.54-56.59-68.8-56.59-113.04v-103.13c0-6.06,3.43-11.61,8.85-14.32L248.85,55.19c.34-.17.67-.32,1-.46,4.27-1.78,9.13-1.63,13.3.46l28.59,14.28.07.03-35.81,17.88-150,74.9v93.24c0,34.21,16.37,66.9,43.78,87.43l106.22,79.56,9.59,7.18c7.07,5.3,8.51,15.33,3.22,22.4h0Z" fill="#4285f4"/>
+    <path d="M438,152.39v103.13c0,44.24-21.16,86.5-56.59,113.04l-115.82,86.75c-.11.08-.21.16-.32.23-.17.13-.36.25-.54.36-.56.38-1.14.71-1.73.99-.27.13-.54.26-.82.37h-.01c-.3.13-.61.24-.91.35-.26.1-.52.18-.78.25-.23.07-.47.13-.71.19,0,0-.01.01-.02.01-.32.07-.64.14-.96.19-.42.08-.85.14-1.27.18-.21.02-.41.03-.62.04-.3.02-.59.03-.89.03-.25,0-.52-.01-.8-.02-.78-.04-1.57-.13-2.35-.29-.62-.12-1.24-.28-1.85-.49-1.61-.52-3.17-1.32-4.6-2.39l-17.1-12.8v-.01l26.69-19.99,106.22-79.56c27.41-20.53,43.78-53.22,43.78-87.43v-103.13c0-8.84,7.16-16,16-16,2.49,0,4.84.57,6.94,1.58.13.06.25.12.38.19.22.11.42.22.63.35.35.19.69.4,1.02.62.13.09.25.18.38.28.14.09.28.2.42.31.13.1.26.2.39.31.28.23.56.47.83.73.21.19.41.39.6.6,0,0,.01.01.02.02.25.26.49.53.72.81l.02.02c.23.28.44.56.65.85.21.3.42.6.61.91.09.14.17.28.25.42.3.51.57,1.04.8,1.59.06.14.12.29.18.44.21.51.39,1.03.54,1.56.1.35.19.71.27,1.07.07.36.14.73.19,1.1.03.18.05.37.07.55.01.13.03.26.04.39.03.43.05.86.05,1.3h0Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+    <symbol id="icon-agents" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M256.083,438.958h-.025c-6.531-.01-12.403-3.982-14.831-10.046-.21-.521-21.989-53.918-63.233-94.966-41.269-41.072-94.336-62.688-94.867-62.902-6.066-2.438-10.046-8.326-10.039-14.865.007-6.537,3.983-12.415,10.053-14.842.964-.39,53.504-21.883,94.854-63.036,41.476-41.278,63-94.697,63.213-95.231,2.422-6.092,8.316-10.098,14.871-10.098h.017c6.562.007,12.456,4.012,14.867,10.113.206.521,21.716,53.924,63.206,95.216,41.538,41.341,94.333,62.827,94.861,63.039,6.064,2.436,10.045,8.316,10.045,14.852s-3.969,12.416-10.033,14.851c-.52.209-53.737,21.965-94.874,62.904-41.11,40.916-63.029,94.463-63.245,94.999-2.444,6.048-8.317,10.013-14.838,10.013h-.002ZM125.551,256.183c21.069,11.566,49.712,29.899,75.016,55.082,25.399,25.278,43.886,54.093,55.524,75.267,11.659-21.198,30.162-50.046,55.502-75.267,25.252-25.131,53.939-43.484,75.035-55.069-21.021-11.563-49.611-29.911-75.035-55.213-25.47-25.349-43.907-54.14-55.514-75.348-11.608,21.21-30.048,50.005-55.512,75.348-25.409,25.288-53.996,43.635-75.017,55.2h0Z" fill="#4285f4"/>
+    <path d="M394.5,181c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.249,16.379-6.249,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h-.001ZM369.627,117.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#9aa0a6"/>
+    <path d="M117.5,181c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.249,16.379-6.249,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h0ZM92.627,117.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#4285f4"/>
+    <path d="M394.5,458c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.248,16.379-6.248,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h-.001ZM369.627,394.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#4285f4"/>
+    <path d="M117.5,458c-4.095,0-8.189-1.562-11.313-4.687l-47.5-47.5c-6.249-6.248-6.249-16.379,0-22.627l47.5-47.5c6.248-6.248,16.379-6.248,22.627,0l47.5,47.5c6.249,6.248,6.249,16.379,0,22.627l-47.5,47.5c-3.124,3.124-7.219,4.687-11.313,4.687h0ZM92.627,394.5l24.873,24.873,24.873-24.873-24.873-24.873-24.873,24.873Z" fill="#9aa0a6"/>
+    <path d="M334.166,333.946c41.137-40.94,94.354-62.695,94.874-62.904,6.064-2.435,10.032-8.315,10.033-14.851,0-6.535-3.98-12.416-10.045-14.851-.528-.212-53.323-21.698-94.861-63.039-.072-.071-.15-.131-.223-.2l-22.604,22.604c.087.091.163.189.253.278,25.424,25.302,54.015,43.649,75.035,55.213-21.096,11.585-49.783,29.939-75.035,55.069-25.34,25.221-43.843,54.068-55.502,75.267-11.622-21.144-30.074-49.907-55.418-75.16l-22.628,22.628c41.21,41.041,62.971,94.392,63.181,94.913,2.428,6.064,8.3,10.035,14.831,10.046h.025c6.521,0,12.393-3.966,14.838-10.013.216-.536,22.135-54.083,63.245-94.999h.001Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+    <symbol id="icon-vertex-ai" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M128,244.99c-8.84,0-16-7.16-16-16v-95.97c0-8.84,7.16-16,16-16s16,7.16,16,16v95.97c0,8.84-7.16,16-16,16Z" fill="#ea4335"/>
+    <path d="M256,458c-2.98,0-5.97-.83-8.59-2.5l-186-122c-7.46-4.74-9.65-14.63-4.91-22.09,4.75-7.46,14.64-9.65,22.09-4.91l177.41,116.53,177.41-116.53c7.45-4.74,17.34-2.55,22.09,4.91,4.74,7.46,2.55,17.34-4.91,22.09l-186,122c-2.62,1.67-5.61,2.5-8.59,2.5Z" fill="#fbbc04"/>
+    <path d="M256,388.03c-8.84,0-16-7.16-16-16v-73.06c0-8.84,7.16-16,16-16s16,7.16,16,16v73.06c0,8.84-7.16,16-16,16Z" fill="#34a853"/>
+    <circle cx="128" cy="70" r="16" fill="#ea4335"/>
+    <circle cx="128" cy="292" r="16" fill="#ea4335"/>
+    <path d="M384.23,308.01c-8.82,0-15.98-7.14-16-15.97l-.23-94.01c-.02-8.84,7.13-16.02,15.97-16.03h.04c8.82,0,15.98,7.14,16,15.97l.23,94.01c.02,8.84-7.13,16.02-15.97,16.03h-.04Z" fill="#4285f4"/>
+    <circle cx="384" cy="70" r="16" fill="#4285f4"/>
+    <circle cx="384" cy="134" r="16" fill="#4285f4"/>
+    <path d="M320,220.36c-8.84,0-16-7.16-16-16v-103.02c0-8.84,7.16-16,16-16s16,7.16,16,16v103.02c0,8.84-7.16,16-16,16Z" fill="#fbbc04"/>
+    <circle cx="256" cy="171" r="16" fill="#34a853"/>
+    <circle cx="256" cy="235" r="16" fill="#34a853"/>
+    <circle cx="320" cy="265" r="16" fill="#fbbc04"/>
+    <circle cx="320" cy="329" r="16" fill="#fbbc04"/>
+    <path d="M192,217.36c-8.84,0-16-7.16-16-16v-100.02c0-8.84,7.16-16,16-16s16,7.16,16,16v100.02c0,8.84-7.16,16-16,16Z" fill="#fbbc04"/>
+    <circle cx="192" cy="265" r="16" fill="#fbbc04"/>
+    <circle cx="192" cy="329" r="16" fill="#fbbc04"/>
+    </g>
+  </symbol>
+    <symbol id="icon-integration-services" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M346.683,112.611l-.039-75.171c-.005-8.834-7.167-15.992-16-15.992h-.008c-8.837.004-15.997,7.172-15.992,16.008l.039,75.155H118c-17.673,0-32,14.327-32,32v111.865c0,89.085,76.262,161.562,170,161.562s170-72.477,170-161.562v-111.865c0-17.673-14.327-32-32-32h-47.317ZM394,256.477c0,71.44-61.906,129.562-138,129.562s-138-58.121-138-129.562v-111.865h276v111.865Z" fill="#4285f4"/>
+    <path d="M314.644,144.611v-32h-117.294l-.039-75.171c-.005-8.834-7.167-15.992-16-15.992h-.008c-8.837.004-15.997,7.172-15.992,16.008l.039,75.155h-47.35c-17.673,0-32,14.327-32,32v111.865c0,83.959,67.741,153.155,154.007,160.841v56.679c0,8.616,6.621,16.029,15.228,16.433,9.188.432,16.772-6.889,16.772-15.982v-89.277c-6.594.627-8.014.652-16,.867h-.007c-76.094,0-138-58.121-138-129.562v-111.865h196.644,0Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+    <symbol id="icon-external-api" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="160" fill="#f1f3f4" stroke="#5f6368" stroke-width="28"/>
+  <path d="M96,256h320M256,96c48,48,80,112,80,160s-32,112-80,160M256,96c-48,48-80,112-80,160s32,112,80,160" fill="none" stroke="#5f6368" stroke-width="20"/>
+</symbol>
+    <symbol id="icon-cloud-run" viewBox="0 0 512 512">
+    <g id="art">
+    <path fill="#fbbc04" d="M144.4,272c-6.4,0-12.4-3.8-14.9-10.1L55.4,75.9c-3.3-8.2.7-17.5,8.9-20.8,8.2-3.3,17.5.7,20.8,8.9l74.2,186c3.3,8.2-.7,17.5-8.9,20.8-1.9.8-3.9,1.1-5.9,1.1h-.1Z"/>
+    <g id="b">
+    <path fill="#ea4335" d="M256,272c-6.4,0-12.4-3.8-14.9-10.1l-74.1-186c-2.6-6.6-.6-14.1,5-18.5s13.4-4.5,19.2-.4l260.1,186c7.2,5.1,8.9,15.1,3.7,22.3s-15.1,8.9-22.3,3.7L216.9,114.7l54,135.3c3.3,8.2-.7,17.5-8.9,20.8-1.9.8-4,1.1-5.9,1.1h-.1Z"/>
+    </g>
+    <path fill="#34a853" d="M127.2,256l-72,180c-3.3,8.2.7,17.5,8.9,20.8,3.1,1.2,4,1.1,5.9,1.1,6.3,0,12.4-3.8,14.9-10.1l74.4-186c.8-2,1.1-4,1.1-5.9h-33.2Z"/>
+    <path fill="#4285f4" d="M414.5,256l-197.7,141.2,54.1-135.3c.8-2,1.1-4,1.1-5.9h-33.2l-72,180c-2.6,6.6-.6,14.1,5,18.5,2.9,2.3,6.4,3.4,9.9,3.4s6.5-1,9.3-3l260.4-186c4.4-3.1,6.7-8,6.7-13h-43.6Z"/>
+    </g>
+  </symbol>
+    <symbol id="icon-networking" viewBox="0 0 512 512">
+    <g id="art">
+    <path d="M331.66,331.66l-22.627-22.627c29.242-29.243,29.242-76.823,0-106.066l22.627-22.627c41.72,41.719,41.72,109.602,0,151.32h0Z" fill="#9aa0a6"/>
+    <path d="M180.34,331.66c-41.72-41.719-41.72-109.602,0-151.32l22.627,22.627c-29.242,29.243-29.242,76.823,0,106.066l-22.627,22.627Z" fill="#9aa0a6"/>
+    <path d="M309.033,202.967c-29.242-29.242-76.824-29.242-106.066,0l-22.627-22.627c20.21-20.21,47.08-31.34,75.66-31.34s55.45,11.13,75.66,31.34l-22.627,22.627h0Z" fill="#4285f4"/>
+    <path d="M256,363c-28.58,0-55.45-11.13-75.66-31.34l22.627-22.627c29.242,29.242,76.824,29.242,106.066,0l22.627,22.627c-20.21,20.21-47.08,31.34-75.66,31.34Z" fill="#4285f4"/>
+    <path d="M170.229,147.603c5.406-9.256,8.521-20.007,8.521-31.478,0-34.531-28.094-62.625-62.625-62.625s-62.625,28.094-62.625,62.625,28.094,62.625,62.625,62.625c11.471,0,22.222-3.114,31.478-8.52l45.281,45.281c5.831-9.07,13.557-16.796,22.627-22.627l-45.281-45.281h-.001ZM116.125,146.75c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#4285f4"/>
+    <path d="M215.51,319.117c-9.07-5.831-16.796-13.557-22.627-22.627l-45.281,45.281c-9.256-5.406-20.007-8.52-31.478-8.52-34.531,0-62.625,28.094-62.625,62.625s28.094,62.625,62.625,62.625,62.625-28.094,62.625-62.625c0-11.471-3.114-22.222-8.521-31.478l45.281-45.281h0ZM116.125,426.5c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#9aa0a6"/>
+    <path d="M395.875,333.25c-11.471,0-22.222,3.114-31.478,8.52l-45.281-45.281c-5.831,9.07-13.557,16.796-22.627,22.627l45.281,45.281c-5.406,9.256-8.521,20.007-8.521,31.478,0,34.531,28.094,62.625,62.625,62.625s62.625-28.094,62.625-62.625-28.094-62.625-62.625-62.625h.001ZM395.875,426.5c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#4285f4"/>
+    <path d="M395.875,53.5c-34.531,0-62.625,28.094-62.625,62.625,0,11.645,3.205,22.551,8.764,31.902l-45.118,45.118c9.03,5.887,16.707,13.663,22.481,22.773l45.444-45.444c9.16,5.255,19.758,8.276,31.054,8.276,34.531,0,62.625-28.094,62.625-62.625s-28.094-62.625-62.625-62.625ZM395.875,146.75c-16.887,0-30.625-13.738-30.625-30.625s13.738-30.625,30.625-30.625,30.625,13.738,30.625,30.625-13.738,30.625-30.625,30.625Z" fill="#9aa0a6"/>
+    </g>
+  </symbol>
+  </defs>
+
+  <metadata id="diagram-model">{
+  "title": "End-to-End Authentication Architecture for a Custom Gemini Enterprise UI",
+  "subtitle": "Layer 1: Keyless Inbound User Identity to :streamAssist \u00b7 Layer 2: Outbound 3LO to Native Connectors and ADK Subagents",
+  "nodes": [
+    {
+      "id": "node-portal",
+      "name": "Custom Web Portal UI",
+      "product": "Enterprise Web Application",
+      "tier": "client",
+      "description": "Custom enterprise web UI where employees sign in with corporate SSO.",
+      "evidence": "static/index.html"
+    },
+    {
+      "id": "node-sts-dwd",
+      "name": "User Token Exchange",
+      "product": "Google STS &amp; IAM Credentials",
+      "tier": "security",
+      "description": "Exchanges OIDC tokens via WIF STS or mints Workspace tokens via Keyless DWD :signJwt.",
+      "evidence": "main.py (get_delegated_credentials)"
+    },
+    {
+      "id": "node-streamassist",
+      "name": "Gemini Enterprise (:streamAssist)",
+      "product": "Discovery Engine v1alpha",
+      "tier": "ai",
+      "focal": true,
+      "description": "Orchestrates enterprise grounding and agent delegation under the signed-in human identity.",
+      "evidence": "main.py (api_chat :streamAssist)"
+    },
+    {
+      "id": "node-connector",
+      "name": "Native Federated Connectors",
+      "product": "Discovery Engine DataConnector",
+      "tier": "integration",
+      "description": "Manages 3LO refresh tokens in GE Keystore via acquireAccessToken and acquireAndStoreRefreshToken.",
+      "evidence": "projects.locations.collections.dataConnector"
+    },
+    {
+      "id": "node-adk-router",
+      "name": "Root ADK Router Agent",
+      "product": "Vertex AI Agent Engine",
+      "tier": "ai",
+      "focal": true,
+      "description": "Routes user intents to specialist subagents without triggering upfront multi-tool OAuth popups.",
+      "evidence": "servicenow_adk_agent/agent.py"
+    },
+    {
+      "id": "node-adk-subagent",
+      "name": "Specialist Subagents (ServiceNow/Jira)",
+      "product": "ADK Subagent + 3LO ToolContext",
+      "tier": "ai",
+      "description": "Requests user OAuth credentials on demand only when a third-party action is invoked.",
+      "evidence": "servicenow_adk_agent/agent.py (request_credential)"
+    },
+    {
+      "id": "node-saas",
+      "name": "Third-Party Enterprise SaaS",
+      "product": "ServiceNow / Jira REST APIs",
+      "tier": "external",
+      "description": "Executes read grounding and write actions using the human user's OAuth 2.0 access token.",
+      "evidence": "servicenow_adk_agent/agent.py (table/incident)"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "node-portal",
+      "to": "node-sts-dwd",
+      "label": "1. Login",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-2",
+      "from": "node-sts-dwd",
+      "to": "node-streamassist",
+      "label": "2. Auth",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-3",
+      "from": "node-streamassist",
+      "to": "node-connector",
+      "label": "3a. Grounding",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-4",
+      "from": "node-streamassist",
+      "to": "node-adk-router",
+      "label": "3b. ADK",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-5",
+      "from": "node-adk-router",
+      "to": "node-adk-subagent",
+      "label": "4. Route Tool",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-6",
+      "from": "node-connector",
+      "to": "node-saas",
+      "label": "5a. Keystore 3LO",
+      "kind": "sync"
+    },
+    {
+      "id": "edge-7",
+      "from": "node-adk-subagent",
+      "to": "node-saas",
+      "label": "5b. 3LO",
+      "kind": "sync"
+    }
+  ],
+  "views": [
+    {
+      "id": "layer1-inbound",
+      "title": "Layer 1: Inbound User Auth",
+      "summary": "Corporate SSO identity is exchanged keylessly to call :streamAssist as the signed-in employee.",
+      "nodes": [
+        "node-portal",
+        "node-sts-dwd",
+        "node-streamassist"
+      ],
+      "edges": [
+        "edge-1",
+        "edge-2"
+      ]
+    },
+    {
+      "id": "layer2a-connectors",
+      "title": "Layer 2A: Native Connectors",
+      "summary": "Gemini Enterprise uses its managed Keystore to refresh 3LO tokens silently for federated connectors.",
+      "nodes": [
+        "node-streamassist",
+        "node-connector",
+        "node-saas"
+      ],
+      "edges": [
+        "edge-3",
+        "edge-6"
+      ]
+    },
+    {
+      "id": "layer2b-adk",
+      "title": "Layer 2B: ADK Subagent 3LO",
+      "summary": "Root Router delegates to specialist subagents that request 3LO credentials on demand.",
+      "nodes": [
+        "node-streamassist",
+        "node-adk-router",
+        "node-adk-subagent",
+        "node-saas"
+      ],
+      "edges": [
+        "edge-4",
+        "edge-5",
+        "edge-7"
+      ]
+    }
+  ]
+}</metadata>
+
+  <g id="layer-header" data-frame-id="header-main" data-frame-kind="header">
+    <rect x="24" y="14" width="1312" height="54" fill="none"/>
+    <text x="24" y="38" font-size="19" font-weight="600" fill="#202124">End-to-End Authentication Architecture for a Custom Gemini Enterprise UI</text>
+    <text x="24" y="58" font-size="12.5" fill="#5f6368">1. User Login &amp; Token Exchange · 2. Hit :streamAssist with User RBAC · 3. Route to Connectors or ADK Subagents</text>
+    <g transform="translate(836, 18)">
+      <rect width="500" height="44" rx="8" fill="#f8f9fa" stroke="#dadce0" stroke-width="1"/>
+      <line x1="16" y1="22" x2="42" y2="22" stroke="#1a73e8" stroke-width="2"/>
+      <polygon points="40,18 48,22 40,26" fill="#1a73e8"/>
+      <text x="54" y="26" font-size="10" font-weight="500" fill="#3c4043">Step 1: User Auth</text>
+      <line x1="171" y1="22" x2="197" y2="22" stroke="#1e8e3e" stroke-width="2"/>
+      <polygon points="195,18 203,22 195,26" fill="#1e8e3e"/>
+      <text x="209" y="26" font-size="10" font-weight="500" fill="#3c4043">Path A: Connector 3LO</text>
+      <line x1="326" y1="22" x2="352" y2="22" stroke="#9334e6" stroke-width="2" stroke-dasharray="5,4"/>
+      <polygon points="350,18 358,22 350,26" fill="#9334e6"/>
+      <text x="364" y="26" font-size="10" font-weight="500" fill="#3c4043">Path B: ADK Agent 3LO</text>
+    </g>
+  </g>
+
+  <g id="layer-boundaries">
+    <g class="boundary" id="boundary-gcp" data-frame-id="boundary-gcp" data-frame-kind="boundary">
+      <rect x="236" y="84" width="868" height="452" rx="16" ry="16" fill="#f8f9fa" stroke="#bdc1c6" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <use href="#icon-google-cloud" x="256" y="100" width="24" height="19"/>
+      <text x="286" y="114" font-size="12" font-weight="600" fill="#3c4043">Google Cloud</text>
+    </g>
+    <g class="boundary" id="boundary-layer1" data-frame-id="boundary-layer1" data-frame-kind="boundary">
+      <rect x="260" y="132" width="260" height="380" rx="14" ry="14" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1.5"/>
+      <use href="#icon-security" x="280" y="148" width="18" height="18"/>
+      <text x="304" y="162" font-size="12" font-weight="600" fill="#174ea6">Step 1: User Auth</text>
+      <text x="304" y="177" font-size="10.5" fill="#5f6368">Google OAuth · WIF STS · DWD</text>
+    </g>
+    <g class="boundary" id="boundary-ge" data-frame-id="boundary-ge" data-frame-kind="boundary">
+      <rect x="544" y="132" width="264" height="380" rx="14" ry="14" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1.5"/>
+      <use href="#icon-gemini" x="564" y="148" width="18" height="18"/>
+      <text x="588" y="162" font-size="12" font-weight="600" fill="#137333">Gemini Enterprise</text>
+      <text x="588" y="177" font-size="10.5" fill="#5f6368">Discovery Engine &amp; Keystore</text>
+    </g>
+    <g class="boundary" id="boundary-adk" data-frame-id="boundary-adk" data-frame-kind="boundary">
+      <rect x="832" y="132" width="252" height="380" rx="14" ry="14" fill="#fef7e0" stroke="#fdd663" stroke-width="1.5"/>
+      <use href="#icon-agents" x="852" y="148" width="18" height="18"/>
+      <text x="876" y="162" font-size="12" font-weight="600" fill="#b06000">Vertex AI Agent Engine</text>
+      <text x="876" y="177" font-size="10.5" fill="#5f6368">Layer 2B: ADK Hierarchy</text>
+    </g>
+  </g>
+
+  <g id="layer-edges">
+    <path id="edge-1" class="edge" data-edge-id="edge-1" data-edge-from="node-portal" data-edge-to="node-sts-dwd" data-edge-label="1. Login" data-edge-kind="sync"
+          d="M 200 244 H 280" fill="none" stroke="#1a73e8" stroke-width="2.2" marker-end="url(#arrow-primary)" mask="url(#mask-edge-1)"/>
+    <path id="edge-2" class="edge" data-edge-id="edge-2" data-edge-from="node-sts-dwd" data-edge-to="node-streamassist" data-edge-label="2. Auth" data-edge-kind="sync"
+          d="M 500 244 H 564" fill="none" stroke="#1a73e8" stroke-width="2.2" marker-end="url(#arrow-primary)" mask="url(#mask-edge-2)"/>
+    <path id="edge-3" class="edge" data-edge-id="edge-3" data-edge-from="node-streamassist" data-edge-to="node-connector" data-edge-label="3a. Grounding" data-edge-kind="sync"
+          d="M 676 288 V 384" fill="none" stroke="#1e8e3e" stroke-width="2.2" marker-end="url(#arrow-green)" mask="url(#mask-edge-3)"/>
+    <path id="edge-4" class="edge" data-edge-id="edge-4" data-edge-from="node-streamassist" data-edge-to="node-adk-router" data-edge-label="3b. ADK" data-edge-kind="sync"
+          d="M 788 244 H 852" fill="none" stroke="#9334e6" stroke-width="2.2" stroke-dasharray="5,4" marker-end="url(#arrow-purple)" mask="url(#mask-edge-4)"/>
+    <path id="edge-5" class="edge" data-edge-id="edge-5" data-edge-from="node-adk-router" data-edge-to="node-adk-subagent" data-edge-label="4. Route Tool" data-edge-kind="sync"
+          d="M 958 288 V 384" fill="none" stroke="#9334e6" stroke-width="2.2" stroke-dasharray="5,4" marker-end="url(#arrow-purple)" mask="url(#mask-edge-5)"/>
+    <path id="edge-6" class="edge" data-edge-id="edge-6" data-edge-from="node-connector" data-edge-to="node-saas" data-edge-label="5a. Keystore 3LO" data-edge-kind="sync"
+          d="M 676 476 V 492 Q 676 500 684 500 H 1232 Q 1240 500 1240 492 V 388" fill="none" stroke="#1e8e3e" stroke-width="2.2" marker-end="url(#arrow-green)" mask="url(#mask-edge-6)"/>
+    <path id="edge-7" class="edge" data-edge-id="edge-7" data-edge-from="node-adk-subagent" data-edge-to="node-saas" data-edge-label="5b. 3LO" data-edge-kind="sync"
+          d="M 1064 430 H 1110 Q 1118 430 1118 422 V 350 Q 1118 342 1126 342 H 1136" fill="none" stroke="#9334e6" stroke-width="2.2" stroke-dasharray="5,4" marker-end="url(#arrow-purple)" mask="url(#mask-edge-7)"/>
+  </g>
+
+  <g id="layer-nodes">
+    <g class="node" id="node-portal" data-frame-id="node-portal" data-frame-kind="node" transform="translate(24, 200)" filter="url(#card-shadow)">
+      <rect width="176" height="88" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-user" x="14" y="27" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Custom Web UI</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">Corporate SSO Login</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Entra / Okta / GWS</text>
+    </g>
+    <g class="node" id="node-sts-dwd" data-frame-id="node-sts-dwd" data-frame-kind="node" transform="translate(280, 200)" filter="url(#card-shadow)">
+      <rect width="220" height="88" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-security" x="14" y="27" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">User Token Exchange</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">Google STS / IAM :signJwt</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Zero Static JSON Keys</text>
+    </g>
+    <g class="node" id="node-streamassist" data-frame-id="node-streamassist" data-frame-kind="node" data-focal="true" transform="translate(564, 200)" filter="url(#card-shadow)">
+      <rect width="224" height="88" rx="10" ry="10" fill="#f8fafd" stroke="#1a73e8" stroke-width="2"/>
+      <use href="#icon-gemini" x="14" y="27" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#174ea6">Gemini Enterprise</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">:streamAssist API</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Per-User Document ACLs</text>
+    </g>
+    <g class="node" id="node-connector" data-frame-id="node-connector" data-frame-kind="node" transform="translate(564, 384)" filter="url(#card-shadow)">
+      <rect width="224" height="92" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-integration-services" x="14" y="29" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Native 3P Connectors</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">dataConnector + Keystore</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Silent Token Refresh</text>
+    </g>
+    <g class="node" id="node-adk-router" data-frame-id="node-adk-router" data-frame-kind="node" data-focal="true" transform="translate(852, 200)" filter="url(#card-shadow)">
+      <rect width="212" height="88" rx="10" ry="10" fill="#f8fafd" stroke="#1a73e8" stroke-width="2"/>
+      <use href="#icon-agents" x="14" y="27" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#174ea6">Root Router Agent</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">ADK Parent Agent</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">0 Upfront OAuth Popups</text>
+    </g>
+    <g class="node" id="node-adk-subagent" data-frame-id="node-adk-subagent" data-frame-kind="node" transform="translate(852, 384)" filter="url(#card-shadow)">
+      <rect width="212" height="92" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-vertex-ai" x="14" y="29" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Specialist Subagent</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">request_credential()</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">On-Demand Per-Tool 3LO</text>
+    </g>
+    <g class="node" id="node-saas" data-frame-id="node-saas" data-frame-kind="node" transform="translate(1136, 296)" filter="url(#card-shadow)">
+      <rect width="200" height="92" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
+      <use href="#icon-external-api" x="14" y="29" width="34" height="34"/>
+      <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">3P Enterprise SaaS</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">ServiceNow / Jira / Box</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">User-Level Audit Trail</text>
+    </g>
+  </g>
+
+  <g id="layer-labels">
+    <g class="edge-label" id="label-edge-1">
+      <rect x="208" y="214" width="64" height="20" rx="10" data-label-for="edge-1" fill="#ffffff" stroke="#d2e3fc" stroke-width="1"/>
+      <text x="240.0" y="228" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1a73e8">1. Login</text>
+    </g>
+    <g class="edge-label" id="label-edge-2">
+      <rect x="506" y="214" width="52" height="20" rx="10" data-label-for="edge-2" fill="#ffffff" stroke="#d2e3fc" stroke-width="1"/>
+      <text x="532.0" y="228" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1a73e8">2. Auth</text>
+    </g>
+    <g class="edge-label" id="label-edge-3">
+      <rect x="628" y="326" width="96" height="20" rx="10" data-label-for="edge-3" fill="#ffffff" stroke="#ceead6" stroke-width="1"/>
+      <text x="676.0" y="340" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1e8e3e">3a. Grounding</text>
+    </g>
+    <g class="edge-label" id="label-edge-4">
+      <rect x="794" y="214" width="52" height="20" rx="10" data-label-for="edge-4" fill="#ffffff" stroke="#e9d2fd" stroke-width="1"/>
+      <text x="820.0" y="228" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#9334e6">3b. ADK</text>
+    </g>
+    <g class="edge-label" id="label-edge-5">
+      <rect x="910" y="326" width="96" height="20" rx="10" data-label-for="edge-5" fill="#ffffff" stroke="#e9d2fd" stroke-width="1"/>
+      <text x="958.0" y="340" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#9334e6">4. Route Tool</text>
+    </g>
+    <g class="edge-label" id="label-edge-6">
+      <rect x="1110" y="490" width="110" height="20" rx="10" data-label-for="edge-6" fill="#ffffff" stroke="#ceead6" stroke-width="1"/>
+      <text x="1165.0" y="504" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#1e8e3e">5a. Keystore 3LO</text>
+    </g>
+    <g class="edge-label" id="label-edge-7">
+      <rect x="1070" y="400" width="58" height="20" rx="10" data-label-for="edge-7" fill="#ffffff" stroke="#e9d2fd" stroke-width="1"/>
+      <text x="1099.0" y="414" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="500" fill="#9334e6">5b. 3LO</text>
+    </g>
+  </g>
+</svg>

@@ -19,8 +19,8 @@ Usage:
   # 2. Query a 3LO-protected tool on the registered ADK agent (triggers on-demand 3P OAuth prompt)
   python 03_adk_agent_oauth/query_registered_agent.py --query "List my open ServiceNow incidents"
 
-  # 3. Test using Keyless DWD user authentication (--auth-mode dwd)
-  python 03_adk_agent_oauth/query_registered_agent.py --auth-mode dwd --query "List my open ServiceNow incidents"
+  # 3. Test using Workforce Identity Federation user authentication (--auth-mode wif)
+  python 03_adk_agent_oauth/query_registered_agent.py --auth-mode wif --browser-login --query "List my open ServiceNow incidents"
 """
 
 import argparse
@@ -28,7 +28,6 @@ import json
 import os
 from pathlib import Path
 import re
-import subprocess
 import sys
 from typing import Any, Dict, List
 from dotenv import load_dotenv
@@ -39,8 +38,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "01_user_auth_streamassist"))
 
 from pattern_a_google_identity import get_google_user_token  # pylint: disable=wrong-import-position
-from pattern_b_workforce_sts import exchange_idp_token_for_sts_token  # pylint: disable=wrong-import-position
-from pattern_c_hybrid_keyless_dwd import mint_keyless_dwd_user_token  # pylint: disable=wrong-import-position
+from pattern_b_workforce_sts import (  # pylint: disable=wrong-import-position
+    exchange_idp_token_for_sts_token,
+    get_entra_id_token_via_browser_login,
+)
 
 load_dotenv(REPO_ROOT / ".env")
 
@@ -55,11 +56,10 @@ def extract_agent_reply_and_oauth(chunks: Any) -> Dict[str, Any]:
 
   for chunk in chunks:
     for reply in chunk.get("answer", {}).get("replies", []):
-      text = (
-          reply.get("groundedContent", {})
-          .get("content", {})
-          .get("text")
-      )
+      content = reply.get("groundedContent", {}).get("content", {})
+      if content.get("thought"):
+        continue
+      text = content.get("text")
       if text:
         texts.append(text)
     summary = (
@@ -82,6 +82,7 @@ def extract_agent_reply_and_oauth(chunks: Any) -> Dict[str, Any]:
   requires_3lo = (
       "SERVICENOW_3LO_AUTH_REQUIRED" in raw_dump
       or "adk_request_credential" in raw_dump
+      or "requiredAuthorizations" in raw_dump
       or bool(oauth_url)
   )
 
@@ -98,9 +99,14 @@ def main() -> None:
   )
   parser.add_argument(
       "--auth-mode",
-      choices=["google", "dwd", "wif"],
+      choices=["google", "wif"],
       default="google",
-      help="User auth mode for :streamAssist ('google', 'dwd', or 'wif')",
+      help="User auth mode for :streamAssist ('google' or 'wif')",
+  )
+  parser.add_argument(
+      "--browser-login",
+      action="store_true",
+      help="Use interactive browser login for Google OAuth or Entra ID OIDC",
   )
   parser.add_argument("--project-id", default=os.environ.get("GCP_PROJECT_ID", ""))
   parser.add_argument("--engine-id", default="")
@@ -118,28 +124,21 @@ def main() -> None:
     engine_id = args.engine_id or os.environ.get("GE_WIF_ENGINE_ID", "")
     location = args.location or os.environ.get("GE_WIF_LOCATION", "us")
     agent_id = args.agent_id or os.environ.get("GE_WIF_AGENT_ID", "")
-    idp_token = os.environ.get("EXTERNAL_IDP_TOKEN", "")
-    if not idp_token:
-      sys.exit("Error: Set EXTERNAL_IDP_TOKEN in .env to use --auth-mode wif.")
+    idp_token = get_entra_id_token_via_browser_login(
+        tenant_id=os.environ.get("ENTRA_TENANT_ID", ""),
+        client_id=os.environ.get("ENTRA_CLIENT_ID", ""),
+    )
     sts_resp = exchange_idp_token_for_sts_token(
         workforce_pool_id=os.environ["WIF_POOL_ID"],
         provider_id=os.environ["WIF_PROVIDER_ID"],
         idp_token=idp_token,
     )
     user_token = sts_resp["access_token"]
-  elif args.auth_mode == "dwd":
-    engine_id = args.engine_id or os.environ.get("GE_GOOGLE_ID_ENGINE_ID", "")
-    location = args.location or os.environ.get("GE_GOOGLE_ID_LOCATION", "global")
-    agent_id = args.agent_id or os.environ.get("GE_GOOGLE_ID_AGENT_ID", "")
-    user_token = mint_keyless_dwd_user_token(
-        service_account_email=os.environ["DWD_SERVICE_ACCOUNT_EMAIL"],
-        target_user_email=os.environ["DWD_TARGET_USER_EMAIL"],
-    )
   else:
     engine_id = args.engine_id or os.environ.get("GE_GOOGLE_ID_ENGINE_ID", "")
     location = args.location or os.environ.get("GE_GOOGLE_ID_LOCATION", "global")
     agent_id = args.agent_id or os.environ.get("GE_GOOGLE_ID_AGENT_ID", "")
-    user_token = get_google_user_token()
+    user_token = get_google_user_token(browser_login=args.browser_login)
 
   if not args.project_id or not engine_id or not agent_id:
     sys.exit(
@@ -158,6 +157,7 @@ def main() -> None:
   )
   payload = {
       "query": {"text": args.query},
+      "answerGenerationMode": "AGENT",
       "agentsSpec": {"agentSpecs": [{"agentId": agent_id}]},
   }
   headers = {

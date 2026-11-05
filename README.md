@@ -2,10 +2,10 @@
 
 Companion code and CLI reference for authenticating a custom enterprise web UI against the Gemini Enterprise **`:streamAssist`** REST API across all three authentication layers:
 
-1. **Part 1 (`01_user_auth_streamassist/`): Authenticating users to `:streamAssist`**
+1. **Part 1 (`01_user_auth_streamassist/`): Authenticating to `:streamAssist`**
    - **Pattern 1A:** Pure Google Identity (`Google Login UI` -> `:streamAssist`)
    - **Pattern 1B:** Pure Workforce Identity Federation (`External IdP UI` -> `Google STS` -> `:streamAssist`)
-   - **Pattern 1C:** Hybrid login (`External IdP UI` -> `Keyless Domain-Wide Delegation (:signJwt)` -> `:streamAssist`)
+   - **Pattern 1C:** Workload Identity Federation for Bots / Backend Services (`Workload JWT` -> `Google STS` -> `Service Account Impersonation` -> `:streamAssist`)
 2. **Part 2 (`02_federated_connector_oauth/`): Authenticating Federated Connectors through a custom UI**
    - Checking and storing per-user 3-legged OAuth (3LO) tokens in Gemini Enterprise's managed `Keystore` via `dataConnector:acquireAccessToken` and `dataConnector:acquireAndStoreRefreshToken`.
 3. **Part 3 (`03_adk_agent_oauth/`): Authenticating custom ADK agents with individual tool OAuth**
@@ -19,14 +19,14 @@ Companion code and CLI reference for authenticating a custom enterprise web UI a
 
 ```text
 gemini-enterprise-custom-ui-auth/
-├── .env.example                    # Template for project, engine, WIF, DWD, connector, and agent IDs
+├── .env.example                    # Template for project, engine, WIF, Workload Identity, connector, and agent IDs
 ├── requirements.txt                # Minimal Python dependencies
 ├── README.md                       # Step-by-step Python & curl commands
 ├── docs/diagrams/                  # Architecture & sequence diagrams (PNG + SVG)
 ├── 01_user_auth_streamassist/
 │   ├── pattern_a_google_identity.py
 │   ├── pattern_b_workforce_sts.py
-│   └── pattern_c_hybrid_keyless_dwd.py
+│   └── pattern_c_workload_identity.py
 ├── 02_federated_connector_oauth/
 │   └── connector_oauth_flow.py
 └── 03_adk_agent_oauth/
@@ -40,7 +40,11 @@ gemini-enterprise-custom-ui-auth/
 
 1. **Existing Gemini Enterprise Setup:**
    - A Gemini Enterprise Engine (`GE_GOOGLE_ID_ENGINE_ID` or `GE_WIF_ENGINE_ID`) configured in your Google Cloud project.
-   - Your identity foundation already configured (Google Identity, a Workforce Identity Pool, or a service account with Domain-Wide Delegation).
+   - Your identity foundation already configured (Google Identity, a Workforce Identity Pool for human users, or a Workload Identity Pool for non-human bots/workloads).
+   - **User IAM Role & Gemini Enterprise License (Required for All Patterns):**
+     In production, every end user (or user group) calling `:streamAssist` must have **both**:
+     1. **Cloud IAM Role:** **Discovery Engine User** (`roles/discoveryengine.user`) granted in **GCP Console $\rightarrow$ IAM & Admin $\rightarrow$ IAM** (provides the `discoveryengine.assistants.assist` permission).
+     2. **Gemini Enterprise License:** An active seat assigned in **Gemini Enterprise $\rightarrow$ Settings $\rightarrow$ License** (assigned directly to the user/group or via **Automatic license assignment** on first access).
    - *(Optional for Part 2)* A Federated Connector configured on a Discovery Engine collection.
    - *(Optional for Part 3)* A custom high-code ADK agent deployed to Vertex AI Agent Engine and registered in Gemini Enterprise (`GE_GOOGLE_ID_AGENT_ID` or `GE_WIF_AGENT_ID`).
 
@@ -63,16 +67,30 @@ set -a && source .env && set +a
 
 Use when both your custom UI and Gemini Enterprise use **Google Identity** (Google Workspace or Cloud Identity).
 
+#### Prerequisites for Custom UI Sign-In (`--browser-login`)
+When building a custom UI (outside `vertexaisearch.cloud.google.com`), your web app needs a **Google OAuth 2.0 Client ID** to sign the user in and obtain a user-scoped access token (`ya29...`):
+1. In **GCP Console $\rightarrow$ APIs & Services $\rightarrow$ Credentials $\rightarrow$ + Create Credentials $\rightarrow$ OAuth client ID**:
+   - **Application type:** `Web application`
+   - **Authorized redirect URIs:** `http://localhost:8085/callback` (for local testing) or your production Custom UI callback URL
+   - **OAuth Scope:** `openid email profile https://www.googleapis.com/auth/cloud-platform`
+2. Set `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` in `.env`.
+3. **IAM & License:** Ensure the signed-in Google user (or Google Group) has the **Discovery Engine User** (`roles/discoveryengine.user`) IAM role on the project **and** an active **Gemini Enterprise license** assigned in **Gemini Enterprise $\rightarrow$ Settings $\rightarrow$ License**.
+
 **Run with Python:**
 ```bash
-# Query the default Gemini Enterprise assistant
+# Option 1: Interactive "Sign in with Google" browser OAuth 2.0 flow (real Custom UI flow)
+python 01_user_auth_streamassist/pattern_a_google_identity.py \
+  --browser-login \
+  --query "What are our Grid Operations SLA policies?"
+
+# Option 2: Quick CLI test using gcloud user credentials
 python 01_user_auth_streamassist/pattern_a_google_identity.py \
   --query "What are our Grid Operations SLA policies?"
 
-# Or route the query to a specific registered agent (--agent-id)
+# Option 3: Route the query directly to a registered ADK agent (--agent-id)
 python 01_user_auth_streamassist/pattern_a_google_identity.py \
   --agent-id "$GE_GOOGLE_ID_AGENT_ID" \
-  --query "What are our Grid Operations SLA policies?"
+  --query "What is our grid operations SLA policy?"
 ```
 
 **Equivalent `curl` command:**
@@ -95,10 +113,24 @@ Use when both your custom UI and Gemini Enterprise use an **external IdP** (Okta
 
 > **Note:** Always use **Workforce Identity Federation (`workforcePools`)** for human users—not Workload Identity Federation (`workloadIdentityPools`). Gemini Enterprise Agent `User permissions` only accept Google Identity or `workforcePools` principals.
 
+#### Prerequisites
+1. **External IdP App Registration (e.g., Microsoft Entra ID):**
+   - Register an OIDC application in your IdP (matching the `clientId` configured on your Workforce Identity Pool OIDC provider).
+   - Add `http://localhost:8000` (or your custom UI origin) under **Authentication $\rightarrow$ Single-page application (SPA)** redirect URIs.
+   - Set `ENTRA_TENANT_ID` and `ENTRA_CLIENT_ID` in `.env`.
+2. **IAM Role:** Grant the **Discovery Engine User** (`roles/discoveryengine.user`) or **Gemini Enterprise User** IAM role to your Workforce Pool user (`principal://iam.googleapis.com/locations/global/workforcePools/${WIF_POOL_ID}/subject/${USER_SUBJECT}`) or all pool users (`principalSet://iam.googleapis.com/locations/global/workforcePools/${WIF_POOL_ID}/*`).
+3. **Gemini Enterprise License:** Assign a Gemini Enterprise license to the federated user/group (or enable **Automatic license assignment**) in **Gemini Enterprise $\rightarrow$ Settings $\rightarrow$ License**.
+
 **Run with Python:**
 ```bash
+# Option 1: Interactive "Sign in with Microsoft Entra ID" browser login (PKCE -> STS -> :streamAssist)
 python 01_user_auth_streamassist/pattern_b_workforce_sts.py \
-  --idp-token "$EXTERNAL_IDP_TOKEN" \
+  --browser-login \
+  --query "What are our Grid Operations SLA policies?"
+
+# Option 2: Pass an existing external IdP OIDC JWT directly
+python 01_user_auth_streamassist/pattern_b_workforce_sts.py \
+  --idp-token "<ENTRA_OR_OKTA_JWT>" \
   --query "What are our Grid Operations SLA policies?"
 ```
 
@@ -129,14 +161,23 @@ curl -s -X POST \
 
 ---
 
-### Pattern 1C: Hybrid Login with Keyless Domain-Wide Delegation (`pattern_c_hybrid_keyless_dwd.py`)
+### Pattern 1C: Direct Workload Identity Federation (`pattern_c_workload_identity.py`)
 
-Use when your custom UI signs employees in with an external IdP (such as Microsoft Entra ID or Okta), while your Gemini Enterprise engine is configured with **Google Identity** (Google Workspace / Cloud Identity). Uses the IAM Credentials API (`:signJwt`) to mint a short-lived Google OAuth user token with **zero downloaded service account JSON keys**.
+Use when a **non-human backend service, microservice, or bot** needs to call `:streamAssist` using a project-scoped **Workload Identity Pool** (`workloadIdentityPools`) directly via Google STS (**zero Service Account required**).
+
+> **Important (Workforce vs. Workload Identity):**
+> - **Human Users $\rightarrow$ Use Pattern 1A (Google Identity) or Pattern 1B (`workforcePools`):** Required for per-user document ACLs, Gemini Enterprise user licenses, and 3LO connectors/agents.
+> - **Bots / Backend Services $\rightarrow$ Use Pattern 1C (`workloadIdentityPools`):** Used for machine-to-machine or bot workloads where per-user 3LO is not required.
+
+#### Prerequisites
+1. **Workload Identity Pool & Provider (`workloadIdentityPools`):**
+   - Configure a project-scoped Workload Identity Pool (`WORKLOAD_POOL_ID`) and OIDC provider (`WORKLOAD_PROVIDER_ID`) in **IAM & Admin $\rightarrow$ Workload Identity Federation**.
+2. **Direct IAM Role (No Service Account Needed):**
+   - Grant the **Discovery Engine User** (`roles/discoveryengine.user`) IAM role directly to your Workload Identity Pool principal (`principalSet://iam.googleapis.com/projects/${GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/${WORKLOAD_POOL_ID}/*`).
 
 **Run with Python:**
 ```bash
-python 01_user_auth_streamassist/pattern_c_hybrid_keyless_dwd.py \
-  --user-email "$DWD_TARGET_USER_EMAIL" \
+python 01_user_auth_streamassist/pattern_c_workload_identity.py \
   --query "What are our Grid Operations SLA policies?"
 ```
 
@@ -200,14 +241,14 @@ Attaching `authorizationConfig` at the top-level Gemini Enterprise agent registr
 ### Test 1: Query an Internal Policy Tool on the Registered Agent (No 3LO Required)
 ```bash
 python 03_adk_agent_oauth/query_registered_agent.py \
-  --auth-mode dwd \
+  --auth-mode google \
   --query "What are our Grid Operations SLA policies?"
 ```
 
 ### Test 2: Query a Protected 3P Tool on the Registered Agent (Triggers On-Demand 3LO Prompt)
 ```bash
 python 03_adk_agent_oauth/query_registered_agent.py \
-  --auth-mode dwd \
+  --auth-mode google \
   --query "List my open ServiceNow incidents"
 ```
 
@@ -220,6 +261,7 @@ curl -s -X POST \
   "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/assistants/default_assistant:streamAssist" \
   -d "{
     \"query\": {\"text\": \"List my open ServiceNow incidents\"},
+    \"answerGenerationMode\": \"AGENT\",
     \"agentsSpec\": {
       \"agentSpecs\": [{\"agentId\": \"${GE_GOOGLE_ID_AGENT_ID}\"}]
     }

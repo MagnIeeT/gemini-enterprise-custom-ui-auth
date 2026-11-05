@@ -12,26 +12,120 @@ How it works:
 
 Usage:
   python 01_user_auth_streamassist/pattern_a_google_identity.py
-  python 01_user_auth_streamassist/pattern_a_google_identity.py --query "What are our SLA policies?"
-  python 01_user_auth_streamassist/pattern_a_google_identity.py --agent-id "$GE_GOOGLE_ID_AGENT_ID" --query "Get my open ServiceNow incidents"
+  python 01_user_auth_streamassist/pattern_a_google_identity.py --browser-login
+  python 01_user_auth_streamassist/pattern_a_google_identity.py --agent-id "$GE_GOOGLE_ID_AGENT_ID" --query "What is our grid operations SLA policy?"
 """
 
 import argparse
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+import urllib.parse
+import webbrowser
 from dotenv import load_dotenv
 import requests
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
+GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+DEFAULT_REDIRECT_URI = "http://localhost:8085/callback"
+DEFAULT_SCOPES = "openid email profile https://www.googleapis.com/auth/cloud-platform"
 
-def get_google_user_token(explicit_token: str = "") -> str:
-  """Returns a Google OAuth user access token from CLI/env or local gcloud CLI."""
-  token = (explicit_token or os.environ.get("GOOGLE_USER_ACCESS_TOKEN", "")).strip()
+
+def login_with_google_browser(
+    client_id: str,
+    client_secret: str,
+    redirect_uri: str = DEFAULT_REDIRECT_URI,
+) -> str:
+  """Runs an interactive 'Sign in with Google' browser OAuth 2.0 flow and returns the user access token."""
+  if not client_id or not client_secret:
+    raise RuntimeError(
+        "Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET in .env to use --browser-login."
+    )
+
+  parsed_redirect = urllib.parse.urlparse(redirect_uri)
+  port = parsed_redirect.port or 8085
+  captured_code: Dict[str, Optional[str]] = {"code": None, "error": None}
+
+  class OAuthCallbackHandler(BaseHTTPRequestHandler):
+    def do_GET(self) -> None:  # pylint: disable=invalid-name
+      qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+      if "code" in qs:
+        captured_code["code"] = qs["code"][0]
+        body = b"<h2>Google Sign-In successful! You can close this tab and return to your terminal.</h2>"
+      else:
+        captured_code["error"] = qs.get("error", ["unknown_error"])[0]
+        body = b"<h2>Google Sign-In failed. Check terminal output.</h2>"
+      self.send_response(200)
+      self.send_header("Content-Type", "text/html; charset=utf-8")
+      self.end_headers()
+      self.wfile.write(body)
+
+    def log_message(self, format: str, *args: Any) -> None:  # pylint: disable=redefined-builtin
+      return
+
+  params = {
+      "client_id": client_id,
+      "redirect_uri": redirect_uri,
+      "response_type": "code",
+      "scope": DEFAULT_SCOPES,
+      "access_type": "offline",
+      "prompt": "consent",
+  }
+  consent_url = f"{GOOGLE_AUTH_URL}?{urllib.parse.urlencode(params)}"
+  print("\n1. Open this URL in your browser to Sign in with Google:")
+  print(f"   {consent_url}\n")
+  try:
+    webbrowser.open(consent_url)
+  except Exception:
+    pass
+
+  print(f"2. Waiting for OAuth redirect on {redirect_uri} ...")
+  server = HTTPServer(("localhost", port), OAuthCallbackHandler)
+  server.handle_request()
+  server.server_close()
+
+  if captured_code["error"] or not captured_code["code"]:
+    raise RuntimeError(f"Google OAuth login failed: {captured_code['error']}")
+
+  print("3. Exchanging authorization code for Google user access token ...")
+  token_resp = requests.post(
+      GOOGLE_TOKEN_URL,
+      data={
+          "code": captured_code["code"],
+          "client_id": client_id,
+          "client_secret": client_secret,
+          "redirect_uri": redirect_uri,
+          "grant_type": "authorization_code",
+      },
+      timeout=20,
+  )
+  if not token_resp.ok:
+    raise RuntimeError(
+        f"Token exchange failed (HTTP {token_resp.status_code}): {token_resp.text}"
+    )
+  token_data = token_resp.json()
+  print("   ✓ Received Google OAuth user access token!\n")
+  return token_data["access_token"]
+
+
+def get_google_user_token(
+    explicit_token: str = "",
+    browser_login: bool = False,
+) -> str:
+  """Returns a Google OAuth user access token via browser login, CLI flag, or gcloud."""
+  if browser_login:
+    return login_with_google_browser(
+        client_id=os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip(),
+        client_secret=os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip(),
+        redirect_uri=os.environ.get("GOOGLE_OAUTH_REDIRECT_URI", DEFAULT_REDIRECT_URI).strip(),
+    )
+  token = explicit_token.strip()
   if token:
     return token
   try:
@@ -43,8 +137,8 @@ def get_google_user_token(explicit_token: str = "") -> str:
     ).strip()
   except Exception as exc:
     raise RuntimeError(
-        "No GOOGLE_USER_ACCESS_TOKEN set and `gcloud auth print-access-token` failed. "
-        "Run `gcloud auth login` or set GOOGLE_USER_ACCESS_TOKEN in .env."
+        "Failed to obtain a Google user token via `gcloud auth print-access-token`. "
+        "Run with `--browser-login` or run `gcloud auth login`."
     ) from exc
 
 
@@ -55,11 +149,10 @@ def extract_reply_text(chunks: Any) -> str:
   texts: List[str] = []
   for chunk in chunks:
     for reply in chunk.get("answer", {}).get("replies", []):
-      text = (
-          reply.get("groundedContent", {})
-          .get("content", {})
-          .get("text")
-      )
+      content = reply.get("groundedContent", {}).get("content", {})
+      if content.get("thought"):
+        continue
+      text = content.get("text")
       if text:
         texts.append(text)
     summary = (
@@ -95,6 +188,7 @@ def call_stream_assist(
 
   payload: Dict[str, Any] = {"query": {"text": query_text}}
   if agent_id.strip():
+    payload["answerGenerationMode"] = "AGENT"
     payload["agentsSpec"] = {"agentSpecs": [{"agentId": agent_id.strip()}]}
 
   headers = {
@@ -127,13 +221,18 @@ def main() -> None:
   parser.add_argument("--agent-id", default="")
   parser.add_argument("--query", default=os.environ.get("QUERY", "What are our SLA policies?"))
   parser.add_argument("--access-token", default="", help="Optional Google OAuth user access token")
+  parser.add_argument(
+      "--browser-login",
+      action="store_true",
+      help="Run interactive 'Sign in with Google' browser OAuth 2.0 flow to obtain user access token",
+  )
   parser.add_argument("--raw", action="store_true", help="Print full raw JSON response")
   args = parser.parse_args()
 
   if not args.project_id or not args.engine_id:
     sys.exit("Error: Set GCP_PROJECT_ID and GE_GOOGLE_ID_ENGINE_ID in .env or via CLI flags.")
 
-  token = get_google_user_token(args.access_token)
+  token = get_google_user_token(args.access_token, browser_login=args.browser_login)
   print("=== Pattern 1A: Pure Google Identity -> :streamAssist ===")
   print(f"Project ID : {args.project_id}")
   print(f"Engine ID  : {args.engine_id} ({args.location})")

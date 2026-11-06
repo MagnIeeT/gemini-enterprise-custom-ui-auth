@@ -44,7 +44,7 @@
 
   <!-- Domain Zone Headers -->
   <rect x="44" y="94" width="548" height="30" rx="6" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1"/>
-  <text x="318" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#174ea6">Customer Domain (www.cust.com) &amp; Third-Party IdP</text>
+  <text x="318" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#174ea6">Customer Domain &amp; Third-Party IdP</text>
 
   <rect x="616" y="94" width="460" height="30" rx="6" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1"/>
   <text x="846" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#137333">Google Cloud — Gemini Enterprise Managed Services</text>
@@ -58,22 +58,20 @@
     <text x="34" y="92" text-anchor="middle" font-size="13" font-weight="600" fill="#202124">Users</text>
   </g>
 
-  <!-- Customer UI (www.cust.com) -->
+  <!-- Customer UI -->
   <g id="node-cust-ui" transform="translate(132, 336)" filter="url(#card-shadow)">
     <rect width="168" height="140" rx="10" fill="#ffffff" stroke="#5f6368" stroke-width="1.8"/>
-    <text x="84" y="48" text-anchor="middle" font-size="14.5" font-weight="700" fill="#202124">Customer UI</text>
-    <text x="84" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11" fill="#5f6368">(www.cust.com)</text>
-    <rect x="22" y="90" width="124" height="28" rx="6" fill="#f1f3f4" stroke="#dadce0" stroke-width="1"/>
-    <text x="84" y="108" text-anchor="middle" font-size="11" font-weight="600" fill="#3c4043">Authorize Button</text>
+    <text x="84" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#202124">Customer UI</text>
+    <rect x="22" y="82" width="124" height="30" rx="6" fill="#f1f3f4" stroke="#dadce0" stroke-width="1"/>
+    <text x="84" y="101" text-anchor="middle" font-size="11" font-weight="600" fill="#3c4043">Authorize Button</text>
   </g>
 
-  <!-- Customer BE (www.cust.com) -->
+  <!-- Customer BE -->
   <g id="node-cust-be" transform="translate(412, 336)" filter="url(#card-shadow)">
     <rect width="176" height="140" rx="10" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.8"/>
-    <text x="88" y="48" text-anchor="middle" font-size="14.5" font-weight="700" fill="#174ea6">Customer BE</text>
-    <text x="88" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11" fill="#174ea6">(www.cust.com)</text>
-    <text x="88" y="98" text-anchor="middle" font-size="11" fill="#3c4043">Mediates GE API calls</text>
-    <text x="88" y="114" text-anchor="middle" font-size="11" fill="#3c4043">with Part 1 User Token</text>
+    <text x="88" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#174ea6">Customer BE</text>
+    <text x="88" y="88" text-anchor="middle" font-size="11" fill="#3c4043">Mediates GE API calls</text>
+    <text x="88" y="106" text-anchor="middle" font-size="11" fill="#3c4043">with Part 1 User Token</text>
   </g>
 
   <!-- Cylinder: <user, goog_oauth_token> below Customer BE -->

@@ -1,118 +1,254 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1077" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 680" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;">
   <defs>
-    <style>
-      .title { font-family: "Google Sans", "Roboto", sans-serif; font-size: 20px; font-weight: 700; fill: #202124; }
-      .subtitle { font-family: "Google Sans", "Roboto", sans-serif; font-size: 13px; font-weight: 400; fill: #5F6368; }
-      .actor-title { font-family: "Google Sans", "Roboto", sans-serif; font-size: 12.5px; font-weight: 700; fill: #202124; text-anchor: middle; }
-      .actor-sub { font-family: "Roboto Mono", monospace; font-size: 10px; font-weight: 500; fill: #1A73E8; text-anchor: middle; }
-      .step-label { font-family: "Google Sans", "Roboto", sans-serif; font-size: 12px; font-weight: 600; fill: #202124; text-anchor: middle; }
-      .step-sub { font-family: "Roboto Mono", monospace; font-size: 10.5px; font-weight: 500; fill: #5F6368; text-anchor: middle; }
-      .phase-text { font-family: "Google Sans", "Roboto", sans-serif; font-size: 12px; font-weight: 700; fill: #174EA6; text-anchor: middle; }
-    </style>
-    <marker id="arrow-solid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#202124"/>
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#202124" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1a73e8"/>
     </marker>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1A73E8"/>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e8e3e"/>
     </marker>
-    <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#9334E6"/>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#e37400"/>
     </marker>
-    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1E8E3E"/>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#9334e6"/>
     </marker>
   </defs>
-  <rect width="1320" height="1077" fill="#FFFFFF"/>
-  <text x="32" y="42" class="title">Part 3 Sequence: Individual Tool OAuth for ADK Agents in a Custom UI</text>
-  <text x="32" y="64" class="subtitle">How EnterpriseRouterAgent + GcpAuthenticatedFunctionTool + GCP Auth Manager Vault &amp; :validateUserAuthorization work end-to-end</text>
-  <line x1="100" y1="159" x2="100" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
-  <line x1="285" y1="159" x2="285" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
-  <line x1="510" y1="159" x2="510" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
-  <line x1="755" y1="159" x2="755" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
-  <line x1="990" y1="159" x2="990" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
-  <line x1="1210" y1="159" x2="1210" y2="1005" stroke="#BDC1C6" stroke-width="1.75"/>
-  <rect x="32.5" y="115" width="135" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
-  <text x="100" y="134" class="actor-title">Employee</text>
-  <text x="100" y="149" class="actor-sub">Browser User</text>
-  <rect x="202.5" y="115" width="165" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
-  <text x="285" y="134" class="actor-title">Custom UI &amp; App</text>
-  <text x="285" y="149" class="actor-sub">Frontend + /validateUserId</text>
-  <rect x="405.0" y="115" width="210" height="44" rx="6" fill="#E8F0FE" stroke="#1A73E8" stroke-width="1.75"/>
-  <text x="510" y="134" class="actor-title">Gemini Enterprise</text>
-  <text x="510" y="149" class="actor-sub">:streamAssist &amp; :validateAuth</text>
-  <rect x="647.5" y="115" width="215" height="44" rx="6" fill="#FEF7E0" stroke="#F29900" stroke-width="1.75"/>
-  <text x="755" y="134" class="actor-title">ADK Router &amp; Subagent</text>
-  <text x="755" y="149" class="actor-sub">AGENT_IDENTITY + GcpAuthProvider</text>
-  <rect x="890.0" y="115" width="200" height="44" rx="6" fill="#F3E8FD" stroke="#9334E6" stroke-width="1.75"/>
-  <text x="990" y="134" class="actor-title">GCP Auth Manager</text>
-  <text x="990" y="149" class="actor-sub">authProviders &amp; Token Vault</text>
-  <rect x="1125.0" y="115" width="170" height="44" rx="6" fill="#E6F4EA" stroke="#1E8E3E" stroke-width="1.75"/>
-  <text x="1210" y="134" class="actor-title">3P IdP / SaaS API</text>
-  <text x="1210" y="149" class="actor-sub">SharePoint / Google</text>
-  <rect x="32.5" y="1005" width="135" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
-  <text x="100" y="1024" class="actor-title">Employee</text>
-  <text x="100" y="1039" class="actor-sub">Browser User</text>
-  <rect x="202.5" y="1005" width="165" height="44" rx="6" fill="#F8FAFC" stroke="#202124" stroke-width="1.75"/>
-  <text x="285" y="1024" class="actor-title">Custom UI &amp; App</text>
-  <text x="285" y="1039" class="actor-sub">Frontend + /validateUserId</text>
-  <rect x="405.0" y="1005" width="210" height="44" rx="6" fill="#E8F0FE" stroke="#1A73E8" stroke-width="1.75"/>
-  <text x="510" y="1024" class="actor-title">Gemini Enterprise</text>
-  <text x="510" y="1039" class="actor-sub">:streamAssist &amp; :validateAuth</text>
-  <rect x="647.5" y="1005" width="215" height="44" rx="6" fill="#FEF7E0" stroke="#F29900" stroke-width="1.75"/>
-  <text x="755" y="1024" class="actor-title">ADK Router &amp; Subagent</text>
-  <text x="755" y="1039" class="actor-sub">AGENT_IDENTITY + GcpAuthProvider</text>
-  <rect x="890.0" y="1005" width="200" height="44" rx="6" fill="#F3E8FD" stroke="#9334E6" stroke-width="1.75"/>
-  <text x="990" y="1024" class="actor-title">GCP Auth Manager</text>
-  <text x="990" y="1039" class="actor-sub">authProviders &amp; Token Vault</text>
-  <rect x="1125.0" y="1005" width="170" height="44" rx="6" fill="#E6F4EA" stroke="#1E8E3E" stroke-width="1.75"/>
-  <text x="1210" y="1024" class="actor-title">3P IdP / SaaS API</text>
-  <text x="1210" y="1039" class="actor-sub">SharePoint / Google</text>
-  <rect x="56" y="181" width="978" height="30" rx="4" fill="#E8F0FE" stroke="#1A73E8" stroke-width="1.5"/>
-  <text x="545.0" y="201" class="phase-text" style="fill:#174EA6">Phase 1: Intent Routing &amp; Auth Manager Vault Check (Zero Upfront OAuth Popups)</text>
-  <rect x="9.1" y="220" width="366.8" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="192.5" y="233" class="step-label" style="fill:#202124">1. Sends query: 'Search my SharePoint sites' (or Policy query)</text>
-  <line x1="100" y1="241" x2="282" y2="241" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
-  <rect x="203.9" y="266" width="387.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="397.5" y="279" class="step-label" style="fill:#1A73E8">2. POST :streamAssist (answerGenerationMode: AGENT, agentId)</text>
-  <line x1="285" y1="287" x2="507" y2="287" stroke="#1A73E8" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
-  <rect x="408.3" y="312" width="448.4" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="632.5" y="325" class="step-label" style="fill:#1A73E8">3. Invokes EnterpriseRouterAgent -&gt; routes to SharePointSubAgent</text>
-  <line x1="510" y1="333" x2="752" y2="333" stroke="#1A73E8" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
-  <rect x="644.9" y="358" width="455.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="872.5" y="371" class="step-label" style="fill:#202124">4. GcpAuthProvider calls RetrieveCredentials (via SPIFFE AGENT_IDENTITY)</text>
-  <line x1="755" y1="379" x2="987" y2="379" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
-  <rect x="241" y="411" width="793" height="30" rx="4" fill="#F3E8FD" stroke="#9334E6" stroke-width="1.5"/>
-  <text x="637.5" y="431" class="phase-text" style="fill:#681DA8">Phase 2: adk_request_credential -&gt; requiredAuthorizations &amp; 3LO Consent Popup</text>
-  <rect x="640" y="456" width="465" height="22" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="872.5" y="471" class="step-label" style="fill:#9334E6">5. No token in Vault -&gt; returns CONSENT_REQUIRED (authUri, consent_nonce)</text>
-  <line x1="990" y1="479" x2="758" y2="479" stroke="#9334E6" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-purple)"/>
-  <rect x="440.0" y="504" width="385.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="632.5" y="517" class="step-label" style="fill:#9334E6">6. Emits adk_request_credential event to Gemini Enterprise</text>
-  <line x1="755" y1="525" x2="513" y2="525" stroke="#9334E6" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-purple)"/>
-  <rect x="169.9" y="550" width="455.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="397.5" y="563" class="step-label" style="fill:#9334E6">7. Saves (consent_nonce, user_id) &amp; returns requiredAuthorizations[]</text>
-  <line x1="510" y1="571" x2="288" y2="571" stroke="#9334E6" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-purple)"/>
-  <rect x="520.0" y="596" width="455.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="747.5" y="609" class="step-label" style="fill:#9334E6">8. Opens authorizationUri popup -&gt; User approves -&gt; /oauthcallback exchanges code</text>
-  <line x1="285" y1="617" x2="1207" y2="617" stroke="#9334E6" stroke-width="1.75" marker-end="url(#arrow-purple)"/>
-  <rect x="56" y="649" width="1198" height="30" rx="4" fill="#E6F4EA" stroke="#1E8E3E" stroke-width="1.5"/>
-  <text x="655.0" y="669" class="phase-text" style="fill:#137333">Phase 3: {session}:validateUserAuthorization (FinalizeCredentials) &amp; Auto Re-Run Query</text>
-  <rect x="413.8" y="688" width="482.4" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="655.0" y="701" class="step-label" style="fill:#1E8E3E">9. Redirects popup to /validateUserId?user_id_validation_state=... (postMessage)</text>
-  <line x1="990" y1="709" x2="288" y2="709" stroke="#1E8E3E" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-green)"/>
-  <rect x="193.7" y="734" width="407.6" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="397.5" y="747" class="step-label" style="fill:#202124">10. POST /v1alpha/{session}:validateUserAuthorization (validationState)</text>
-  <line x1="285" y1="755" x2="507" y2="755" stroke="#202124" stroke-width="1.75" marker-end="url(#arrow-solid)"/>
-  <rect x="536.0" y="780" width="428.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="750.0" y="793" class="step-label" style="fill:#1E8E3E">11. Calls FinalizeCredentials -&gt; binds &amp; stores user 3LO token in Vault</text>
-  <line x1="510" y1="801" x2="987" y2="801" stroke="#1E8E3E" stroke-width="1.75" marker-end="url(#arrow-green)"/>
-  <rect x="290.0" y="826" width="460.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="520.0" y="839" class="step-label" style="fill:#1A73E8">12. Auto re-runs POST :streamAssist on same session -&gt; Vault returns token</text>
-  <line x1="285" y1="847" x2="752" y2="847" stroke="#1A73E8" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
-  <rect x="780.0" y="872" width="405.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="982.5" y="885" class="step-label" style="fill:#1E8E3E">13. Calls 3P API (Microsoft Graph / Google) with user's OAuth token</text>
-  <line x1="755" y1="893" x2="1207" y2="893" stroke="#1E8E3E" stroke-width="1.75" marker-end="url(#arrow-green)"/>
-  <rect x="300.0" y="918" width="450.0" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
-  <text x="525.0" y="931" class="step-label" style="fill:#1E8E3E">14. Synthesizes grounded answer &amp; streams back to Custom UI</text>
-  <line x1="755" y1="939" x2="288" y2="939" stroke="#1E8E3E" stroke-width="1.75" stroke-dasharray="6,4" marker-end="url(#arrow-green)"/>
+
+  <!-- Title & Legend Header -->
+  <g id="header">
+    <text x="28" y="36" font-size="19" font-weight="700" fill="#202124">Part 3: Custom ADK Agent &amp; GCP Auth Manager 3LO Flow</text>
+    <text x="28" y="56" font-size="11.5" fill="#5f6368">Component architecture &amp; end-to-end OAuth handshake across Custom UI, GE Server, Agent Engine &amp; Auth Manager</text>
+
+    <!-- Compact Phase Legend Top-Right -->
+    <g transform="translate(664, 16)">
+      <rect width="492" height="44" rx="8" fill="#f8f9fa" stroke="#dadce0" stroke-width="1"/>
+      <rect x="12" y="12" width="32" height="20" rx="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.4"/>
+      <text x="28" y="25.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#174ea6">1–7</text>
+      <text x="50" y="26" font-size="10.5" font-weight="500" fill="#3c4043">Check Token Vault</text>
+
+      <rect x="156" y="12" width="36" height="20" rx="10" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.4"/>
+      <text x="174" y="25.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9334e6">8–10</text>
+      <text x="198" y="26" font-size="10.5" font-weight="500" fill="#3c4043">3LO Popup &amp; Callback</text>
+
+      <rect x="322" y="12" width="42" height="20" rx="10" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.4"/>
+      <text x="343" y="25.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#137333">11–19</text>
+      <text x="370" y="26" font-size="10.5" font-weight="500" fill="#3c4043">Finalize &amp; Resume</text>
+    </g>
+  </g>
+
+  <!-- Main Canvas Background -->
+  <rect x="24" y="76" width="1132" height="584" rx="16" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5"/>
+
+  <!-- Domain Zone Headers -->
+  <rect x="44" y="94" width="524" height="30" rx="6" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1"/>
+  <text x="306" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#174ea6">Customer Domain &amp; Third-Party IdP / APIs</text>
+
+  <rect x="592" y="94" width="544" height="30" rx="6" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1"/>
+  <text x="864" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#137333">Google Cloud — Gemini Enterprise, Agent Engine &amp; GCP Auth Manager</text>
+
+  <!-- ==================== NODES ==================== -->
+
+  <!-- Users Icon -->
+  <g id="node-user" transform="translate(42, 390)">
+    <circle cx="32" cy="24" r="18" fill="#4285f4"/>
+    <path d="M8,68 C8,45 56,45 56,68 Z" fill="#4285f4"/>
+    <text x="32" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#202124">Users</text>
+  </g>
+
+  <!-- Customer UI -->
+  <g id="node-cust-ui" transform="translate(118, 332)" filter="url(#card-shadow)">
+    <rect width="172" height="184" rx="10" fill="#ffffff" stroke="#5f6368" stroke-width="1.8"/>
+    <text x="86" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#202124">Customer UI</text>
+    <rect x="20" y="74" width="132" height="30" rx="6" fill="#f1f3f4" stroke="#dadce0" stroke-width="1"/>
+    <text x="86" y="93" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3c4043">Authorize Button</text>
+    <rect x="20" y="118" width="132" height="30" rx="6" fill="#f3e8fd" stroke="#d7aefb" stroke-width="1"/>
+    <text x="86" y="137" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="600" fill="#7627bb">/validateUserId</text>
+  </g>
+
+  <!-- Customer BE -->
+  <g id="node-cust-be" transform="translate(384, 332)" filter="url(#card-shadow)">
+    <rect width="172" height="184" rx="10" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.8"/>
+    <text x="86" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#174ea6">Customer BE</text>
+    <text x="86" y="82" text-anchor="middle" font-size="10.5" fill="#3c4043">Mediates GE API calls</text>
+    <text x="86" y="98" text-anchor="middle" font-size="10.5" fill="#3c4043">with Part 1 User Token</text>
+    <text x="86" y="128" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#174ea6">• /api/auth/validate</text>
+    <text x="86" y="146" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#174ea6">• /api/chat</text>
+  </g>
+
+  <!-- Cylinder: <user, goog_oauth_token> below Customer BE -->
+  <g id="node-user-token-db" transform="translate(402, 548)" filter="url(#card-shadow)">
+    <path d="M 0,14 L 0,70 A 68,12 0 0,0 136,70 L 136,14 Z" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.6"/>
+    <ellipse cx="68" cy="14" rx="68" ry="12" fill="#e8f0fe" stroke="#174ea6" stroke-width="1.6"/>
+    <text x="68" y="40" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">&lt;user,</text>
+    <text x="68" y="55" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">goog_oauth</text>
+    <text x="68" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">_token&gt;</text>
+  </g>
+
+  <!-- 3P Auth & API Server (Top Left-Center) -->
+  <g id="node-3p-auth" transform="translate(304, 138)" filter="url(#card-shadow)">
+    <rect width="212" height="106" rx="10" fill="#fef7e0" stroke="#e37400" stroke-width="1.8"/>
+    <text x="106" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#b06000">3P Auth &amp; API Server</text>
+    <text x="106" y="48" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">(Entra ID / MS Graph API,</text>
+    <text x="106" y="63" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">Google OAuth / Drive API)</text>
+    <text x="106" y="83" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b06000">3LO Consent &amp; Token Endpoint</text>
+    <text x="106" y="97" text-anchor="middle" font-size="9.5" fill="#5f6368">+ Protected SaaS Data APIs</text>
+  </g>
+
+  <!-- GCP Auth Manager (Top Right-Center) -->
+  <g id="node-auth-manager" transform="translate(652, 134)" filter="url(#card-shadow)">
+    <rect width="232" height="130" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
+    <text x="116" y="28" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0d652d">GCP Auth Manager</text>
+    <text x="116" y="46" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" fill="#0d652d">(agentidentity.googleapis.com)</text>
+    <rect x="14" y="56" width="204" height="22" rx="4" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1"/>
+    <text x="116" y="71" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" font-weight="600" fill="#0d652d">.../v1/.../oauthcallback</text>
+    <text x="116" y="96" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• RetrieveCredentials</text>
+    <text x="116" y="112" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• FinalizeCredentials</text>
+  </g>
+
+  <!-- Cylinder: Token Vault (Top Far-Right) -->
+  <g id="node-token-vault" transform="translate(948, 128)" filter="url(#card-shadow)">
+    <path d="M 0,14 L 0,72 A 78,12 0 0,0 156,72 L 156,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
+    <ellipse cx="78" cy="14" rx="78" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
+    <text x="78" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#0d652d">Token Vault</text>
+    <text x="78" y="62" text-anchor="middle" font-size="9.5" fill="#3c4043">Per-User 3LO Tokens</text>
+  </g>
+
+  <!-- Cylinder: authProviders (Middle Far-Right, under Token Vault) -->
+  <g id="node-auth-providers" transform="translate(948, 224)" filter="url(#card-shadow)">
+    <path d="M 0,12 L 0,62 A 78,10 0 0,0 156,62 L 156,12 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
+    <ellipse cx="78" cy="12" rx="78" ry="10" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
+    <text x="78" y="40" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11.5" font-weight="700" fill="#0d652d">authProviders</text>
+    <text x="78" y="55" text-anchor="middle" font-size="9.5" fill="#3c4043">OAuth Client &amp; Scopes</text>
+  </g>
+
+  <!-- GE Server (discoveryengine.googleapis.com) -->
+  <g id="node-ge-server" transform="translate(652, 332)" filter="url(#card-shadow)">
+    <rect width="212" height="184" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
+    <text x="106" y="38" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0d652d">GE Server</text>
+    <text x="106" y="56" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" fill="#0d652d">(discoveryengine.</text>
+    <text x="106" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" fill="#0d652d">googleapis.com)</text>
+    <text x="106" y="100" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• :streamAssist</text>
+    <text x="106" y="118" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• :validateUser</text>
+    <text x="106" y="132" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">   Authorization</text>
+    <text x="106" y="158" text-anchor="middle" font-size="9.5" fill="#0d652d">Session &amp; Auth Broker</text>
+  </g>
+
+  <!-- Vertex AI Agent Engine (Custom ADK Agent) -->
+  <g id="node-agent-engine" transform="translate(944, 332)" filter="url(#card-shadow)">
+    <rect width="184" height="184" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
+    <text x="92" y="32" text-anchor="middle" font-size="13" font-weight="700" fill="#0d652d">Vertex AI Agent Engine</text>
+    <text x="92" y="50" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3c4043">Custom ADK Agent</text>
+    <rect x="10" y="62" width="164" height="42" rx="6" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1"/>
+    <text x="92" y="78" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" font-weight="600" fill="#0d652d">EnterpriseRouterAgent</text>
+    <text x="92" y="94" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="8.8" fill="#3c4043">↳ SharePoint / Drive SubAgent</text>
+    <text x="92" y="122" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9" fill="#0d652d">• AGENT_IDENTITY (SPIFFE)</text>
+    <text x="92" y="138" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9" fill="#0d652d">• GcpAuthProvider</text>
+    <text x="92" y="160" text-anchor="middle" font-size="9.5" fill="#3c4043">Calls 3P API with 3LO token</text>
+  </g>
+
+  <!-- ==================== ARROWS & NUMBERED STEPS ==================== -->
+
+  <!-- Customer BE -> <user, goog_oauth_token> -->
+  <line x1="470" y1="516" x2="470" y2="540" stroke="#174ea6" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
+
+  <!-- GCP Auth Manager -> Token Vault & authProviders -->
+  <path d="M 884 174 L 940 166" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+  <path d="M 884 220 L 940 250" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+
+  <!-- ==================== PHASE 1: CHECK TOKEN VAULT (1–7, Blue) ==================== -->
+
+  <!-- Row 1 (y=356, Rightward): Steps 1, 2, 3 -->
+  <line x1="290" y1="356" x2="376" y2="356" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="335" cy="356" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="335" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">1</text>
+
+  <line x1="556" y1="356" x2="644" y2="356" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="602" cy="356" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="602" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">2</text>
+
+  <line x1="864" y1="356" x2="936" y2="356" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="902" cy="356" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="902" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">3</text>
+
+  <!-- Step 4: Vertex AI Agent Engine <-> GCP Auth Manager (RetrieveCredentials check -> returns authorizationUri) -->
+  <path d="M 968 332 C 924 292, 874 286, 824 268" fill="none" stroke="#1a73e8" stroke-width="2" marker-start="url(#arrow-blue)" marker-end="url(#arrow-blue)"/>
+  <circle cx="898" cy="296" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="898" y="300" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">4</text>
+
+  <!-- Row 2 (y=384, Leftward): Steps 5, 6, 7 -->
+  <line x1="944" y1="384" x2="872" y2="384" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="902" cy="384" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="902" y="388" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">5</text>
+
+  <line x1="652" y1="384" x2="564" y2="384" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="602" cy="384" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="602" y="388" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">6</text>
+
+  <line x1="384" y1="384" x2="298" y2="384" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="335" cy="384" r="10.5" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="335" y="388" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">7</text>
+
+  <!-- ==================== PHASE 2: 3LO POPUP & CALLBACK (8–10, Amber/Purple) ==================== -->
+
+  <!-- Step 8: Customer UI -> 3P Auth Server (Popup Consent) -->
+  <line x1="196" y1="332" x2="328" y2="250" stroke="#e37400" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <circle cx="256" cy="294" r="11" fill="#fef7e0" stroke="#e37400" stroke-width="1.6"/>
+  <text x="256" y="298" text-anchor="middle" font-size="10.5" font-weight="700" fill="#b06000">8</text>
+
+  <!-- Step 9: 3P Auth Server <-> GCP Auth Manager (/oauthcallback redirect & code exchange) -->
+  <line x1="516" y1="190" x2="644" y2="190" stroke="#9334e6" stroke-width="2" marker-start="url(#arrow-purple)" marker-end="url(#arrow-purple)"/>
+  <circle cx="580" cy="190" r="11" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
+  <text x="580" y="194" text-anchor="middle" font-size="10.5" font-weight="700" fill="#9334e6">9</text>
+
+  <!-- Step 10: GCP Auth Manager (/oauthcallback) -> Customer UI (/validateUserId) -->
+  <line x1="652" y1="232" x2="296" y2="344" stroke="#9334e6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+  <circle cx="484" cy="286" r="11.5" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
+  <text x="484" y="290" text-anchor="middle" font-size="10" font-weight="700" fill="#9334e6">10</text>
+
+  <!-- ==================== PHASE 3: FINALIZE & RESUME (11–19, Green) ==================== -->
+
+  <!-- Row 3 (y=414, Rightward): Steps 11, 12 + Bidirectional Step 13 -->
+  <line x1="290" y1="414" x2="376" y2="414" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="335" cy="414" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="335" y="418" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">11</text>
+
+  <line x1="556" y1="414" x2="644" y2="414" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="602" cy="414" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="602" y="418" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">12</text>
+
+  <!-- Step 13 (Bidirectional): GE Server <-> GCP Auth Manager (FinalizeCredentials saves token in Vault & returns OK) -->
+  <line x1="758" y1="324" x2="758" y2="272" stroke="#1e8e3e" stroke-width="2" marker-start="url(#arrow-green)" marker-end="url(#arrow-green)"/>
+  <circle cx="758" cy="298" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="758" y="302" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">13</text>
+
+  <!-- Row 4 (y=442, Leftward): Step 14 (GE Server -> Customer BE: 200 OK from :validateUserAuthorization) -->
+  <line x1="652" y1="442" x2="564" y2="442" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="602" cy="442" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="602" y="446" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">14</text>
+
+  <!-- Row 5 (y=470, Rightward): Steps 15, 16 (Customer BE retries :streamAssist -> GE Server -> Agent Engine) -->
+  <line x1="556" y1="470" x2="644" y2="470" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="602" cy="470" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="602" y="474" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">15</text>
+
+  <line x1="864" y1="470" x2="936" y2="470" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="902" cy="470" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="902" y="474" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">16</text>
+
+  <!-- Row 6 (y=498, Leftward): Steps 17, 18, 19 (Grounded 3P Answer Streamed Back to Customer UI) -->
+  <line x1="944" y1="498" x2="872" y2="498" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="902" cy="498" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="902" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">17</text>
+
+  <line x1="652" y1="498" x2="564" y2="498" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="602" cy="498" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="602" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">18</text>
+
+  <line x1="384" y1="498" x2="298" y2="498" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="335" cy="498" r="10.5" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="335" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">19</text>
+
 </svg>

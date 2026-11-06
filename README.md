@@ -258,20 +258,24 @@ curl -s -X POST \
 
 ## Part 3: Authenticating Custom ADK Agents with Individual Tool OAuth
 
-![Custom ADK Agent On-Demand 3LO Sequence](docs/diagrams/fig4-adk-subagent-on-demand-3lo.png)
+![Custom ADK Agent On-Demand 3LO Architecture & Flow](docs/diagrams/fig4-adk-subagent-on-demand-3lo.png)
 
-When a custom ADK agent has multiple tools or sub-agents (e.g., an internal policy tool that needs no user auth, a Google Workspace tool that needs Google 3LO, and a SharePoint tool that needs Microsoft 3LO), attaching top-level `authorizationConfig` at agent registration blocks the entire agent behind upfront OAuth.
+When a custom ADK agent has multiple tools or sub-agents (for example, an internal policy tool that needs no user login, a Google Workspace tool that needs Google 3LO, and a SharePoint tool that needs Microsoft 3LO), attaching top-level `authorizationConfig` when registering the agent blocks the entire agent behind upfront OAuth prompts.
 
-Instead, we combine **four building blocks**:
-1. **Deploy with `AGENT_IDENTITY` (`03_adk_agent_oauth/deploy_agent_runtime.py`):** Deploys `EnterpriseRouterAgent` to Vertex AI Agent Runtime with a cryptographic SPIFFE identity (`principal://agents.global.org-...`).
-2. **Configure 3LO Auth Providers in Google Cloud Auth Manager (`authProviders`):** Store your 3P OAuth Client ID, Client Secret, and `defaultContinueUri` (`http://localhost:8503/validateUserId` for local Custom UI or `https://your-custom-ui.example.com/validateUserId` in production) inside GCP Auth Manager (`projects/${GCP_PROJECT_ID}/locations/us-central1/authProviders/{provider_id}`)—no OAuth secrets in `.env` or agent code.
-3. **Wrap Protected Tools with `AuthenticatedFunctionTool` + `GcpAuthProviderScheme` (`03_adk_agent_oauth/enterprise_router_agent/tools.py`):**
-   - Non-3LO tools (`get_company_sla_policy`) run immediately with zero OAuth prompts.
-   - 3LO tools (`get_google_user_info`, `get_sharepoint_sites`) automatically query Auth Manager Vault (`RetrieveCredentials`) and emit `adk_request_credential` only when the user has not yet authorized that specific tool.
-4. **Finalize User Authorization via `{session}:validateUserAuthorization` (`03_adk_agent_oauth/query_registered_agent.py`):**
-   - Gemini Enterprise intercepts `adk_request_credential` and returns `answer.requiredAuthorizations[]` (`authorizationUri`, `displayName`) and `sessionInfo.session` in `:streamAssist`.
-   - After the user approves the popup, Auth Manager exchanges the code at `/oauthcallback` and redirects the popup to your Custom UI's `/validateUserId?user_id_validation_state=...` endpoint.
-   - Your Custom UI backend calls `POST /v1alpha/{session}:validateUserAuthorization` with `userIdValidationState` and `downstreamConnector` to bind and store the token in Auth Manager Vault (`FinalizeCredentials`), then automatically re-runs the query on the same `session`.
+To trigger 3-Legged OAuth **on demand per tool** and let Gemini Enterprise and Google Cloud manage the per-user Token Vault automatically, follow these four simple steps:
+
+1. **Wrap your sub-agent tools with `AuthenticatedFunctionTool` and `GcpAuthProvider` (`03_adk_agent_oauth/enterprise_router_agent/tools.py`):**
+   - Tools that don't need user OAuth (`get_company_sla_policy`) run as normal functions with zero OAuth prompts.
+   - Tools that call protected third-party APIs (`get_google_user_info`, `get_sharepoint_sites`) are wrapped in `AuthenticatedFunctionTool` + `GcpAuthProvider` pointing to your Auth Provider ID (`projects/${GCP_PROJECT_ID}/locations/us-central1/authProviders/{provider_id}`).
+2. **Deploy the ADK agent to Vertex AI Agent Engine with `AGENT_IDENTITY` enabled (`03_adk_agent_oauth/deploy_agent_runtime.py`):**
+   - Deploy `EnterpriseRouterAgent` and its sub-agents with `identity_type=AGENT_IDENTITY`. This gives your agent a built-in SPIFFE identity (`principal://agents.global.org-...`). Grant that identity `roles/agentidentity.ServiceAgent` on your project so the agent can read tokens from the GCP Auth Manager Token Vault.
+3. **Add your 3LO Auth Providers in Google Cloud Console (Auth Manager) with Default Continue URI set to `<your-custom-ui-url>/validateUserId`:**
+   - In Google Cloud Auth Manager (`authProviders`), register your third-party OAuth Client ID and Client Secret (e.g., `google-workspace-provider` and `sharepoint-provider`).
+   - Set **Default Continue URI** (`defaultContinueUri`) to your Custom UI's `/validateUserId` page (for example, `http://localhost:8503/validateUserId` locally or `https://your-custom-ui.company.com/validateUserId` in production). Because the third-party IdP (Entra ID / Google) always redirects to Google's managed `https://agentidentitycredentials.googleapis.com/v1/.../oauthcallback` URL first, you never need to register your Custom UI URL in Entra ID or Google OAuth Console.
+4. **Validate the session (`{session}:validateUserAuthorization`) and retry `:streamAssist` (`03_adk_agent_oauth/query_registered_agent.py`):**
+   - On a first-time query (**Steps 1–7**), the sub-agent checks the Token Vault (`RetrieveCredentials`), sees a cache miss, and returns an `authorizationUri` via `:streamAssist`.
+   - When the user approves consent in the popup (**Steps 8–10**), `/oauthcallback` exchanges the code and redirects the popup to `<your-custom-ui-url>/validateUserId?user_id_validation_state=...`.
+   - Your Custom Backend calls `POST /v1alpha/{session}:validateUserAuthorization` (**Steps 11–14**) so Gemini Enterprise finalizes and saves the token in the Token Vault (`FinalizeCredentials`), and then automatically retries `:streamAssist` on the same `session` (**Steps 15–19**) to return the grounded answer.
 
 > **Note on Project Allowlisting (`adk_tool_auth_enabled`):**
 > On-demand ADK tool-level 3LO via `:streamAssist` (`requiredAuthorizations` and `{session}:validateUserAuthorization`) currently requires enabling the `adk_tool_auth_enabled` feature flag on your Google Cloud project. Contact your Google Cloud account team to allowlist your project ID/number before testing Part 3.

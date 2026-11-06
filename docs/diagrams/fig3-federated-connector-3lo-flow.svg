@@ -1,11 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 760" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;">
   <defs>
     <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%">
       <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#202124" flood-opacity="0.08"/>
     </filter>
-    <marker id="arrow-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#3c4043"/>
-    </marker>
     <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1a73e8"/>
     </marker>
@@ -20,224 +17,182 @@
     </marker>
   </defs>
 
-  <!-- Title Banner -->
+  <!-- Title & Legend Header -->
   <g id="header">
-    <text x="28" y="38" font-size="20" font-weight="700" fill="#202124">Part 2: Federated Connector 3LO Authentication Flow (Components &amp; Steps 1–11)</text>
-    <text x="28" y="58" font-size="12.5" fill="#5f6368">How a Custom UI and Backend authenticate a Gemini Enterprise Federated Connector via GE Server, GE FE OAuth Redirect Handler, and Keystore</text>
+    <text x="28" y="36" font-size="19" font-weight="700" fill="#202124">Part 2: Federated Connector 3LO Authentication Flow</text>
+    <text x="28" y="56" font-size="12" fill="#5f6368">Component architecture &amp; 11-step OAuth handshake across Custom UI, Backend, GE Server, and Keystore</text>
+
+    <!-- Compact Phase Legend Top-Right -->
+    <g transform="translate(628, 16)">
+      <rect width="468" height="44" rx="8" fill="#f8f9fa" stroke="#dadce0" stroke-width="1"/>
+      <rect x="12" y="12" width="32" height="20" rx="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.4"/>
+      <text x="28" y="25.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#174ea6">1–4</text>
+      <text x="50" y="26" font-size="10.5" font-weight="500" fill="#3c4043">Check Keystore</text>
+
+      <rect x="148" y="12" width="32" height="20" rx="10" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.4"/>
+      <text x="164" y="25.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9334e6">5–7</text>
+      <text x="186" y="26" font-size="10.5" font-weight="500" fill="#3c4043">3LO Popup &amp; Redirect</text>
+
+      <rect x="314" y="12" width="36" height="20" rx="10" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.4"/>
+      <text x="332" y="25.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#137333">8–11</text>
+      <text x="356" y="26" font-size="10.5" font-weight="500" fill="#3c4043">Save Token &amp; Confirm</text>
+    </g>
   </g>
 
-  <!-- Left Architecture Canvas Background -->
-  <rect x="24" y="76" width="900" height="656" rx="14" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5"/>
+  <!-- Main Canvas Background -->
+  <rect x="24" y="76" width="1072" height="540" rx="16" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5"/>
 
-  <!-- Zone Labels inside Canvas -->
-  <rect x="40" y="92" width="440" height="28" rx="6" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1"/>
-  <text x="260" y="110" text-anchor="middle" font-size="11.5" font-weight="600" fill="#174ea6">Customer Domain (www.cust.com) &amp; 3P IdP</text>
+  <!-- Domain Zone Headers -->
+  <rect x="44" y="94" width="548" height="30" rx="6" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1"/>
+  <text x="318" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#174ea6">Customer Domain (www.cust.com) &amp; Third-Party IdP</text>
 
-  <rect x="504" y="92" width="404" height="28" rx="6" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1"/>
-  <text x="706" y="110" text-anchor="middle" font-size="11.5" font-weight="600" fill="#137333">Google Cloud — Gemini Enterprise Managed Services</text>
+  <rect x="616" y="94" width="460" height="30" rx="6" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1"/>
+  <text x="846" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="#137333">Google Cloud — Gemini Enterprise Managed Services</text>
 
   <!-- ==================== NODES ==================== -->
 
   <!-- Users Icon -->
-  <g id="node-user" transform="translate(38, 376)">
-    <circle cx="32" cy="24" r="18" fill="#4285f4"/>
-    <path d="M8,68 C8,46 56,46 56,68 Z" fill="#4285f4"/>
-    <text x="32" y="88" text-anchor="middle" font-size="12" font-weight="600" fill="#202124">Users</text>
+  <g id="node-user" transform="translate(46, 360)">
+    <circle cx="34" cy="24" r="19" fill="#4285f4"/>
+    <path d="M8,70 C8,46 60,46 60,70 Z" fill="#4285f4"/>
+    <text x="34" y="92" text-anchor="middle" font-size="13" font-weight="600" fill="#202124">Users</text>
   </g>
 
   <!-- Customer UI (www.cust.com) -->
-  <g id="node-cust-ui" transform="translate(114, 346)" filter="url(#card-shadow)">
-    <rect width="142" height="126" rx="10" fill="#ffffff" stroke="#5f6368" stroke-width="1.8"/>
-    <text x="71" y="46" text-anchor="middle" font-size="13.5" font-weight="700" fill="#202124">Customer UI</text>
-    <text x="71" y="66" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#5f6368">(www.cust.com)</text>
-    <rect x="18" y="82" width="106" height="24" rx="5" fill="#f1f3f4" stroke="#dadce0" stroke-width="1"/>
-    <text x="71" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#3c4043">Authorize Popup</text>
+  <g id="node-cust-ui" transform="translate(132, 326)" filter="url(#card-shadow)">
+    <rect width="168" height="140" rx="10" fill="#ffffff" stroke="#5f6368" stroke-width="1.8"/>
+    <text x="84" y="48" text-anchor="middle" font-size="14.5" font-weight="700" fill="#202124">Customer UI</text>
+    <text x="84" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11" fill="#5f6368">(www.cust.com)</text>
+    <rect x="22" y="90" width="124" height="28" rx="6" fill="#f1f3f4" stroke="#dadce0" stroke-width="1"/>
+    <text x="84" y="108" text-anchor="middle" font-size="11" font-weight="600" fill="#3c4043">Authorize Button</text>
   </g>
 
   <!-- Customer BE (www.cust.com) -->
-  <g id="node-cust-be" transform="translate(338, 346)" filter="url(#card-shadow)">
-    <rect width="146" height="126" rx="10" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.8"/>
-    <text x="73" y="46" text-anchor="middle" font-size="13.5" font-weight="700" fill="#174ea6">Customer BE</text>
-    <text x="73" y="66" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#174ea6">(www.cust.com)</text>
-    <text x="73" y="92" text-anchor="middle" font-size="10" fill="#3c4043">Mediates GE API calls</text>
-    <text x="73" y="106" text-anchor="middle" font-size="10" fill="#3c4043">with Part 1 User Token</text>
+  <g id="node-cust-be" transform="translate(412, 326)" filter="url(#card-shadow)">
+    <rect width="176" height="140" rx="10" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.8"/>
+    <text x="88" y="48" text-anchor="middle" font-size="14.5" font-weight="700" fill="#174ea6">Customer BE</text>
+    <text x="88" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11" fill="#174ea6">(www.cust.com)</text>
+    <text x="88" y="98" text-anchor="middle" font-size="11" fill="#3c4043">Mediates GE API calls</text>
+    <text x="88" y="114" text-anchor="middle" font-size="11" fill="#3c4043">with Part 1 User Token</text>
   </g>
 
   <!-- Cylinder: <user, goog_oauth_token> below Customer BE -->
-  <g id="node-user-token-db" transform="translate(351, 536)" filter="url(#card-shadow)">
-    <path d="M 0,14 L 0,74 A 60,12 0 0,0 120,74 L 120,14 Z" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.5"/>
-    <ellipse cx="60" cy="14" rx="60" ry="12" fill="#e8f0fe" stroke="#174ea6" stroke-width="1.5"/>
-    <text x="60" y="42" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="600" fill="#174ea6">&lt;user,</text>
-    <text x="60" y="56" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="600" fill="#174ea6">goog_oauth</text>
-    <text x="60" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10" font-weight="600" fill="#174ea6">_token&gt;</text>
+  <g id="node-user-token-db" transform="translate(432, 512)" filter="url(#card-shadow)">
+    <path d="M 0,14 L 0,74 A 68,12 0 0,0 136,74 L 136,14 Z" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.6"/>
+    <ellipse cx="68" cy="14" rx="68" ry="12" fill="#e8f0fe" stroke="#174ea6" stroke-width="1.6"/>
+    <text x="68" y="42" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">&lt;user,</text>
+    <text x="68" y="57" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">goog_oauth</text>
+    <text x="68" y="72" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">_token&gt;</text>
   </g>
 
-  <!-- 3P Auth Server (Top Middle) -->
-  <g id="node-3p-auth" transform="translate(332, 146)" filter="url(#card-shadow)">
-    <rect width="158" height="108" rx="10" fill="#fef7e0" stroke="#e37400" stroke-width="1.8"/>
-    <text x="79" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#b06000">3P Auth Server</text>
-    <text x="79" y="54" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">(Entra ID / Google /</text>
-    <text x="79" y="68" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">Jira / Box / ServiceNow)</text>
-    <text x="79" y="90" text-anchor="middle" font-size="10" font-weight="500" fill="#b06000">3LO Consent Endpoint</text>
+  <!-- 3P Auth Server (Top Middle — raised slightly for clean clearance above arrows 6 & 7) -->
+  <g id="node-3p-auth" transform="translate(384, 134)" filter="url(#card-shadow)">
+    <rect width="192" height="106" rx="10" fill="#fef7e0" stroke="#e37400" stroke-width="1.8"/>
+    <text x="96" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#b06000">3P Auth Server</text>
+    <text x="96" y="55" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">(Entra ID / Google /</text>
+    <text x="96" y="71" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">Jira / Box / ServiceNow)</text>
+    <text x="96" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b06000">3LO Consent Endpoint</text>
   </g>
 
-  <!-- GE FE Server (vertexaisearch.cloud.google.com) -->
-  <g id="node-ge-fe" transform="translate(566, 170)" filter="url(#card-shadow)">
-    <rect width="176" height="114" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
-    <text x="88" y="32" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0d652d">GE FE Server</text>
-    <text x="88" y="50" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#0d652d">(vertexaisearch.</text>
-    <text x="88" y="64" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#0d652d">cloud.google.com</text>
-    <text x="88" y="78" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" font-weight="600" fill="#0d652d">/oauth-redirect)</text>
-    <text x="88" y="98" text-anchor="middle" font-size="10" fill="#3c4043">OAuth Redirect Handler</text>
+  <!-- GE FE Server (vertexaisearch.cloud.google.com/oauth-redirect) -->
+  <g id="node-ge-fe" transform="translate(692, 168)" filter="url(#card-shadow)">
+    <rect width="204" height="118" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
+    <text x="102" y="34" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0d652d">GE FE Server</text>
+    <text x="102" y="54" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#0d652d">(vertexaisearch.</text>
+    <text x="102" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#0d652d">cloud.google.com</text>
+    <text x="102" y="86" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#0d652d">/oauth-redirect)</text>
+    <text x="102" y="106" text-anchor="middle" font-size="10.5" fill="#3c4043">OAuth Redirect Handler</text>
   </g>
 
   <!-- GE Server (discoveryengine.googleapis.com) -->
-  <g id="node-ge-server" transform="translate(566, 346)" filter="url(#card-shadow)">
-    <rect width="176" height="126" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
-    <text x="88" y="34" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0d652d">GE Server</text>
-    <text x="88" y="52" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#0d652d">(discoveryengine.</text>
-    <text x="88" y="66" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#0d652d">googleapis.com)</text>
-    <text x="88" y="88" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9" fill="#3c4043">• widgetConfigs</text>
-    <text x="88" y="102" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9" fill="#3c4043">• acquireAccessToken</text>
-    <text x="88" y="116" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9" fill="#3c4043">• acquireAndStoreRefresh</text>
+  <g id="node-ge-server" transform="translate(692, 326)" filter="url(#card-shadow)">
+    <rect width="204" height="140" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
+    <text x="102" y="36" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0d652d">GE Server</text>
+    <text x="102" y="56" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#0d652d">(discoveryengine.</text>
+    <text x="102" y="72" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#0d652d">googleapis.com)</text>
+    <text x="102" y="96" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• widgetConfigs</text>
+    <text x="102" y="111" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• acquireAccessToken</text>
+    <text x="102" y="126" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#3c4043">• acquireAndStoreRefresh</text>
   </g>
 
-  <!-- Cylinder: Keystore -->
-  <g id="node-keystore" transform="translate(794, 242)" filter="url(#card-shadow)">
-    <path d="M 0,14 L 0,76 A 54,12 0 0,0 108,76 L 108,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
-    <ellipse cx="54" cy="14" rx="54" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
-    <text x="54" y="48" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d652d">Keystore</text>
-    <text x="54" y="64" text-anchor="middle" font-size="9.5" fill="#3c4043">3LO Refresh Tokens</text>
+  <!-- Cylinder: Keystore (connected ONLY to GE Server) -->
+  <g id="node-keystore" transform="translate(952, 286)" filter="url(#card-shadow)">
+    <path d="M 0,14 L 0,80 A 60,12 0 0,0 120,80 L 120,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
+    <ellipse cx="60" cy="14" rx="60" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
+    <text x="60" y="50" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0d652d">Keystore</text>
+    <text x="60" y="68" text-anchor="middle" font-size="10" fill="#3c4043">3LO Refresh Tokens</text>
   </g>
 
-  <!-- Cylinder: User Table -->
-  <g id="node-user-table" transform="translate(794, 378)" filter="url(#card-shadow)">
-    <path d="M 0,14 L 0,76 A 54,12 0 0,0 108,76 L 108,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
-    <ellipse cx="54" cy="14" rx="54" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
-    <text x="54" y="48" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d652d">User Table</text>
-    <text x="54" y="64" text-anchor="middle" font-size="9.5" fill="#3c4043">Per-User Mapping</text>
+  <!-- Cylinder: User Table (connected ONLY to GE Server) -->
+  <g id="node-user-table" transform="translate(952, 412)" filter="url(#card-shadow)">
+    <path d="M 0,14 L 0,80 A 60,12 0 0,0 120,80 L 120,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
+    <ellipse cx="60" cy="14" rx="60" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
+    <text x="60" y="50" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0d652d">User Table</text>
+    <text x="60" y="68" text-anchor="middle" font-size="10" fill="#3c4043">Per-User Mapping</text>
   </g>
 
   <!-- ==================== ARROWS & NUMBERED STEPS 1–11 ==================== -->
 
   <!-- Customer BE -> <user, goog_oauth_token> -->
-  <line x1="411" y1="472" x2="411" y2="528" stroke="#174ea6" stroke-width="1.6" marker-end="url(#arrow-blue)"/>
+  <line x1="500" y1="466" x2="500" y2="504" stroke="#174ea6" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
 
-  <!-- GE FE Server & GE Server -> Keystore & User Table -->
-  <path d="M 742 227 C 768 227, 768 272, 788 272" fill="none" stroke="#137333" stroke-width="1.6" marker-end="url(#arrow-green)"/>
-  <path d="M 742 382 C 768 382, 768 296, 788 296" fill="none" stroke="#137333" stroke-width="1.6" marker-end="url(#arrow-green)"/>
-  <line x1="742" y1="422" x2="788" y2="422" stroke="#137333" stroke-width="1.6" marker-end="url(#arrow-green)"/>
+  <!-- GE Server -> Keystore & User Table (NO arrow from GE FE Server to Keystore!) -->
+  <path d="M 896 368 C 924 368, 924 334, 944 334" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+  <path d="M 896 424 C 924 424, 924 456, 944 456" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
 
   <!-- Step 5: Customer UI -> 3P Auth Server -->
-  <line x1="176" y1="346" x2="326" y2="212" stroke="#e37400" stroke-width="2" marker-end="url(#arrow-amber)"/>
-  <circle cx="246" cy="283" r="11" fill="#fef7e0" stroke="#e37400" stroke-width="1.5"/>
-  <text x="246" y="287" text-anchor="middle" font-size="10.5" font-weight="700" fill="#b06000">5</text>
+  <line x1="212" y1="326" x2="376" y2="196" stroke="#e37400" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <circle cx="292" cy="262" r="12" fill="#fef7e0" stroke="#e37400" stroke-width="1.6"/>
+  <text x="292" y="266" text-anchor="middle" font-size="11" font-weight="700" fill="#b06000">5</text>
 
   <!-- Step 6: Customer UI (Popup) -> GE FE Server (/oauth-redirect) -->
-  <line x1="256" y1="356" x2="558" y2="232" stroke="#9334e6" stroke-width="1.8" marker-end="url(#arrow-purple)"/>
-  <circle cx="388" cy="302" r="11" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.5"/>
-  <text x="388" y="306" text-anchor="middle" font-size="10.5" font-weight="700" fill="#9334e6">6</text>
+  <line x1="300" y1="342" x2="684" y2="232" stroke="#9334e6" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  <circle cx="468" cy="294" r="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
+  <text x="468" y="298" text-anchor="middle" font-size="11" font-weight="700" fill="#9334e6">6</text>
 
   <!-- Step 7: GE FE Server (/oauth-redirect) -> Customer UI (postMessage) -->
-  <line x1="566" y1="250" x2="262" y2="374" stroke="#9334e6" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
-  <circle cx="412" cy="313" r="11" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.5"/>
-  <text x="412" y="317" text-anchor="middle" font-size="10.5" font-weight="700" fill="#9334e6">7</text>
+  <line x1="692" y1="252" x2="308" y2="362" stroke="#9334e6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+  <circle cx="508" cy="305" r="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
+  <text x="508" y="309" text-anchor="middle" font-size="11" font-weight="700" fill="#9334e6">7</text>
 
   <!-- Step 1: Customer UI -> Customer BE -->
-  <line x1="256" y1="384" x2="332" y2="384" stroke="#1a73e8" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
-  <circle cx="295" cy="384" r="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.4"/>
-  <text x="295" y="388" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">1</text>
+  <line x1="300" y1="368" x2="404" y2="368" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="354" cy="368" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="354" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">1</text>
 
   <!-- Step 4: Customer BE -> Customer UI -->
-  <line x1="338" y1="406" x2="262" y2="406" stroke="#1a73e8" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
-  <circle cx="295" cy="406" r="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.4"/>
-  <text x="295" y="410" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">4</text>
+  <line x1="412" y1="394" x2="308" y2="394" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="354" cy="394" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="354" y="398" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">4</text>
 
   <!-- Step 8: Customer UI -> Customer BE -->
-  <line x1="256" y1="430" x2="332" y2="430" stroke="#1e8e3e" stroke-width="1.8" marker-end="url(#arrow-green)"/>
-  <circle cx="295" cy="430" r="10" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.4"/>
-  <text x="295" y="434" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">8</text>
+  <line x1="300" y1="422" x2="404" y2="422" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="354" cy="422" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="354" y="426" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">8</text>
 
   <!-- Step 11: Customer BE -> Customer UI -->
-  <line x1="338" y1="452" x2="262" y2="452" stroke="#1e8e3e" stroke-width="1.8" marker-end="url(#arrow-green)"/>
-  <circle cx="295" cy="452" r="10" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.4"/>
-  <text x="295" y="456" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">11</text>
+  <line x1="412" y1="448" x2="308" y2="448" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="354" cy="448" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="354" y="452" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">11</text>
 
   <!-- Step 2: Customer BE -> GE Server -->
-  <line x1="484" y1="384" x2="560" y2="384" stroke="#1a73e8" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
-  <circle cx="523" cy="384" r="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.4"/>
-  <text x="523" y="388" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">2</text>
+  <line x1="588" y1="368" x2="684" y2="368" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="638" cy="368" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="638" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">2</text>
 
   <!-- Step 3: GE Server -> Customer BE -->
-  <line x1="566" y1="406" x2="490" y2="406" stroke="#1a73e8" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
-  <circle cx="523" cy="406" r="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.4"/>
-  <text x="523" y="410" text-anchor="middle" font-size="10" font-weight="700" fill="#174ea6">3</text>
+  <line x1="692" y1="394" x2="596" y2="394" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="638" cy="394" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="638" y="398" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">3</text>
 
   <!-- Step 9: Customer BE -> GE Server -->
-  <line x1="484" y1="430" x2="560" y2="430" stroke="#1e8e3e" stroke-width="1.8" marker-end="url(#arrow-green)"/>
-  <circle cx="523" cy="430" r="10" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.4"/>
-  <text x="523" y="434" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">9</text>
+  <line x1="588" y1="422" x2="684" y2="422" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="638" cy="422" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="638" y="426" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">9</text>
 
   <!-- Step 10: GE Server -> Customer BE -->
-  <line x1="566" y1="452" x2="490" y2="452" stroke="#1e8e3e" stroke-width="1.8" marker-end="url(#arrow-green)"/>
-  <circle cx="523" cy="452" r="10" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.4"/>
-  <text x="523" y="456" text-anchor="middle" font-size="10" font-weight="700" fill="#137333">10</text>
+  <line x1="692" y1="448" x2="596" y2="448" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="638" cy="448" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="638" y="452" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">10</text>
 
-  <!-- Bottom Note Banner inside Left Canvas: Querying :streamAssist after Step 11 -->
-  <g transform="translate(44, 650)">
-    <rect width="860" height="64" rx="10" fill="#ffffff" stroke="#a8dab5" stroke-width="1.5"/>
-    <text x="20" y="25" font-size="12" font-weight="700" fill="#137333">After Step 11 (or when Step 2 already finds a valid token in Keystore): Querying :streamAssist</text>
-    <text x="20" y="46" font-size="10.5" fill="#3c4043">Customer BE calls <tspan font-family="'Roboto Mono', monospace" font-size="10" font-weight="600" fill="#174ea6">POST .../assistants/default_assistant:streamAssist</tspan> with <tspan font-family="'Roboto Mono', monospace" font-size="10" font-weight="600" fill="#0d652d">toolsSpec.vertexAiSearchSpec.dataStoreSpecs</tspan> for each connector.</text>
-  </g>
-
-  <!-- ==================== RIGHT PANEL: STEPS 1–11 REFERENCE ==================== -->
-  <g transform="translate(944, 76)" filter="url(#card-shadow)">
-    <rect width="472" height="656" rx="14" fill="#ffffff" stroke="#dadce0" stroke-width="1.5"/>
-    <rect x="0" y="0" width="472" height="42" rx="14" fill="#f1f3f4"/>
-    <text x="20" y="26" font-size="13.5" font-weight="700" fill="#202124">Auth Flow: Step-by-Step Reference (1–11)</text>
-
-    <!-- Phase 1 Header -->
-    <rect x="16" y="54" width="440" height="24" rx="5" fill="#e8f0fe"/>
-    <text x="26" y="70" font-size="11" font-weight="700" fill="#174ea6">Phase 1: Discover Connectors &amp; Check Keystore (Steps 1–4)</text>
-
-    <text x="20" y="94" font-size="11" fill="#202124"><tspan font-weight="700" fill="#174ea6">1.</tspan> <tspan font-weight="600">Customer UI</tspan> loads connector UI elements from <tspan font-weight="600">Customer BE</tspan>.</text>
-    <text x="20" y="114" font-size="11" fill="#202124"><tspan font-weight="700" fill="#174ea6">2.</tspan> <tspan font-weight="600">Customer BE</tspan> calls <tspan font-weight="600">GE Server</tspan> (<tspan font-family="'Roboto Mono', monospace" font-size="10">GET widgetConfigs</tspan> +</text>
-    <text x="34" y="130" font-size="11" fill="#202124"><tspan font-family="'Roboto Mono', monospace" font-size="10">POST dataConnector:acquireAccessToken</tspan>) with the user's token.</text>
-    <text x="20" y="150" font-size="11" fill="#202124"><tspan font-weight="700" fill="#174ea6">3.</tspan> <tspan font-weight="600">GE Server</tspan> returns the connector list and <tspan font-family="'Roboto Mono', monospace" font-size="10">authUri</tspan> for any</text>
-    <text x="34" y="166" font-size="11" fill="#202124">connector the user has not yet authorized in <tspan font-weight="600">Keystore</tspan>.</text>
-    <text x="20" y="186" font-size="11" fill="#202124"><tspan font-weight="700" fill="#174ea6">4.</tspan> <tspan font-weight="600">Customer BE</tspan> returns the connectors &amp; <tspan font-family="'Roboto Mono', monospace" font-size="10">authUri</tspan> to <tspan font-weight="600">Customer UI</tspan>,</text>
-    <text x="34" y="202" font-size="11" fill="#202124">which displays an <tspan font-weight="600">Authorize</tspan> button if <tspan font-family="'Roboto Mono', monospace" font-size="10">authUri</tspan> is present.</text>
-
-    <!-- Phase 2 Header -->
-    <rect x="16" y="218" width="440" height="24" rx="5" fill="#f3e8fd"/>
-    <text x="26" y="234" font-size="11" font-weight="700" fill="#9334e6">Phase 2: 3P Consent Popup &amp; Redirect Handler (Steps 5–7)</text>
-
-    <text x="20" y="258" font-size="11" fill="#202124"><tspan font-weight="700" fill="#b06000">5.</tspan> User clicks <tspan font-weight="600">Authorize</tspan>. <tspan font-weight="600">Customer UI</tspan> opens a popup window to</text>
-    <text x="34" y="274" font-size="11" fill="#202124">start the 3LO flow at the <tspan font-weight="600">3P Auth Server</tspan>.</text>
-    <text x="20" y="294" font-size="11" fill="#202124"><tspan font-weight="700" fill="#9334e6">6.</tspan> After login &amp; consent at the <tspan font-weight="600">3P Auth Server</tspan>, the popup is</text>
-    <text x="34" y="310" font-size="11" fill="#202124">redirected to <tspan font-weight="600">GE FE Server</tspan> (<tspan font-family="'Roboto Mono', monospace" font-size="10">/oauth-redirect?code=...&amp;state=...</tspan>).</text>
-    <text x="20" y="330" font-size="11" fill="#202124"><tspan font-weight="700" fill="#9334e6">7.</tspan> <tspan font-weight="600">GE FE Server</tspan> (<tspan font-family="'Roboto Mono', monospace" font-size="10">/oauth-redirect</tspan>) posts the <tspan font-family="'Roboto Mono', monospace" font-size="10">code</tspan> and <tspan font-family="'Roboto Mono', monospace" font-size="10">state</tspan></text>
-    <text x="34" y="346" font-size="11" fill="#202124">(<tspan font-family="'Roboto Mono', monospace" font-size="10">fullRedirectUri</tspan>) back to the parent <tspan font-weight="600">Customer UI</tspan> window.</text>
-
-    <!-- Phase 3 Header -->
-    <rect x="16" y="362" width="440" height="24" rx="5" fill="#e6f4ea"/>
-    <text x="26" y="378" font-size="11" font-weight="700" fill="#137333">Phase 3: Store Token in Keystore &amp; Confirm (Steps 8–11)</text>
-
-    <text x="20" y="402" font-size="11" fill="#202124"><tspan font-weight="700" fill="#137333">8.</tspan> <tspan font-weight="600">Customer UI</tspan> (parent window) sends the callback <tspan font-family="'Roboto Mono', monospace" font-size="10">code</tspan> &amp; <tspan font-family="'Roboto Mono', monospace" font-size="10">state</tspan></text>
-    <text x="34" y="418" font-size="11" fill="#202124">(<tspan font-family="'Roboto Mono', monospace" font-size="10">fullRedirectUri</tspan>) to <tspan font-weight="600">Customer BE</tspan> to complete authorization.</text>
-    <text x="20" y="438" font-size="11" fill="#202124"><tspan font-weight="700" fill="#137333">9.</tspan> <tspan font-weight="600">Customer BE</tspan> calls <tspan font-weight="600">GE Server</tspan> (<tspan font-family="'Roboto Mono', monospace" font-size="10">acquireAndStoreRefreshToken</tspan>).</text>
-    <text x="34" y="454" font-size="11" fill="#202124"><tspan font-weight="600">GE Server</tspan> exchanges <tspan font-family="'Roboto Mono', monospace" font-size="10">code</tspan> at the 3P token API and stores the</text>
-    <text x="34" y="470" font-size="11" fill="#202124">user's <tspan font-family="'Roboto Mono', monospace" font-size="10">refresh_token</tspan> and <tspan font-family="'Roboto Mono', monospace" font-size="10">access_token</tspan> in <tspan font-weight="600">Keystore</tspan>.</text>
-    <text x="20" y="490" font-size="11" fill="#202124"><tspan font-weight="700" fill="#137333">10.</tspan> <tspan font-weight="600">GE Server</tspan> returns <tspan font-family="'Roboto Mono', monospace" font-size="10">"connector authorized"</tspan> status to <tspan font-weight="600">Customer BE</tspan>.</text>
-    <text x="20" y="510" font-size="11" fill="#202124"><tspan font-weight="700" fill="#137333">11.</tspan> <tspan font-weight="600">Customer BE</tspan> returns <tspan font-family="'Roboto Mono', monospace" font-size="10">"connector authorized"</tspan> status to <tspan font-weight="600">Customer UI</tspan>.</text>
-
-    <!-- Divider & Component Roles Summary -->
-    <line x1="16" y1="528" x2="456" y2="528" stroke="#dadce0" stroke-width="1"/>
-    <text x="20" y="548" font-size="11.5" font-weight="700" fill="#202124">Key Google Cloud Components:</text>
-    <text x="20" y="568" font-size="10.5" fill="#3c4043">• <tspan font-weight="600" fill="#0d652d">GE Server (discoveryengine.googleapis.com):</tspan> Generates <tspan font-family="'Roboto Mono', monospace" font-size="10">authUri</tspan>,</text>
-    <text x="28" y="583" font-size="10.5" fill="#3c4043">exchanges 3P auth codes for tokens, and manages <tspan font-weight="600">Keystore</tspan> storage.</text>
-    <text x="20" y="603" font-size="10.5" fill="#3c4043">• <tspan font-weight="600" fill="#0d652d">GE FE Server (vertexaisearch.cloud.google.com/oauth-redirect):</tspan></text>
-    <text x="28" y="618" font-size="10.5" fill="#3c4043">Google-hosted redirect handler that receives the 3P callback and</text>
-    <text x="28" y="633" font-size="10.5" fill="#3c4043">posts <tspan font-family="'Roboto Mono', monospace" font-size="10">code</tspan> &amp; <tspan font-family="'Roboto Mono', monospace" font-size="10">state</tspan> back to the parent <tspan font-weight="600">Customer UI</tspan> window.</text>
-  </g>
 </svg>

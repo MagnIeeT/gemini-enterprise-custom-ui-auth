@@ -358,7 +358,7 @@
       <rect x="260" y="132" width="260" height="380" rx="14" ry="14" fill="#e8f0fe" stroke="#aecbfa" stroke-width="1.5"/>
       <use href="#icon-security" x="280" y="148" width="18" height="18"/>
       <text x="304" y="162" font-size="12" font-weight="600" fill="#174ea6">Step 1: User Auth</text>
-      <text x="304" y="177" font-size="10.5" fill="#5f6368">Google OAuth · WIF STS · DWD</text>
+      <text x="304" y="177" font-size="10.5" fill="#5f6368">Google OAuth · Workforce Identity STS</text>
     </g>
     <g class="boundary" id="boundary-ge" data-frame-id="boundary-ge" data-frame-kind="boundary">
       <rect x="544" y="132" width="264" height="380" rx="14" ry="14" fill="#e6f4ea" stroke="#a8dab5" stroke-width="1.5"/>
@@ -370,7 +370,7 @@
       <rect x="832" y="132" width="252" height="380" rx="14" ry="14" fill="#fef7e0" stroke="#fdd663" stroke-width="1.5"/>
       <use href="#icon-agents" x="852" y="148" width="18" height="18"/>
       <text x="876" y="162" font-size="12" font-weight="600" fill="#b06000">Vertex AI Agent Engine</text>
-      <text x="876" y="177" font-size="10.5" fill="#5f6368">Layer 2B: ADK Hierarchy</text>
+      <text x="876" y="177" font-size="10.5" fill="#5f6368">AGENT_IDENTITY + Auth Manager</text>
     </g>
   </g>
 
@@ -397,20 +397,20 @@
       <use href="#icon-user" x="14" y="27" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Custom Web UI</text>
       <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">Corporate SSO Login</text>
-      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Entra / Okta / GWS</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Google / Entra ID</text>
     </g>
     <g class="node" id="node-sts-dwd" data-frame-id="node-sts-dwd" data-frame-kind="node" transform="translate(280, 200)" filter="url(#card-shadow)">
       <rect width="220" height="88" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
       <use href="#icon-security" x="14" y="27" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">User Token Exchange</text>
-      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">Google STS / IAM :signJwt</text>
-      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Zero Static JSON Keys</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">Google OAuth / WIF STS</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">IAM Role + GE License</text>
     </g>
     <g class="node" id="node-streamassist" data-frame-id="node-streamassist" data-frame-kind="node" data-focal="true" transform="translate(564, 200)" filter="url(#card-shadow)">
       <rect width="224" height="88" rx="10" ry="10" fill="#f8fafd" stroke="#1a73e8" stroke-width="2"/>
       <use href="#icon-gemini" x="14" y="27" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#174ea6">Gemini Enterprise</text>
-      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1a73e8">:streamAssist API</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9" fill="#1a73e8">:streamAssist + :validateAuth</text>
       <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Per-User Document ACLs</text>
     </g>
     <g class="node" id="node-connector" data-frame-id="node-connector" data-frame-kind="node" transform="translate(564, 384)" filter="url(#card-shadow)">
@@ -418,27 +418,27 @@
       <use href="#icon-integration-services" x="14" y="29" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Native 3P Connectors</text>
       <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">dataConnector + Keystore</text>
-      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">Silent Token Refresh</text>
+      <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">acquireAndStoreRefreshToken</text>
     </g>
     <g class="node" id="node-adk-router" data-frame-id="node-adk-router" data-frame-kind="node" data-focal="true" transform="translate(852, 200)" filter="url(#card-shadow)">
       <rect width="212" height="88" rx="10" ry="10" fill="#f8fafd" stroke="#1a73e8" stroke-width="2"/>
       <use href="#icon-agents" x="14" y="27" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#174ea6">Root Router Agent</text>
-      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">ADK Parent Agent</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">EnterpriseRouterAgent</text>
       <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">0 Upfront OAuth Popups</text>
     </g>
     <g class="node" id="node-adk-subagent" data-frame-id="node-adk-subagent" data-frame-kind="node" transform="translate(852, 384)" filter="url(#card-shadow)">
       <rect width="212" height="92" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
       <use href="#icon-vertex-ai" x="14" y="29" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">Specialist Subagent</text>
-      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">request_credential()</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#9334e6">GcpAuthProvider (Vault)</text>
       <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">On-Demand Per-Tool 3LO</text>
     </g>
     <g class="node" id="node-saas" data-frame-id="node-saas" data-frame-kind="node" transform="translate(1136, 296)" filter="url(#card-shadow)">
       <rect width="200" height="92" rx="10" ry="10" fill="#ffffff" stroke="#8ab4f8" stroke-width="1.5"/>
       <use href="#icon-external-api" x="14" y="29" width="34" height="34"/>
       <text x="56" y="30" font-size="13" font-weight="600" fill="#202124">3P Enterprise SaaS</text>
-      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">ServiceNow / Jira / Box</text>
+      <text x="56" y="47" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#1e8e3e">SharePoint / GWS / Jira</text>
       <text x="56" y="64" font-family="'Roboto Mono', monospace" font-size="9.5" fill="#5f6368">User-Level Audit Trail</text>
     </g>
   </g>

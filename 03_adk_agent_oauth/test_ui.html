@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Enterprise — Part 3: ADK Agent On-Demand 3LO Test UI</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --blue: #1a73e8;
+      --blue-hover: #1557b0;
+      --green-bg: #dcfce7;
+      --green-text: #166534;
+      --amber-bg: #fef3c7;
+      --amber-text: #92400e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    header, .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 4px 0; }
+    .subtitle { color: var(--muted); font-size: 0.875rem; margin: 0; }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .section-title { font-size: 1.05rem; font-weight: 600; margin: 0; }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    select, input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--text);
+    }
+    button {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--blue-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.secondary {
+      background: #f1f5f9;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+    }
+    button.secondary:hover { background: #e2e8f0; }
+    .chat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .chat-row input { flex: 1; }
+    .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .answer-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      font-size: 0.93rem;
+    }
+    .auth-card {
+      border: 1px solid #f59e0b;
+      background: #fffbeb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .redirect-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .redirect-row input {
+      flex: 1;
+      min-width: 260px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82rem;
+    }
+    pre.log {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      max-height: 280px;
+      margin: 10px 0 0 0;
+    }
+    .hint { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Gemini Enterprise — Part 3: Custom UI + ADK Agent On-Demand 3LO</h1>
+        <p class="subtitle">
+          <code>:streamAssist</code> &rarr; <code>requiredAuthorizations</code> &rarr;
+          3LO Popup &rarr; <code>{session}:validateUserAuthorization</code> &rarr;
+          Auto Re-Run Query
+        </p>
+      </div>
+      <div class="controls">
+        <label for="authMode" style="font-size:0.85rem;color:var(--muted);">Auth Mode:</label>
+        <select id="authMode">
+          <option value="google">Google Identity (Pattern 1A)</option>
+          <option value="wif">Workforce Identity / Entra STS (Pattern 1B)</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- STEP 1: QUERY REGISTERED ADK AGENT -->
+    <div class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Query Registered High-Code ADK Agent (<code>EnterpriseRouterAgent</code>)</h2>
+          <div class="hint" id="sessionMeta">Session: (new session will be created automatically)</div>
+        </div>
+        <div class="controls">
+          <button class="secondary" onclick="revokeTokens()">Clear Stored 3LO Tokens (Reset Auth Vault)</button>
+          <button class="secondary" onclick="resetSession()">New Session</button>
+        </div>
+      </div>
+
+      <div class="preset-row">
+        <button class="secondary" onclick="setAndSend('What are our Grid Operations SLA policies?')">
+          1. PolicySubAgent (No Auth)
+        </button>
+        <button class="secondary" onclick="setAndSend('What is my Google profile and email?')">
+          2. GoogleWorkspaceSubAgent (Google 3LO)
+        </button>
+        <button class="secondary" onclick="setAndSend('Search my SharePoint sites')">
+          3. SharePointSubAgent (Microsoft 3LO)
+        </button>
+      </div>
+
+      <div class="chat-row">
+        <input
+          type="text"
+          id="chatQuery"
+          value="What is my Google profile and email?"
+          placeholder="Ask EnterpriseRouterAgent a question..."
+          onkeydown="if(event.key==='Enter') sendChat()"
+        />
+        <button id="btnChat" onclick="sendChat()">Send to ADK Agent</button>
+      </div>
+
+      <div id="chatResult" class="answer-box" style="display:none;"></div>
+      <div id="authContainer"></div>
+    </div>
+
+    <!-- API LOG -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Backend API Activity Log</h2>
+        <button class="secondary" onclick="document.getElementById('apiLog').textContent='Ready.'">Clear Log</button>
+      </div>
+      <pre id="apiLog" class="log">Ready.</pre>
+    </div>
+  </div>
+
+  <script>
+    let currentSession = "";
+    let lastQuery = "";
+    let activeConnectorForPopup = "";
+
+    function logMsg(title, payload) {
+      const el = document.getElementById("apiLog");
+      const ts = new Date().toISOString().split("T")[1].slice(0, 8);
+      const body = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+      el.textContent = `[${ts}] ${title}\n${body}\n\n` + (el.textContent === "Ready." ? "" : el.textContent);
+    }
+
+    function resetSession() {
+      currentSession = "";
+      document.getElementById("sessionMeta").textContent = "Session: (reset — new session will be created on next query)";
+      document.getElementById("authContainer").innerHTML = "";
+      document.getElementById("chatResult").style.display = "none";
+    }
+
+    async function revokeTokens() {
+      try {
+        const res = await fetch("/api/revoke", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json();
+        logMsg(`POST /api/revoke (HTTP ${res.status})`, data);
+        resetSession();
+        const resultEl = document.getElementById("chatResult");
+        resultEl.style.display = "block";
+        const count = (data.revoked || []).filter((r) => r.delete_status === 200).length;
+        resultEl.textContent = `✅ Cleared ${count} stored user 3LO token(s) from Google Cloud Auth Manager Vault and reset the session. Send a Google Workspace or SharePoint query now to trigger the 3LO consent popup!`;
+      } catch (err) {
+        logMsg("POST /api/revoke error", String(err));
+      }
+    }
+
+    function setAndSend(q) {
+      document.getElementById("chatQuery").value = q;
+      sendChat();
+    }
+
+    // Listen for automatic postMessage from /validateUserId popup
+    window.addEventListener("message", async (event) => {
+      const data = event.data || {};
+      if (!data.fullRedirectUrl || !data.fullRedirectUrl.includes("user_id_validation_state=")) return;
+      logMsg(`Received postMessage from ${event.origin}`, data);
+      if (activeConnectorForPopup) {
+        await completeValidation(activeConnectorForPopup, data.fullRedirectUrl);
+      }
+    });
+
+    async function sendChat() {
+      const btn = document.getElementById("btnChat");
+      const authMode = document.getElementById("authMode").value;
+      const query = document.getElementById("chatQuery").value.trim();
+      const resultEl = document.getElementById("chatResult");
+      const authContainer = document.getElementById("authContainer");
+      if (!query) return;
+
+      lastQuery = query;
+      btn.disabled = true;
+      btn.textContent = "Querying ADK Agent...";
+      resultEl.style.display = "block";
+      resultEl.textContent = "Waiting for Gemini Enterprise :streamAssist -> ADK Agent...";
+      authContainer.innerHTML = "";
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            auth_mode: authMode,
+            query,
+            session: currentSession,
+          }),
+        });
+        const data = await res.json();
+        logMsg(`POST /api/chat (HTTP ${res.status})`, data);
+
+        if (data.session) {
+          currentSession = data.session;
+          document.getElementById("sessionMeta").textContent =
+            `Agent ID: ${data.agent_id || "-"} | Session: ${currentSession}`;
+        }
+
+        if (res.ok && data.status_code === 200) {
+          if (data.requires_3lo && data.required_authorizations && data.required_authorizations.length > 0) {
+            resultEl.textContent =
+              data.reply_text ||
+              "🔒 The ADK sub-agent tool emitted `adk_request_credential` (`requiredAuthorizations`). Authorize below to continue:";
+            renderAuthCards(data.required_authorizations);
+          } else {
+            resultEl.textContent = data.reply_text || "(No text returned — see raw response in log below)";
+          }
+        } else {
+          resultEl.textContent = `Error (HTTP ${data.status_code || res.status}):\n` + JSON.stringify(data.raw_response || data, null, 2);
+        }
+      } catch (err) {
+        resultEl.textContent = "Request failed: " + String(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Send to ADK Agent";
+      }
+    }
+
+    function renderAuthCards(reqAuths) {
+      const authContainer = document.getElementById("authContainer");
+      authContainer.innerHTML = reqAuths.map((req) => {
+        const connector = req.displayName || req.authorization || "";
+        const authUri = req.authorizationUri || "";
+        activeConnectorForPopup = connector;
+        return `
+          <div class="auth-card">
+            <div style="font-weight:600;margin-bottom:4px;">
+              On-Demand 3LO Authorization Required
+            </div>
+            <div style="font-size:0.83rem;font-family:monospace;color:var(--muted);margin-bottom:10px;">
+              Auth Provider: <strong>${escapeHtml(connector)}</strong>
+            </div>
+            <div class="controls">
+              <button onclick="openAuthPopup('${escapeAttr(connector)}', '${escapeAttr(authUri)}')">
+                Authorize in Popup (3LO)
+              </button>
+            </div>
+            <div class="hint" style="margin-top:8px;">
+              Approving access in the popup automatically calls <code>{session}:validateUserAuthorization</code> and re-runs your query.
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function openAuthPopup(connector, authUri) {
+      activeConnectorForPopup = connector;
+      logMsg(`Opening 3LO Popup for '${connector}'`, authUri);
+      window.open(authUri, "ge_adk_3lo_popup", "width=620,height=740,noopener=no");
+    }
+
+    async function completeValidation(connector, fullRedirectUri) {
+      const authMode = document.getElementById("authMode").value;
+      if (!fullRedirectUri) return;
+
+      logMsg(`POST /api/validate for '${connector}'`, {
+        session: currentSession,
+        downstream_connector: connector,
+        full_redirect_uri: fullRedirectUri,
+      });
+
+      try {
+        const res = await fetch("/api/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            auth_mode: authMode,
+            session: currentSession,
+            downstream_connector: connector,
+            full_redirect_uri: fullRedirectUri,
+          }),
+        });
+        const data = await res.json();
+        logMsg(`POST /api/validate response (HTTP ${res.status})`, data);
+
+        if (res.ok && data.validate_status === 200) {
+          // Automatically re-send the original query on the same session!
+          document.getElementById("chatQuery").value = lastQuery;
+          await sendChat();
+        } else {
+          alert(`ValidateUserAuthorization failed (HTTP ${data.validate_status || res.status}). Check Backend API Activity Log.`);
+        }
+      } catch (err) {
+        logMsg("POST /api/validate error", String(err));
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function escapeAttr(str) {
+      return String(str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>

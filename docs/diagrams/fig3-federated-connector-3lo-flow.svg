@@ -52,14 +52,14 @@
   <!-- ==================== NODES ==================== -->
 
   <!-- Users Icon -->
-  <g id="node-user" transform="translate(46, 360)">
+  <g id="node-user" transform="translate(46, 368)">
     <circle cx="34" cy="24" r="19" fill="#4285f4"/>
     <path d="M8,70 C8,46 60,46 60,70 Z" fill="#4285f4"/>
     <text x="34" y="92" text-anchor="middle" font-size="13" font-weight="600" fill="#202124">Users</text>
   </g>
 
   <!-- Customer UI (www.cust.com) -->
-  <g id="node-cust-ui" transform="translate(132, 326)" filter="url(#card-shadow)">
+  <g id="node-cust-ui" transform="translate(132, 336)" filter="url(#card-shadow)">
     <rect width="168" height="140" rx="10" fill="#ffffff" stroke="#5f6368" stroke-width="1.8"/>
     <text x="84" y="48" text-anchor="middle" font-size="14.5" font-weight="700" fill="#202124">Customer UI</text>
     <text x="84" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11" fill="#5f6368">(www.cust.com)</text>
@@ -68,7 +68,7 @@
   </g>
 
   <!-- Customer BE (www.cust.com) -->
-  <g id="node-cust-be" transform="translate(412, 326)" filter="url(#card-shadow)">
+  <g id="node-cust-be" transform="translate(412, 336)" filter="url(#card-shadow)">
     <rect width="176" height="140" rx="10" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.8"/>
     <text x="88" y="48" text-anchor="middle" font-size="14.5" font-weight="700" fill="#174ea6">Customer BE</text>
     <text x="88" y="70" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="11" fill="#174ea6">(www.cust.com)</text>
@@ -77,25 +77,25 @@
   </g>
 
   <!-- Cylinder: <user, goog_oauth_token> below Customer BE -->
-  <g id="node-user-token-db" transform="translate(432, 512)" filter="url(#card-shadow)">
-    <path d="M 0,14 L 0,74 A 68,12 0 0,0 136,74 L 136,14 Z" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.6"/>
+  <g id="node-user-token-db" transform="translate(432, 518)" filter="url(#card-shadow)">
+    <path d="M 0,14 L 0,72 A 68,12 0 0,0 136,72 L 136,14 Z" fill="#d2e3fc" stroke="#174ea6" stroke-width="1.6"/>
     <ellipse cx="68" cy="14" rx="68" ry="12" fill="#e8f0fe" stroke="#174ea6" stroke-width="1.6"/>
-    <text x="68" y="42" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">&lt;user,</text>
-    <text x="68" y="57" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">goog_oauth</text>
-    <text x="68" y="72" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">_token&gt;</text>
+    <text x="68" y="41" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">&lt;user,</text>
+    <text x="68" y="56" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">goog_oauth</text>
+    <text x="68" y="71" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" font-weight="600" fill="#174ea6">_token&gt;</text>
   </g>
 
-  <!-- 3P Auth Server (Top Middle — raised slightly for clean clearance above arrows 6 & 7) -->
-  <g id="node-3p-auth" transform="translate(384, 134)" filter="url(#card-shadow)">
-    <rect width="192" height="106" rx="10" fill="#fef7e0" stroke="#e37400" stroke-width="1.8"/>
-    <text x="96" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#b06000">3P Auth Server</text>
-    <text x="96" y="55" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">(Entra ID / Google /</text>
-    <text x="96" y="71" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">Jira / Box / ServiceNow)</text>
-    <text x="96" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b06000">3LO Consent Endpoint</text>
+  <!-- 3P Auth Server (Top Middle — positioned with clear channel below for arrows 6 & 7) -->
+  <g id="node-3p-auth" transform="translate(344, 132)" filter="url(#card-shadow)">
+    <rect width="192" height="98" rx="10" fill="#fef7e0" stroke="#e37400" stroke-width="1.8"/>
+    <text x="96" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#b06000">3P Auth Server</text>
+    <text x="96" y="50" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">(Entra ID / Google /</text>
+    <text x="96" y="65" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#3c4043">Jira / Box / ServiceNow)</text>
+    <text x="96" y="85" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b06000">3LO Consent Endpoint</text>
   </g>
 
   <!-- GE FE Server (vertexaisearch.cloud.google.com/oauth-redirect) -->
-  <g id="node-ge-fe" transform="translate(692, 168)" filter="url(#card-shadow)">
+  <g id="node-ge-fe" transform="translate(692, 156)" filter="url(#card-shadow)">
     <rect width="204" height="118" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
     <text x="102" y="34" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0d652d">GE FE Server</text>
     <text x="102" y="54" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#0d652d">(vertexaisearch.</text>
@@ -105,7 +105,7 @@
   </g>
 
   <!-- GE Server (discoveryengine.googleapis.com) -->
-  <g id="node-ge-server" transform="translate(692, 326)" filter="url(#card-shadow)">
+  <g id="node-ge-server" transform="translate(692, 336)" filter="url(#card-shadow)">
     <rect width="204" height="140" rx="10" fill="#ceead6" stroke="#137333" stroke-width="1.8"/>
     <text x="102" y="36" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0d652d">GE Server</text>
     <text x="102" y="56" text-anchor="middle" font-family="'Roboto Mono', monospace" font-size="10.5" fill="#0d652d">(discoveryengine.</text>
@@ -116,7 +116,7 @@
   </g>
 
   <!-- Cylinder: Keystore (connected ONLY to GE Server) -->
-  <g id="node-keystore" transform="translate(952, 286)" filter="url(#card-shadow)">
+  <g id="node-keystore" transform="translate(952, 294)" filter="url(#card-shadow)">
     <path d="M 0,14 L 0,80 A 60,12 0 0,0 120,80 L 120,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
     <ellipse cx="60" cy="14" rx="60" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
     <text x="60" y="50" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0d652d">Keystore</text>
@@ -124,7 +124,7 @@
   </g>
 
   <!-- Cylinder: User Table (connected ONLY to GE Server) -->
-  <g id="node-user-table" transform="translate(952, 412)" filter="url(#card-shadow)">
+  <g id="node-user-table" transform="translate(952, 420)" filter="url(#card-shadow)">
     <path d="M 0,14 L 0,80 A 60,12 0 0,0 120,80 L 120,14 Z" fill="#ceead6" stroke="#137333" stroke-width="1.6"/>
     <ellipse cx="60" cy="14" rx="60" ry="12" fill="#e6f4ea" stroke="#137333" stroke-width="1.6"/>
     <text x="60" y="50" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0d652d">User Table</text>
@@ -134,65 +134,65 @@
   <!-- ==================== ARROWS & NUMBERED STEPS 1–11 ==================== -->
 
   <!-- Customer BE -> <user, goog_oauth_token> -->
-  <line x1="500" y1="466" x2="500" y2="504" stroke="#174ea6" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
+  <line x1="500" y1="476" x2="500" y2="510" stroke="#174ea6" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
 
   <!-- GE Server -> Keystore & User Table (NO arrow from GE FE Server to Keystore!) -->
-  <path d="M 896 368 C 924 368, 924 334, 944 334" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
-  <path d="M 896 424 C 924 424, 924 456, 944 456" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+  <path d="M 896 378 C 924 378, 924 342, 944 342" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+  <path d="M 896 434 C 924 434, 924 464, 944 464" fill="none" stroke="#137333" stroke-width="1.8" marker-end="url(#arrow-green)"/>
 
   <!-- Step 5: Customer UI -> 3P Auth Server -->
-  <line x1="212" y1="326" x2="376" y2="196" stroke="#e37400" stroke-width="2" marker-end="url(#arrow-amber)"/>
-  <circle cx="292" cy="262" r="12" fill="#fef7e0" stroke="#e37400" stroke-width="1.6"/>
-  <text x="292" y="266" text-anchor="middle" font-size="11" font-weight="700" fill="#b06000">5</text>
+  <line x1="196" y1="336" x2="338" y2="188" stroke="#e37400" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <circle cx="266" cy="263" r="12" fill="#fef7e0" stroke="#e37400" stroke-width="1.6"/>
+  <text x="266" y="267" text-anchor="middle" font-size="11" font-weight="700" fill="#b06000">5</text>
 
   <!-- Step 6: Customer UI (Popup) -> GE FE Server (/oauth-redirect) -->
-  <line x1="300" y1="342" x2="684" y2="232" stroke="#9334e6" stroke-width="2" marker-end="url(#arrow-purple)"/>
-  <circle cx="468" cy="294" r="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
-  <text x="468" y="298" text-anchor="middle" font-size="11" font-weight="700" fill="#9334e6">6</text>
+  <line x1="268" y1="336" x2="684" y2="206" stroke="#9334e6" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  <circle cx="464" cy="275" r="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
+  <text x="464" y="279" text-anchor="middle" font-size="11" font-weight="700" fill="#9334e6">6</text>
 
   <!-- Step 7: GE FE Server (/oauth-redirect) -> Customer UI (postMessage) -->
-  <line x1="692" y1="252" x2="308" y2="362" stroke="#9334e6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
-  <circle cx="508" cy="305" r="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
-  <text x="508" y="309" text-anchor="middle" font-size="11" font-weight="700" fill="#9334e6">7</text>
+  <line x1="692" y1="226" x2="298" y2="349" stroke="#9334e6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+  <circle cx="504" cy="285" r="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="1.6"/>
+  <text x="504" y="289" text-anchor="middle" font-size="11" font-weight="700" fill="#9334e6">7</text>
 
   <!-- Step 1: Customer UI -> Customer BE -->
-  <line x1="300" y1="368" x2="404" y2="368" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
-  <circle cx="354" cy="368" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
-  <text x="354" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">1</text>
+  <line x1="300" y1="378" x2="404" y2="378" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="354" cy="378" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="354" y="382" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">1</text>
 
   <!-- Step 4: Customer BE -> Customer UI -->
-  <line x1="412" y1="394" x2="308" y2="394" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
-  <circle cx="354" cy="394" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
-  <text x="354" y="398" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">4</text>
+  <line x1="412" y1="404" x2="308" y2="404" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="354" cy="404" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="354" y="408" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">4</text>
 
   <!-- Step 8: Customer UI -> Customer BE -->
-  <line x1="300" y1="422" x2="404" y2="422" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
-  <circle cx="354" cy="422" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
-  <text x="354" y="426" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">8</text>
+  <line x1="300" y1="432" x2="404" y2="432" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="354" cy="432" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="354" y="436" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">8</text>
 
   <!-- Step 11: Customer BE -> Customer UI -->
-  <line x1="412" y1="448" x2="308" y2="448" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
-  <circle cx="354" cy="448" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
-  <text x="354" y="452" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">11</text>
+  <line x1="412" y1="458" x2="308" y2="458" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="354" cy="458" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="354" y="462" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">11</text>
 
   <!-- Step 2: Customer BE -> GE Server -->
-  <line x1="588" y1="368" x2="684" y2="368" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
-  <circle cx="638" cy="368" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
-  <text x="638" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">2</text>
+  <line x1="588" y1="378" x2="684" y2="378" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="638" cy="378" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="638" y="382" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">2</text>
 
   <!-- Step 3: GE Server -> Customer BE -->
-  <line x1="692" y1="394" x2="596" y2="394" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
-  <circle cx="638" cy="394" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
-  <text x="638" y="398" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">3</text>
+  <line x1="692" y1="404" x2="596" y2="404" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <circle cx="638" cy="404" r="11" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+  <text x="638" y="408" text-anchor="middle" font-size="10.5" font-weight="700" fill="#174ea6">3</text>
 
   <!-- Step 9: Customer BE -> GE Server -->
-  <line x1="588" y1="422" x2="684" y2="422" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
-  <circle cx="638" cy="422" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
-  <text x="638" y="426" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">9</text>
+  <line x1="588" y1="432" x2="684" y2="432" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="638" cy="432" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="638" y="436" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">9</text>
 
   <!-- Step 10: GE Server -> Customer BE -->
-  <line x1="692" y1="448" x2="596" y2="448" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
-  <circle cx="638" cy="448" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
-  <text x="638" y="452" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">10</text>
+  <line x1="692" y1="458" x2="596" y2="458" stroke="#1e8e3e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <circle cx="638" cy="458" r="11" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="1.5"/>
+  <text x="638" y="462" text-anchor="middle" font-size="10.5" font-weight="700" fill="#137333">10</text>
 
 </svg>

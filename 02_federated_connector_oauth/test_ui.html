@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Enterprise — Federated Connector 3LO & Chat Test UI</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --blue: #1a73e8;
+      --blue-hover: #1557b0;
+      --green-bg: #dcfce7;
+      --green-text: #166534;
+      --amber-bg: #fef3c7;
+      --amber-text: #92400e;
+      --red-bg: #fee2e2;
+      --red-text: #991b1b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      margin: 0 0 4px 0;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    select, input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--text);
+    }
+    button {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--blue-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.secondary {
+      background: #f1f5f9;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+    }
+    button.secondary:hover { background: #e2e8f0; }
+    .connector-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .connector-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fcfdff;
+    }
+    .connector-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .connector-name {
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0 0 4px 0;
+    }
+    .connector-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge.ok { background: var(--green-bg); color: var(--green-text); }
+    .badge.warn { background: var(--amber-bg); color: var(--amber-text); }
+    .auth-box {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .redirect-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .redirect-row input {
+      flex: 1;
+      min-width: 260px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82rem;
+    }
+    .chat-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .chat-row input {
+      flex: 1;
+    }
+    .answer-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      font-size: 0.93rem;
+    }
+    pre.log {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      max-height: 260px;
+      margin: 10px 0 0 0;
+    }
+    .hint {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Gemini Enterprise — Custom UI Federated Connector Auth & Chat</h1>
+        <p class="subtitle">
+          End-to-End Flow: <code>GetWidgetConfig</code> &rarr; 3LO Popup &rarr;
+          <code>vertexaisearch.cloud.google.com/oauth-redirect</code> &rarr;
+          <code>acquireAndStoreRefreshToken</code> &rarr; <code>:streamAssist</code>
+        </p>
+      </div>
+      <div class="controls">
+        <label for="authMode" style="font-size:0.85rem;color:var(--muted);">Auth Mode:</label>
+        <select id="authMode">
+          <option value="google">Google Identity (Pattern 1A)</option>
+          <option value="wif">Workforce Identity / Entra STS (Pattern 1B)</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- STEP 1 & 2: LIST & AUTHENTICATE CONNECTORS -->
+    <div class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Step 1 &amp; 2: List Connectors &amp; Authenticate (3LO &rarr; GE Keystore)</h2>
+          <div class="hint" id="engineMeta">Click "1. List Connectors" to inspect attached connectors on the engine.</div>
+        </div>
+        <button id="btnList" onclick="listConnectors()">1. List Connectors</button>
+      </div>
+
+      <div id="connectorsContainer" class="connector-grid"></div>
+    </div>
+
+    <!-- STEP 3: CHAT (:streamAssist) -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Step 3: Chat with Gemini Enterprise (<code>:streamAssist</code>)</h2>
+      </div>
+      <div class="chat-row">
+        <input
+          type="text"
+          id="chatQuery"
+          value="What are the key points in Cymbal_Sigma_Notes.docx?"
+          placeholder="Ask a question across your connected SharePoint / OneDrive sources..."
+          onkeydown="if(event.key==='Enter') sendChat()"
+        />
+        <button id="btnChat" onclick="sendChat()">3. Send Chat</button>
+      </div>
+      <div id="chatResult" class="answer-box" style="display:none;"></div>
+    </div>
+
+    <!-- API LOG -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Backend API Activity Log</h2>
+        <button class="secondary" onclick="document.getElementById('apiLog').textContent='Ready.'">Clear Log</button>
+      </div>
+      <pre id="apiLog" class="log">Ready.</pre>
+    </div>
+  </div>
+
+  <script>
+    let activeCollectionForPopup = null;
+
+    function logMsg(title, payload) {
+      const el = document.getElementById("apiLog");
+      const ts = new Date().toISOString().split("T")[1].slice(0, 8);
+      const body = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+      el.textContent = `[${ts}] ${title}\n${body}\n\n` + (el.textContent === "Ready." ? "" : el.textContent);
+    }
+
+    // Listen for automatic postMessage from https://vertexaisearch.cloud.google.com/oauth-redirect
+    // (Slide 10, Step 7: window.opener.postMessage({code, state, fullRedirectUrl}, origin))
+    window.addEventListener("message", async (event) => {
+      if (!event.origin.includes("vertexaisearch.cloud.google.com")) return;
+      logMsg(`Received postMessage from ${event.origin}`, event.data);
+      const data = event.data || {};
+      const fullRedirectUrl = data.fullRedirectUrl || (
+        data.code
+          ? `https://vertexaisearch.cloud.google.com/oauth-redirect?code=${encodeURIComponent(data.code)}${data.state ? "&state=" + encodeURIComponent(data.state) : ""}`
+          : ""
+      );
+      if (fullRedirectUrl && activeCollectionForPopup) {
+        const input = document.getElementById(`redirect-${activeCollectionForPopup}`);
+        if (input) input.value = fullRedirectUrl;
+        await completeConnectorAuth(activeCollectionForPopup, fullRedirectUrl);
+      }
+    });
+
+    async function listConnectors() {
+      const btn = document.getElementById("btnList");
+      const authMode = document.getElementById("authMode").value;
+      const container = document.getElementById("connectorsContainer");
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+      try {
+        const res = await fetch(`/api/list?auth_mode=${encodeURIComponent(authMode)}`);
+        const data = await res.json();
+        logMsg(`GET /api/list (HTTP ${res.status})`, data);
+
+        document.getElementById("engineMeta").textContent =
+          `Project: ${data.project_id || "-"} | Engine: ${data.engine_id || "-"} (${data.location || "-"}) | Auth Mode: ${data.auth_mode || authMode}`;
+
+        if (!res.ok) {
+          container.innerHTML = `<div class="answer-box" style="color:#991b1b;">Error: ${JSON.stringify(data)}</div>`;
+          return;
+        }
+
+        const connectors = data.connectors || [];
+        if (connectors.length === 0) {
+          container.innerHTML = `<div class="hint">No connectors attached to this engine.</div>`;
+          return;
+        }
+
+        container.innerHTML = connectors.map((c) => {
+          const cid = c.target_collection_id || c.collection_id;
+          const isAuth = c.keystore_authorized;
+          const badgeClass = isAuth ? "ok" : "warn";
+          const badgeText = isAuth
+            ? "AUTHORIZED IN KEYSTORE (HTTP 200)"
+            : `NOT AUTHORIZED (${c.keystore_status_text || "Needs 3LO"})`;
+
+          return `
+            <div class="connector-card">
+              <div class="connector-top">
+                <div>
+                  <div class="connector-name">${escapeHtml(c.display_name)}</div>
+                  <div class="connector-meta">
+                    Collection ID: <strong>${escapeHtml(cid)}</strong> &bull;
+                    Data Source: <strong>${escapeHtml(c.data_source)}</strong> &bull;
+                    Widget State: <strong>${escapeHtml(c.widget_auth_state)}</strong>
+                  </div>
+                </div>
+                <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
+              </div>
+
+              <div class="auth-box">
+                <div class="controls">
+                  ${c.auth_uri ? `
+                    <button onclick="openAuthPopup('${escapeAttr(cid)}', '${escapeAttr(c.auth_uri)}')">
+                      2. Authenticate (${escapeHtml(c.display_name)})
+                    </button>
+                  ` : ""}
+                  <button class="secondary" onclick="toggleManualBox('${escapeAttr(cid)}')">
+                    Paste Redirect URL Manually
+                  </button>
+                </div>
+
+                <div id="manual-box-${escapeAttr(cid)}" style="display:${isAuth ? "none" : "block"};">
+                  <div class="hint">
+                    After signing in at Microsoft in the popup, if the popup stays on
+                    <code>https://vertexaisearch.cloud.google.com/oauth-redirect?code=...</code>,
+                    copy that full URL from the popup address bar and paste it below:
+                  </div>
+                  <div class="redirect-row">
+                    <input
+                      type="text"
+                      id="redirect-${escapeAttr(cid)}"
+                      placeholder="https://vertexaisearch.cloud.google.com/oauth-redirect?code=..."
+                    />
+                    <button onclick="completeConnectorAuth('${escapeAttr(cid)}')">
+                      Complete Auth (Store in Keystore)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        logMsg("GET /api/list failed", String(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "1. List Connectors";
+      }
+    }
+
+    function toggleManualBox(cid) {
+      const box = document.getElementById(`manual-box-${cid}`);
+      if (box) box.style.display = box.style.display === "none" ? "block" : "none";
+    }
+
+    function openAuthPopup(cid, authUri) {
+      activeCollectionForPopup = cid;
+      const box = document.getElementById(`manual-box-${cid}`);
+      if (box) box.style.display = "block";
+      logMsg(`Opening 3LO OAuth Popup for '${cid}'`, authUri);
+      window.open(authUri, "ge_3lo_popup", "width=620,height=740,noopener=no");
+    }
+
+    async function completeConnectorAuth(cid, explicitRedirectUri) {
+      const authMode = document.getElementById("authMode").value;
+      const inputEl = document.getElementById(`redirect-${cid}`);
+      const fullRedirectUri = (explicitRedirectUri || (inputEl ? inputEl.value : "")).trim();
+      if (!fullRedirectUri) {
+        alert("Please paste the full redirect URL (https://vertexaisearch.cloud.google.com/oauth-redirect?code=...) from the popup window.");
+        return;
+      }
+
+      logMsg(`POST /api/store for '${cid}'`, { collection_id: cid, full_redirect_uri: fullRedirectUri });
+      try {
+        const res = await fetch("/api/store", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            auth_mode: authMode,
+            collection_id: cid,
+            full_redirect_uri: fullRedirectUri,
+          }),
+        });
+        const data = await res.json();
+        logMsg(`POST /api/store response (HTTP ${res.status})`, data);
+        if (res.ok && data.store_status === 200) {
+          await listConnectors();
+        } else {
+          alert(`Failed to store token (HTTP ${data.store_status || res.status}). Check Backend API Activity Log below.`);
+        }
+      } catch (err) {
+        logMsg("POST /api/store error", String(err));
+      }
+    }
+
+    async function sendChat() {
+      const btn = document.getElementById("btnChat");
+      const authMode = document.getElementById("authMode").value;
+      const query = document.getElementById("chatQuery").value.trim();
+      const resultEl = document.getElementById("chatResult");
+      if (!query) return;
+
+      btn.disabled = true;
+      btn.textContent = "Querying :streamAssist...";
+      resultEl.style.display = "block";
+      resultEl.textContent = "Waiting for Gemini Enterprise :streamAssist response...";
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ auth_mode: authMode, query }),
+        });
+        const data = await res.json();
+        logMsg(`POST /api/chat (HTTP ${res.status})`, data);
+        if (res.ok && data.status_code === 200) {
+          resultEl.textContent = data.reply_text || "(No text returned — see raw response in log below)";
+        } else {
+          resultEl.textContent = `Error (HTTP ${data.status_code || res.status}):\n` + JSON.stringify(data.raw_response || data, null, 2);
+        }
+      } catch (err) {
+        resultEl.textContent = "Request failed: " + String(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "3. Send Chat";
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function escapeAttr(str) {
+      return String(str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>

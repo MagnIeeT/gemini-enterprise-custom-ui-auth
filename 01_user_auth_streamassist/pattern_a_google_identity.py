@@ -173,6 +173,7 @@ def call_stream_assist(
     user_access_token: str,
     query_text: str,
     agent_id: str = "",
+    data_store_specs: Optional[List[Dict[str, str]]] = None,
 ) -> Dict[str, Any]:
   """Calls Gemini Enterprise :streamAssist with a Google Identity user bearer token."""
   host = (
@@ -190,6 +191,10 @@ def call_stream_assist(
   if agent_id.strip():
     payload["answerGenerationMode"] = "AGENT"
     payload["agentsSpec"] = {"agentSpecs": [{"agentId": agent_id.strip()}]}
+  if data_store_specs:
+    payload["toolsSpec"] = {
+        "vertexAiSearchSpec": {"dataStoreSpecs": data_store_specs}
+    }
 
   headers = {
       "Authorization": f"Bearer {user_access_token}",

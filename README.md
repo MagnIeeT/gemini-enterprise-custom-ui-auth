@@ -187,27 +187,48 @@ python 01_user_auth_streamassist/pattern_c_workload_identity.py \
 
 ![Federated Connector 3LO Sequence](docs/diagrams/fig3-federated-connector-3lo-flow.png)
 
-When your custom UI queries a Federated Connector, use `dataConnector:acquireAccessToken` to check if the user already has a refresh token stored in Gemini Enterprise's managed `Keystore`, and `dataConnector:acquireAndStoreRefreshToken` to store the authorization code returned after the user approves consent.
+When your custom UI queries a Federated or Action Connector (SharePoint, Jira, Confluence, ServiceNow, Salesforce, Google Drive), Gemini Enterprise uses its managed **Keystore** to store and mint per-user 3-legged OAuth (3LO) tokens:
 
-### Step 1: Check Keystore or Get `authUri`
+1. **List Connectors & Check Authorization Status (`GET .../widgetConfigs/default_search_widget_config` + `POST .../dataConnector:acquireAccessToken`):** Returns `collectionComponents[]` for the engine, each connector's `connectorAuthState.authState`, and the 3LO `authorizationUri` if the user has not authorized the connector yet.
+2. **Open 3LO Consent Popup (`https://vertexaisearch.cloud.google.com/oauth-redirect`):** The user signs in to the 3P Auth Server and grants consent; Google's redirect page returns `code` and `state`.
+3. **Exchange Code & Store Refresh Token in GE Keystore (`POST .../dataConnector:acquireAndStoreRefreshToken`):** Your backend passes `fullRedirectUri` to Gemini Enterprise, which exchanges the code and saves the `refresh_token` and `access_token` in its managed **Keystore**.
+4. **Query `:streamAssist` (`POST .../assistants/default_assistant:streamAssist`):** Subsequent `:streamAssist` queries automatically retrieve live results from the authorized connector using the token in the Keystore.
+
+### Step 1: List All Connectors on the Engine & Check Keystore Auth Status
 ```bash
-python 02_federated_connector_oauth/connector_oauth_flow.py --step check
+# Using Google Identity (or pass --auth-mode wif --browser-login for Workforce Identity)
+python 02_federated_connector_oauth/connector_oauth_flow.py --step list
 ```
 
-**Equivalent `curl` command:**
+**Equivalent `curl` commands (List Engine Connectors + Check Keystore Token):**
 ```bash
+# 1a. List connectors attached to the engine and get authorizationUri if unauthorized
 curl -s -X GET \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
-  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${CONNECTOR_LOCATION}/collections/${CONNECTOR_COLLECTION_ID}/dataConnector:acquireAccessToken?redirectUri=https://vertexaisearch.cloud.google.com/oauth-redirect"
+  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/widgetConfigs/default_search_widget_config"
+
+# 1b. Check if a live access token can be minted from the GE Keystore for a specific connector
+curl -s -X POST \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
+  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${CONNECTOR_LOCATION}/collections/${CONNECTOR_COLLECTION_ID}/dataConnector:acquireAccessToken" \
+  -d "{}"
 ```
 
-### Step 2: Open Popup & Listen for `postMessage` in Your Custom UI
-When `acquireAccessToken` returns an `authUri`, open it in a browser popup from your frontend and listen for the callback from `https://vertexaisearch.cloud.google.com/oauth-redirect`:
+### Step 2: Check a Specific Connector & Open the 3LO Popup
+```bash
+python 02_federated_connector_oauth/connector_oauth_flow.py \
+  --step check \
+  --collection-id "${CONNECTOR_COLLECTION_ID}"
+```
+
+In a web frontend, open `authorizationUri` in a popup and listen for `window.opener.postMessage` from `https://vertexaisearch.cloud.google.com/oauth-redirect`:
 
 ```javascript
 // In your custom frontend UI:
-const popup = window.open(authUri, "ConnectorOAuth", "width=520,height=680");
+const popup = window.open(authorizationUri, "ConnectorOAuth", "width=520,height=680");
 
 window.addEventListener("message", async (event) => {
   if (event.origin !== "https://vertexaisearch.cloud.google.com") return;
@@ -224,10 +245,18 @@ window.addEventListener("message", async (event) => {
 
 ### Step 3: Exchange Code & Store Refresh Token in Gemini Enterprise `Keystore`
 ```bash
+# Pass the full redirect URL from the browser (or --code "<CODE>" --state "<STATE>")
 python 02_federated_connector_oauth/connector_oauth_flow.py \
   --step store \
-  --code "<OAUTH_CODE_FROM_POPUP>" \
-  --state "<STATE_FROM_POPUP>"
+  --collection-id "${CONNECTOR_COLLECTION_ID}" \
+  --full-redirect-uri "https://vertexaisearch.cloud.google.com/oauth-redirect?code=...&state=..."
+```
+
+### Step 4: Run a `:streamAssist` Query Using the Authorized Connector
+```bash
+python 02_federated_connector_oauth/connector_oauth_flow.py \
+  --step query \
+  --query "Summarize my latest documents in SharePoint"
 ```
 
 ---

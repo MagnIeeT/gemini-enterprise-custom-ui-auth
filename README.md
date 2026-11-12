@@ -121,7 +121,7 @@ curl -s -X POST \
 
 Use when both your Custom UI and Gemini Enterprise use an **external IdP** (Microsoft Entra ID, Okta, Ping Identity) mapped to a Google Cloud **Workforce Identity Pool** (`workforcePools`).
 
-> **Note:** Always use **Workforce Identity Federation (`workforcePools`)** for human users—not Workload Identity Federation (`workloadIdentityPools`). Gemini Enterprise user licenses, per-user document ACLs, and Agent `User permissions` require Google Identity or `workforcePools` principals.
+> **Note:** Always use **Workforce Identity Federation (`workforcePools`)** for human users—not Workload Identity Federation (`workloadIdentityPools`). Gemini Enterprise user licenses, per-user document ACLs, and Agent `User permissions` in the console UI require Google Identity or `workforcePools` principals.
 
 #### Prerequisites
 1. **External IdP App Registration (e.g., Microsoft Entra ID):**

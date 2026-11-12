@@ -12,12 +12,12 @@ Usage:
 """
 
 import argparse
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
 import sys
-from typing import Any, Dict
+from typing import Any, Dict, List
 from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
@@ -48,6 +48,7 @@ load_dotenv(REPO_ROOT / ".env")
 
 HTML_FILE = CURRENT_DIR / "test_ui.html"
 _TOKEN_CACHE: Dict[str, str] = {}
+_SPECS_CACHE: Dict[str, List[Dict[str, str]]] = {}
 
 
 def get_cached_user_token(auth_mode: str) -> str:
@@ -191,6 +192,17 @@ class TestUIHandler(BaseHTTPRequestHandler):
               "auth_uri": auth_uri,
           })
 
+        specs: List[Dict[str, str]] = []
+        seen_ds = set()
+        for comp in components:
+          for ds in comp.get("dataStoreComponents", []):
+            ds_name = ds.get("name", "")
+            if ds_name and ds_name not in seen_ds:
+              seen_ds.add(ds_name)
+              specs.append({"dataStore": ds_name})
+        if specs:
+          _SPECS_CACHE[auth_mode] = specs
+
         self._send_json(
             200,
             {
@@ -256,12 +268,16 @@ class TestUIHandler(BaseHTTPRequestHandler):
       try:
         project_id, engine_id, location = resolve_engine_and_location(auth_mode)
         user_token = get_cached_user_token(auth_mode)
-        data_store_specs = get_engine_data_store_specs(
-            project_id=project_id,
-            location=location,
-            engine_id=engine_id,
-            user_bearer_token=user_token,
-        )
+        data_store_specs = _SPECS_CACHE.get(auth_mode)
+        if not data_store_specs:
+          data_store_specs = get_engine_data_store_specs(
+              project_id=project_id,
+              location=location,
+              engine_id=engine_id,
+              user_bearer_token=user_token,
+          )
+          if data_store_specs:
+            _SPECS_CACHE[auth_mode] = data_store_specs
         chat_res = call_stream_assist(
             project_id=project_id,
             location=location,
@@ -296,7 +312,7 @@ def main() -> None:
   parser.add_argument("--port", type=int, default=8502, help="Local port (default: 8502)")
   args = parser.parse_args()
 
-  server = HTTPServer(("127.0.0.1", args.port), TestUIHandler)
+  server = ThreadingHTTPServer(("127.0.0.1", args.port), TestUIHandler)
   print("======================================================================")
   print(" Gemini Enterprise — Federated Connector 3LO & Chat Test UI")
   print(f" Open in your browser: http://localhost:{args.port}")

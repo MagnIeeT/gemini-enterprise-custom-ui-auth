@@ -188,15 +188,17 @@ python 01_user_auth_streamassist/pattern_c_workload_identity.py \
 
 When your Custom UI queries a Federated or Action Connector (OneDrive, SharePoint, Jira, Confluence, ServiceNow, Google Drive), Gemini Enterprise uses its managed **Keystore** to store and mint per-user 3-legged OAuth (3LO) tokens:
 
-1. **Discover Engine Connectors (`GET .../widgetConfigs/default_search_widget_config`):** Returns `collectionComponents[]` attached to the engine, each connector's `dataStoreComponents[]`, and the 3LO `authorizationUri`.
-2. **Check Live Keystore Token Status (`POST .../collections/{collection_id}/dataConnector:acquireAccessToken`):** Verifies whether Gemini Enterprise's Keystore can mint a live access token for the signed-in user (`USER_AUTHORIZED`) or requires 3LO consent (`NOT_AUTHORIZED`).
-3. **Open 3LO Consent Popup (`https://vertexaisearch.cloud.google.com/oauth-redirect`):** The user signs in to the 3P Auth Server and grants consent; Google's redirect relay receives `?code=...&state=...`.
+1. **Discover Engine Connectors (`GET .../widgetConfigs/default_search_widget_config?getWidgetConfigRequestOption.customDomain=...`):** Returns `collectionComponents[]` attached to the engine, each connector's `dataStoreComponents[]`, and the 3LO `authorizationUri` with a Google-signed encrypted `state` parameter for your Custom UI origin.
+2. **Check Live Keystore Token Status (`POST .../collections/{collection_id}/dataConnector:acquireAccessToken`):** Authoritatively verifies whether Gemini Enterprise's Keystore holds a valid refresh/access token for the signed-in user (`HTTP 200 OK`) or requires 3LO consent (`HTTP 404 NOT_FOUND`).
+3. **Open 3LO Consent Popup (`https://vertexaisearch.cloud.google.com/oauth-redirect`):** The user signs in to the 3P Auth Server and grants consent; Google's `/oauth-redirect` handler verifies the encrypted `state`, executes `window.opener.postMessage({code, state, fullRedirectUrl}, customOrigin)`, and automatically closes the popup.
 4. **Exchange Code & Store Refresh Token in GE Keystore (`POST .../collections/{collection_id}/dataConnector:acquireAndStoreRefreshToken`):** Your backend passes `fullRedirectUri` to Gemini Enterprise, which exchanges the code and saves the encrypted `refresh_token` and `access_token` in its managed **Keystore**.
 5. **Query `:streamAssist` (`POST .../assistants/default_assistant:streamAssist`):** Passing `toolsSpec.vertexAiSearchSpec.dataStoreSpecs` grounds the response on live documents from the authorized connector.
 
-> **Note on Custom UI Cross-Origin `postMessage` (`/oauth-redirect`) & `dataStoreSpecs`:**
-> - By default, `https://vertexaisearch.cloud.google.com/oauth-redirect` restricts `window.opener.postMessage` to the `https://vertexaisearch.cloud.google.com` origin. Contact your Google Cloud account team to enable cross-origin `postMessage` support for your Custom UI origin (or paste the `/oauth-redirect?code=...&state=...` URL into the Test UI fallback box during local testing).
-> - Passing `toolsSpec.vertexAiSearchSpec.dataStoreSpecs` in `:streamAssist` ensures Federated Connectors are queried explicitly alongside enterprise search data stores.
+> **Note on Enabling Automatic Popup `postMessage` (`/oauth-redirect`):**
+> - To have `GetWidgetConfig` mint a Google-signed `&state=...` for your Custom UI origin (so `/oauth-redirect` automatically posts `{code, state, fullRedirectUrl}` back to `window.opener` and closes the popup):
+>   1. Ask your Google Cloud account team to enable the **`GE_CUSTOM_UI_USER`** API visibility label on your GCP project.
+>   2. Add your Custom UI's **bare hostname** (e.g., `localhost` or `customer-ui.example.com`) to `accessSettings.allowlistedDomains` on the engine's widget config (`test_ui.py` / `connector_oauth_flow.py` adds this automatically), and pass the full origin (`http://localhost:8502` or `https://customer-ui.example.com`) in `?getWidgetConfigRequestOption.customDomain=...` when calling `GetWidgetConfig`.
+> - Always rely on `POST dataConnector:acquireAccessToken` (`keystore_authorized`) rather than `GetWidgetConfig`'s cached `connectorAuthState.authState` (`EngineUserData`) as the source of truth for whether a user's 3LO token is stored in the Keystore.
 
 ### Option A: Run the Interactive Local Test UI (`http://localhost:8502`)
 ```bash
@@ -229,11 +231,11 @@ python 02_federated_connector_oauth/connector_oauth_flow.py \
 
 **Equivalent `curl` commands:**
 ```bash
-# 1. Discover connectors and dataStoreSpecs attached to the engine
+# 1. Discover connectors with Google-signed state for your Custom UI origin
 curl -s -X GET \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
-  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/widgetConfigs/default_search_widget_config"
+  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/widgetConfigs/default_search_widget_config?getWidgetConfigRequestOption.customDomain=http://localhost:8502"
 
 # 2. Check if a live access token exists in the GE Keystore for a connector
 curl -s -X POST \

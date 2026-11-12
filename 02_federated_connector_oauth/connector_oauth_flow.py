@@ -137,6 +137,40 @@ def get_engine_widget_config(
     if resp.status_code == 200:
       return {"status_code": resp.status_code, "url": resp.url, "data": resp.json()}
 
+    # If custom_domain's hostname is not yet in accessSettings.allowlistedDomains, add it and retry
+    from urllib.parse import urlparse  # pylint: disable=import-outside-toplevel
+    host_only = urlparse(custom_domain).hostname or custom_domain
+    base_resp = requests.get(base_url, headers=headers, timeout=30)
+    if base_resp.status_code == 200 and isinstance(base_resp.json(), dict):
+      cfg = base_resp.json()
+      access_settings = dict(cfg.get("accessSettings", {}))
+      allowlisted = list(access_settings.get("allowlistedDomains", []))
+      if host_only not in allowlisted:
+        allowlisted.append(host_only)
+        access_settings["allowlistedDomains"] = allowlisted
+        requests.patch(
+            base_url,
+            headers=headers,
+            params={"updateMask": "accessSettings"},
+            json={
+                "name": cfg.get("name", ""),
+                "accessSettings": access_settings,
+            },
+            timeout=30,
+        )
+        retry_resp = requests.get(
+            base_url,
+            headers=headers,
+            params={"getWidgetConfigRequestOption.customDomain": custom_domain},
+            timeout=30,
+        )
+        if retry_resp.status_code == 200:
+          return {
+              "status_code": retry_resp.status_code,
+              "url": retry_resp.url,
+              "data": retry_resp.json(),
+          }
+
   resp = requests.get(base_url, headers=headers, timeout=30)
   try:
     data = resp.json()

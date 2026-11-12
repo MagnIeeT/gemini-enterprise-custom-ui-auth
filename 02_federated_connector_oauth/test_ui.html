@@ -266,16 +266,32 @@
     }
 
     // Listen for automatic postMessage from https://vertexaisearch.cloud.google.com/oauth-redirect
-    // (Slide 10, Step 7: window.opener.postMessage({code, state, fullRedirectUrl}, origin))
+    // (Slide 10, Step 7: window.opener.postMessage(..., origin))
     window.addEventListener("message", async (event) => {
       if (!event.origin.includes("vertexaisearch.cloud.google.com")) return;
       logMsg(`Received postMessage from ${event.origin}`, event.data);
-      const data = event.data || {};
-      const fullRedirectUrl = data.fullRedirectUrl || (
-        data.code
-          ? `https://vertexaisearch.cloud.google.com/oauth-redirect?code=${encodeURIComponent(data.code)}${data.state ? "&state=" + encodeURIComponent(data.state) : ""}`
-          : ""
-      );
+      const raw = event.data;
+      let fullRedirectUrl = "";
+      if (typeof raw === "string") {
+        if (raw.startsWith("http")) {
+          fullRedirectUrl = raw;
+        } else if (raw.includes("code=")) {
+          fullRedirectUrl = `https://vertexaisearch.cloud.google.com/oauth-redirect${raw.startsWith("?") ? "" : "?"}${raw}`;
+        } else {
+          try {
+            const parsed = JSON.parse(raw);
+            fullRedirectUrl = parsed.fullRedirectUrl || parsed.fullRedirectUri || parsed.redirectUrl || parsed.url || "";
+            if (!fullRedirectUrl && parsed.code) {
+              fullRedirectUrl = `https://vertexaisearch.cloud.google.com/oauth-redirect?code=${encodeURIComponent(parsed.code)}${parsed.state ? "&state=" + encodeURIComponent(parsed.state) : ""}`;
+            }
+          } catch (_) {}
+        }
+      } else if (raw && typeof raw === "object") {
+        fullRedirectUrl = raw.fullRedirectUrl || raw.fullRedirectUri || raw.redirectUrl || raw.url || raw.href || "";
+        if (!fullRedirectUrl && raw.code) {
+          fullRedirectUrl = `https://vertexaisearch.cloud.google.com/oauth-redirect?code=${encodeURIComponent(raw.code)}${raw.state ? "&state=" + encodeURIComponent(raw.state) : ""}`;
+        }
+      }
       if (fullRedirectUrl && activeCollectionForPopup) {
         const input = document.getElementById(`redirect-${activeCollectionForPopup}`);
         if (input) input.value = fullRedirectUrl;
@@ -330,36 +346,18 @@
                 <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
               </div>
 
-              <div class="auth-box">
-                <div class="controls">
-                  ${c.auth_uri ? `
+              ${c.auth_uri ? `
+                <div class="auth-box">
+                  <div class="controls">
                     <button onclick="openAuthPopup('${escapeAttr(cid)}', '${escapeAttr(c.auth_uri)}')">
                       2. Authenticate (${escapeHtml(c.display_name)})
                     </button>
-                  ` : ""}
-                  <button class="secondary" onclick="toggleManualBox('${escapeAttr(cid)}')">
-                    Paste Redirect URL Manually
-                  </button>
-                </div>
-
-                <div id="manual-box-${escapeAttr(cid)}" style="display:${isAuth ? "none" : "block"};">
-                  <div class="hint">
-                    After signing in at Microsoft in the popup, if the popup stays on
-                    <code>https://vertexaisearch.cloud.google.com/oauth-redirect?code=...</code>,
-                    copy that full URL from the popup address bar and paste it below:
                   </div>
-                  <div class="redirect-row">
-                    <input
-                      type="text"
-                      id="redirect-${escapeAttr(cid)}"
-                      placeholder="https://vertexaisearch.cloud.google.com/oauth-redirect?code=..."
-                    />
-                    <button onclick="completeConnectorAuth('${escapeAttr(cid)}')">
-                      Complete Auth (Store in Keystore)
-                    </button>
+                  <div class="hint" style="margin-top:8px;">
+                    Approving access in the popup automatically posts the OAuth callback via <code>/oauth-redirect</code> and stores the refresh token in the GE Keystore.
                   </div>
                 </div>
-              </div>
+              ` : ""}
             </div>
           `;
         }).join("");
@@ -371,15 +369,8 @@
       }
     }
 
-    function toggleManualBox(cid) {
-      const box = document.getElementById(`manual-box-${cid}`);
-      if (box) box.style.display = box.style.display === "none" ? "block" : "none";
-    }
-
     function openAuthPopup(cid, authUri) {
       activeCollectionForPopup = cid;
-      const box = document.getElementById(`manual-box-${cid}`);
-      if (box) box.style.display = "block";
       logMsg(`Opening 3LO OAuth Popup for '${cid}'`, authUri);
       window.open(authUri, "ge_3lo_popup", "width=620,height=740,noopener=no");
     }

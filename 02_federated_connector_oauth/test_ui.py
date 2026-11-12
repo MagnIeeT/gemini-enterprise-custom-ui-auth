@@ -153,7 +153,7 @@ class TestUIHandler(BaseHTTPRequestHandler):
           auth_uri = auth_state_obj.get("authorizationUri", "")
           widget_auth_state = auth_state_obj.get(
               "authState",
-              "AUTH_STATE_UNSPECIFIED (Needs 3LO)" if auth_uri else "NO_AUTH",
+              "AUTH_STATE_UNSPECIFIED" if auth_uri else "NO_AUTH",
           )
           action_connector = comp.get("actionConnector", "")
           target_collection_id = (

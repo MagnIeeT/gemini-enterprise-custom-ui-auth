@@ -279,9 +279,6 @@ To trigger 3-Legged OAuth **on demand per tool** and let Gemini Enterprise and G
    - When the user approves consent in the popup (**Steps 8–10**), `/oauthcallback` exchanges the code and redirects the popup to `<your-custom-ui-url>/validateUserId?user_id_validation_state=...`.
    - Your Custom Backend calls `POST /v1alpha/{session}:validateUserAuthorization` (**Steps 11–14**) so Gemini Enterprise finalizes and saves the token in the Token Vault (`FinalizeCredentials`), and then automatically retries `:streamAssist` on the same `session` (**Steps 15–19**) to return the grounded answer.
 
-> **Note on Project Allowlisting (`adk_tool_auth_enabled`):**
-> On-demand ADK tool-level 3LO via `:streamAssist` (`requiredAuthorizations` and `{session}:validateUserAuthorization`) currently requires enabling the `adk_tool_auth_enabled` feature flag on your Google Cloud project. Contact your Google Cloud account team to allowlist your project ID/number before testing Part 3.
-
 ---
 
 ### Step 1: Deploy `EnterpriseRouterAgent` to Vertex AI Agent Runtime

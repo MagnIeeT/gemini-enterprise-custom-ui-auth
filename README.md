@@ -96,11 +96,6 @@ python 01_user_auth_streamassist/pattern_a_google_identity.py \
 # Option 2: Quick CLI test using gcloud user credentials
 python 01_user_auth_streamassist/pattern_a_google_identity.py \
   --query "What are our Grid Operations SLA policies?"
-
-# Option 3: Route the query directly to a registered ADK agent (--agent-id)
-python 01_user_auth_streamassist/pattern_a_google_identity.py \
-  --agent-id "$GE_GOOGLE_ID_AGENT_ID" \
-  --query "What are our Grid Operations SLA policies?"
 ```
 
 **Equivalent `curl` command:**
@@ -109,7 +104,7 @@ curl -s -X POST \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "Content-Type: application/json" \
   -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
-  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/assistants/default_assistant:streamAssist" \
+  "https://discoveryengine.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/assistants/default_assistant:streamAssist" \
   -d "{
     \"query\": {\"text\": \"${QUERY}\"}
   }"
@@ -163,7 +158,7 @@ curl -s -X POST \
   -H "Authorization: Bearer ${STS_TOKEN}" \
   -H "Content-Type: application/json" \
   -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
-  "https://${GE_WIF_LOCATION}-discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_WIF_LOCATION}/collections/default_collection/engines/${GE_WIF_ENGINE_ID}/assistants/default_assistant:streamAssist" \
+  "https://${GE_WIF_LOCATION}-discoveryengine.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GE_WIF_LOCATION}/collections/default_collection/engines/${GE_WIF_ENGINE_ID}/assistants/default_assistant:streamAssist" \
   -d "{
     \"query\": {\"text\": \"${QUERY}\"}
   }"
@@ -188,11 +183,11 @@ python 01_user_auth_streamassist/pattern_c_workload_identity.py \
 
 When your Custom UI queries a Federated or Action Connector (OneDrive, SharePoint, Jira, Confluence, ServiceNow, Google Drive), Gemini Enterprise uses its managed **Keystore** to store and mint per-user 3-legged OAuth (3LO) tokens:
 
-1. **Discover Engine Connectors (`GET .../widgetConfigs/default_search_widget_config?getWidgetConfigRequestOption.customDomain=...`):** Returns `collectionComponents[]` attached to the engine, each connector's `dataStoreComponents[]`, and the 3LO `authorizationUri` with a Google-signed encrypted `state` parameter for your Custom UI origin.
-2. **Check Live Keystore Token Status (`POST .../collections/{collection_id}/dataConnector:acquireAccessToken`):** Authoritatively verifies whether Gemini Enterprise's Keystore holds a valid refresh/access token for the signed-in user (`HTTP 200 OK`) or requires 3LO consent (`HTTP 404 NOT_FOUND`).
+1. **Discover Engine Connectors (`GET /v1/.../widgetConfigs/default_search_widget_config?getWidgetConfigRequestOption.customDomain=...`):** Returns `collectionComponents[]` attached to the engine, each connector's `dataStoreComponents[]`, and the 3LO `authorizationUri` with a Google-signed encrypted `state` parameter for your Custom UI origin.
+2. **Check Live Keystore Token Status (`POST /v1alpha/.../collections/{collection_id}/dataConnector:acquireAccessToken`):** Authoritatively verifies whether Gemini Enterprise's Keystore holds a valid refresh/access token for the signed-in user (`HTTP 200 OK`) or requires 3LO consent (`HTTP 404 NOT_FOUND`).
 3. **Open 3LO Consent Popup (`https://vertexaisearch.cloud.google.com/oauth-redirect`):** The user signs in to the 3P Auth Server and grants consent; Google's `/oauth-redirect` handler verifies the encrypted `state`, executes `window.opener.postMessage({code, state, fullRedirectUrl}, customOrigin)`, and automatically closes the popup.
-4. **Exchange Code & Store Refresh Token in GE Keystore (`POST .../collections/{collection_id}/dataConnector:acquireAndStoreRefreshToken`):** Your backend passes `fullRedirectUri` to Gemini Enterprise, which exchanges the code and saves the encrypted `refresh_token` and `access_token` in its managed **Keystore**.
-5. **Query `:streamAssist` (`POST .../assistants/default_assistant:streamAssist`):** Passing `toolsSpec.vertexAiSearchSpec.dataStoreSpecs` grounds the response on live documents from the authorized connector.
+4. **Exchange Code & Store Refresh Token in GE Keystore (`POST /v1alpha/.../collections/{collection_id}/dataConnector:acquireAndStoreRefreshToken`):** Your backend passes `fullRedirectUri` to Gemini Enterprise, which exchanges the code and saves the encrypted `refresh_token` and `access_token` in its managed **Keystore**.
+5. **Query `:streamAssist` (`POST /v1/.../assistants/default_assistant:streamAssist`):** Passing `toolsSpec.vertexAiSearchSpec.dataStoreSpecs` grounds the response on live documents from the authorized connector.
 
 > **Note on Enabling Automatic Popup `postMessage` (`/oauth-redirect`):**
 > - To have `GetWidgetConfig` mint a Google-signed `&state=...` for your Custom UI origin (so `/oauth-redirect` automatically posts `{code, state, fullRedirectUrl}` back to `window.opener` and closes the popup):
@@ -231,11 +226,11 @@ python 02_federated_connector_oauth/connector_oauth_flow.py \
 
 **Equivalent `curl` commands:**
 ```bash
-# 1. Discover connectors with Google-signed state for your Custom UI origin
+# 1. Discover connectors with Google-signed state for your Custom UI origin (GA v1)
 curl -s -X GET \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
-  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/widgetConfigs/default_search_widget_config?getWidgetConfigRequestOption.customDomain=http://localhost:8502"
+  "https://discoveryengine.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/widgetConfigs/default_search_widget_config?getWidgetConfigRequestOption.customDomain=http://localhost:8502"
 
 # 2. Check if a live access token exists in the GE Keystore for a connector
 curl -s -X POST \

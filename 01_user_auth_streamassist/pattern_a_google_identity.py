@@ -172,25 +172,21 @@ def call_stream_assist(
     engine_id: str,
     user_access_token: str,
     query_text: str,
-    agent_id: str = "",
     data_store_specs: Optional[List[Dict[str, str]]] = None,
 ) -> Dict[str, Any]:
-  """Calls Gemini Enterprise :streamAssist with a Google Identity user bearer token."""
+  """Calls Gemini Enterprise GA v1 :streamAssist with a Google Identity user bearer token."""
   host = (
       "discoveryengine.googleapis.com"
       if location == "global"
       else f"{location}-discoveryengine.googleapis.com"
   )
   endpoint = (
-      f"https://{host}/v1alpha/projects/{project_id}/locations/{location}/"
+      f"https://{host}/v1/projects/{project_id}/locations/{location}/"
       f"collections/default_collection/engines/{engine_id}/"
       f"assistants/default_assistant:streamAssist"
   )
 
   payload: Dict[str, Any] = {"query": {"text": query_text}}
-  if agent_id.strip():
-    payload["answerGenerationMode"] = "AGENT"
-    payload["agentsSpec"] = {"agentSpecs": [{"agentId": agent_id.strip()}]}
   if data_store_specs:
     payload["toolsSpec"] = {
         "vertexAiSearchSpec": {"dataStoreSpecs": data_store_specs}
@@ -218,12 +214,11 @@ def call_stream_assist(
 
 def main() -> None:
   parser = argparse.ArgumentParser(
-      description="Pattern 1A: Call Gemini Enterprise :streamAssist using Google Identity."
+      description="Pattern 1A: Call Gemini Enterprise v1 :streamAssist using Google Identity."
   )
   parser.add_argument("--project-id", default=os.environ.get("GCP_PROJECT_ID", ""))
   parser.add_argument("--engine-id", default=os.environ.get("GE_GOOGLE_ID_ENGINE_ID", ""))
   parser.add_argument("--location", default=os.environ.get("GE_GOOGLE_ID_LOCATION", "global"))
-  parser.add_argument("--agent-id", default="")
   parser.add_argument("--query", default=os.environ.get("QUERY", "What are our SLA policies?"))
   parser.add_argument("--access-token", default="", help="Optional Google OAuth user access token")
   parser.add_argument(
@@ -238,10 +233,9 @@ def main() -> None:
     sys.exit("Error: Set GCP_PROJECT_ID and GE_GOOGLE_ID_ENGINE_ID in .env or via CLI flags.")
 
   token = get_google_user_token(args.access_token, browser_login=args.browser_login)
-  print("=== Pattern 1A: Pure Google Identity -> :streamAssist ===")
+  print("=== Pattern 1A: Pure Google Identity -> v1 :streamAssist ===")
   print(f"Project ID : {args.project_id}")
   print(f"Engine ID  : {args.engine_id} ({args.location})")
-  print(f"Target     : {'Agent ID ' + args.agent_id if args.agent_id else 'Default Assistant'}")
   print(f"Query      : {args.query}\n")
 
   result = call_stream_assist(
@@ -250,7 +244,6 @@ def main() -> None:
       engine_id=args.engine_id,
       user_access_token=token,
       query_text=args.query,
-      agent_id=args.agent_id,
   )
 
   print(f"HTTP Status: {result['status_code']}")

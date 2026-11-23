@@ -118,7 +118,7 @@ def get_engine_widget_config(
   `{code, state, fullRedirectUrl}` back to `window.opener` and closes the popup.
   """
   base_url = (
-      f"{discovery_host(location)}/v1alpha/projects/{project_id}/locations/{location}"
+      f"{discovery_host(location)}/v1/projects/{project_id}/locations/{location}"
       f"/collections/default_collection/engines/{engine_id}"
       f"/widgetConfigs/default_search_widget_config"
   )

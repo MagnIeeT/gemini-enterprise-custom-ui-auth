@@ -222,24 +222,20 @@ def call_stream_assist(
     engine_id: str,
     federated_access_token: str,
     query_text: str,
-    agent_id: str = "",
 ) -> Dict[str, Any]:
-  """Calls Gemini Enterprise :streamAssist with a Workforce Identity STS bearer token."""
+  """Calls Gemini Enterprise GA v1 :streamAssist with a Workforce Identity STS bearer token."""
   host = (
       "discoveryengine.googleapis.com"
       if location == "global"
       else f"{location}-discoveryengine.googleapis.com"
   )
   endpoint = (
-      f"https://{host}/v1alpha/projects/{project_id}/locations/{location}/"
+      f"https://{host}/v1/projects/{project_id}/locations/{location}/"
       f"collections/default_collection/engines/{engine_id}/"
       f"assistants/default_assistant:streamAssist"
   )
 
   payload: Dict[str, Any] = {"query": {"text": query_text}}
-  if agent_id.strip():
-    payload["answerGenerationMode"] = "AGENT"
-    payload["agentsSpec"] = {"agentSpecs": [{"agentId": agent_id.strip()}]}
 
   headers = {
       "Authorization": f"Bearer {federated_access_token}",
@@ -262,14 +258,13 @@ def call_stream_assist(
 
 def main() -> None:
   parser = argparse.ArgumentParser(
-      description="Pattern 1B: Exchange external IdP token at Google STS and call :streamAssist."
+      description="Pattern 1B: Exchange external IdP token at Google STS and call v1 :streamAssist."
   )
   parser.add_argument("--project-id", default=os.environ.get("GCP_PROJECT_ID", ""))
   parser.add_argument("--pool-id", default=os.environ.get("WIF_POOL_ID", ""))
   parser.add_argument("--provider-id", default=os.environ.get("WIF_PROVIDER_ID", ""))
   parser.add_argument("--engine-id", default=os.environ.get("GE_WIF_ENGINE_ID", ""))
   parser.add_argument("--location", default=os.environ.get("GE_WIF_LOCATION", "us"))
-  parser.add_argument("--agent-id", default="")
   parser.add_argument("--idp-token", default="", help="External IdP OIDC ID token (JWT)")
   parser.add_argument(
       "--browser-login",
@@ -300,10 +295,9 @@ def main() -> None:
         "or pass an external IdP OIDC token via --idp-token '<JWT>'."
     )
 
-  print("=== Pattern 1B: Workforce Identity Federation (STS) -> :streamAssist ===")
+  print("=== Pattern 1B: Workforce Identity Federation (STS) -> v1 :streamAssist ===")
   print(f"Workforce Pool : {args.pool_id} (Provider: {args.provider_id})")
   print(f"Engine ID      : {args.engine_id} ({args.location})")
-  print(f"Target         : {'Agent ID ' + args.agent_id if args.agent_id else 'Default Assistant'}")
   print(f"Query          : {args.query}\n")
 
   print("1. Exchanging external IdP token at https://sts.googleapis.com/v1/token ...")
@@ -315,14 +309,13 @@ def main() -> None:
   federated_token = sts_data["access_token"]
   print(f"   ✓ Received federated STS access token (expires_in={sts_data.get('expires_in')}s)")
 
-  print("2. Calling Gemini Enterprise :streamAssist ...")
+  print("2. Calling Gemini Enterprise v1 :streamAssist ...")
   result = call_stream_assist(
       project_id=args.project_id,
       location=args.location,
       engine_id=args.engine_id,
       federated_access_token=federated_token,
       query_text=args.query,
-      agent_id=args.agent_id,
   )
 
   print(f"   HTTP Status: {result['status_code']}")

@@ -130,14 +130,14 @@
       <div>
         <h1>Gemini Enterprise — Part 3: Custom UI + ADK Agent On-Demand 3LO</h1>
         <p class="subtitle">
-          <code>:streamAssist</code> &rarr; <code>requiredAuthorizations</code> &rarr;
-          3LO Popup &rarr; <code>{session}:validateUserAuthorization</code> &rarr;
+          <code>/v1/.../a2a/v1/message:send</code> &rarr; <code>requiredAuthorizations</code> &rarr;
+          3LO Popup &rarr; <code>{contextId}:validateUserAuthorization</code> &rarr;
           Auto Re-Run Query
         </p>
       </div>
       <div class="controls">
         <label for="authMode" style="font-size:0.85rem;color:var(--muted);">Auth Mode:</label>
-        <select id="authMode">
+        <select id="authMode" onchange="resetSession()">
           <option value="google">Google Identity (Pattern 1A)</option>
           <option value="wif">Workforce Identity / Entra STS (Pattern 1B)</option>
         </select>
@@ -237,14 +237,26 @@
       sendChat();
     }
 
-    // Listen for automatic postMessage from /validateUserId popup
-    window.addEventListener("message", async (event) => {
-      const data = event.data || {};
-      if (!data.fullRedirectUrl || !data.fullRedirectUrl.includes("user_id_validation_state=")) return;
-      logMsg(`Received postMessage from ${event.origin}`, data);
+    let handledRedirectUrls = new Set();
+
+    async function handlePopupCallback(data, sourceLabel) {
+      if (!data || !data.fullRedirectUrl || !data.fullRedirectUrl.includes("user_id_validation_state=")) return;
+      if (handledRedirectUrls.has(data.fullRedirectUrl)) return;
+      handledRedirectUrls.add(data.fullRedirectUrl);
+      logMsg(`Received 3LO callback via ${sourceLabel}`, data);
       if (activeConnectorForPopup) {
         await completeValidation(activeConnectorForPopup, data.fullRedirectUrl);
       }
+    }
+
+    // Listen via BroadcastChannel (immune to Google COOP severing window.opener) + postMessage fallback
+    try {
+      const bc = new BroadcastChannel("ge_adk_3lo");
+      bc.onmessage = (event) => handlePopupCallback(event.data, "BroadcastChannel");
+    } catch (e) {}
+
+    window.addEventListener("message", (event) => {
+      handlePopupCallback(event.data, `postMessage (${event.origin})`);
     });
 
     async function sendChat() {
@@ -259,7 +271,7 @@
       btn.disabled = true;
       btn.textContent = "Querying ADK Agent...";
       resultEl.style.display = "block";
-      resultEl.textContent = "Waiting for Gemini Enterprise :streamAssist -> ADK Agent...";
+      resultEl.textContent = "Waiting for Gemini Enterprise GA A2A Proxy (/a2a/v1/message:send) -> ADK Agent...";
       authContainer.innerHTML = "";
 
       try {
@@ -278,7 +290,7 @@
         if (data.session) {
           currentSession = data.session;
           document.getElementById("sessionMeta").textContent =
-            `Agent ID: ${data.agent_id || "-"} | Session: ${currentSession}`;
+            `Agent ID: ${data.agent_id || "-"} | Session (contextId): ${currentSession}`;
         }
 
         if (res.ok && data.status_code === 200) {

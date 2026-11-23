@@ -10,7 +10,7 @@ Usage:
 """
 
 import argparse
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
@@ -32,7 +32,7 @@ from pattern_b_workforce_sts import (  # pylint: disable=wrong-import-position
 )
 from query_registered_agent import (  # pylint: disable=wrong-import-position
     parse_validation_redirect_uri,
-    query_adk_agent_stream_assist,
+    query_adk_agent_a2a,
     revoke_stored_authorizations,
     validate_user_authorization,
 )
@@ -49,7 +49,10 @@ def get_cached_user_token(auth_mode: str) -> str:
     return _TOKEN_CACHE[auth_mode]
 
   if auth_mode == "google":
-    token = get_google_user_token(browser_login=False)
+    try:
+      token = get_google_user_token(browser_login=False)
+    except RuntimeError:
+      token = get_google_user_token(browser_login=True)
   else:
     pool_id = os.environ.get("WIF_POOL_ID", "")
     provider_id = os.environ.get("WIF_PROVIDER_ID", "")
@@ -106,15 +109,20 @@ class Part3TestUIHandler(BaseHTTPRequestHandler):
       return
 
     if parsed.path == "/validateUserId":
-      # Optional direct callback handler if continue_uri points to http://localhost:8502/validateUserId
-      callback_html = f"""<!DOCTYPE html>
-<html><body>
-<p>Completing authorization...</p>
+      callback_html = """<!DOCTYPE html>
+<html><body style="font-family:sans-serif;padding:24px;">
+<p>Completing authorization... This window will close automatically.</p>
 <script>
-  if (window.opener) {{
-    window.opener.postMessage({{ fullRedirectUrl: window.location.href }}, "*");
-    window.close();
-  }}
+  const payload = { fullRedirectUrl: window.location.href };
+  try {
+    const bc = new BroadcastChannel("ge_adk_3lo");
+    bc.postMessage(payload);
+    bc.close();
+  } catch (e) {}
+  if (window.opener) {
+    try { window.opener.postMessage(payload, "*"); } catch (e) {}
+  }
+  setTimeout(() => window.close(), 150);
 </script>
 </body></html>""".encode("utf-8")
       self.send_response(200)
@@ -142,7 +150,7 @@ class Part3TestUIHandler(BaseHTTPRequestHandler):
       try:
         project_id, engine_id, location, agent_id = resolve_engine_location_agent(auth_mode)
         user_token = get_cached_user_token(auth_mode)
-        res = query_adk_agent_stream_assist(
+        res = query_adk_agent_a2a(
             project_id=project_id,
             location=location,
             engine_id=engine_id,
@@ -210,7 +218,7 @@ class Part3TestUIHandler(BaseHTTPRequestHandler):
       try:
         project_id = os.environ.get("GCP_PROJECT_ID", "")
         provider_loc = os.environ.get("AUTH_PROVIDER_LOCATION", "us-central1")
-        user_token = get_google_user_token(browser_login=False)
+        user_token = get_cached_user_token("google")
         providers = body.get("providers") or [
             os.environ.get("GOOGLE_AUTH_PROVIDER_ID", "google-workspace-provider"),
             os.environ.get("SHAREPOINT_AUTH_PROVIDER_ID", "sharepoint-provider"),
@@ -230,13 +238,22 @@ class Part3TestUIHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+  import socket  # pylint: disable=import-outside-toplevel
+
+  class DualStackServer(ThreadingHTTPServer):
+    address_family = socket.AF_INET6
+
+    def server_bind(self) -> None:
+      self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+      super().server_bind()
+
   parser = argparse.ArgumentParser(description="Run local Test UI for Part 3 ADK Agent 3LO & Chat.")
   parser.add_argument("--port", type=int, default=8503, help="Local port (default: 8503)")
   args = parser.parse_args()
 
-  server = HTTPServer(("127.0.0.1", args.port), Part3TestUIHandler)
+  server = DualStackServer(("::", args.port), Part3TestUIHandler)
   print("======================================================================")
-  print(" Gemini Enterprise — Part 3: ADK Agent 3LO & :streamAssist Test UI")
+  print(" Gemini Enterprise — Part 3: ADK Agent 3LO & GA A2A Proxy Test UI")
   print(f" Open in your browser: http://localhost:{args.port}")
   print("======================================================================")
   try:

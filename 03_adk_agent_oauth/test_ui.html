@@ -128,14 +128,19 @@
   <div class="container">
     <header>
       <div>
-        <h1>Gemini Enterprise — Part 3: Custom UI + ADK Agent On-Demand 3LO</h1>
-        <p class="subtitle">
-          <code>/v1/.../a2a/v1/message:send</code> &rarr; <code>requiredAuthorizations</code> &rarr;
-          3LO Popup &rarr; <code>{contextId}:validateUserAuthorization</code> &rarr;
+        <h1>Gemini Enterprise - Part 3: Custom UI + ADK Agent On-Demand 3LO</h1>
+        <p class="subtitle" id="transportSubtitle">
+          <code>v1alpha :streamAssist</code> (allowlisted) &rarr; <code>requiredAuthorizations</code> &rarr;
+          3LO Popup &rarr; <code>{session}:validateUserAuthorization</code> &rarr;
           Auto Re-Run Query
         </p>
       </div>
       <div class="controls">
+        <label for="transportMode" style="font-size:0.85rem;color:var(--muted);">Transport:</label>
+        <select id="transportMode" onchange="onTransportChange()">
+          <option value="streamassist">v1alpha :streamAssist (Interactive 3LO, allowlisted)</option>
+          <option value="a2a">GA v1 A2A Proxy (Zero allowlist, non-3LO / pre-auth)</option>
+        </select>
         <label for="authMode" style="font-size:0.85rem;color:var(--muted);">Auth Mode:</label>
         <select id="authMode" onchange="resetSession()">
           <option value="google">Google Identity (Pattern 1A)</option>
@@ -206,9 +211,22 @@
       el.textContent = `[${ts}] ${title}\n${body}\n\n` + (el.textContent === "Ready." ? "" : el.textContent);
     }
 
+    function onTransportChange() {
+      const transport = document.getElementById("transportMode").value;
+      const sub = document.getElementById("transportSubtitle");
+      if (transport === "a2a") {
+        sub.innerHTML =
+          '<code>/v1/.../a2a/v1/message:send</code> (zero allowlist) &rarr; Non-3LO tools or users pre-authorized in the built-in Gemini Enterprise web app';
+      } else {
+        sub.innerHTML =
+          '<code>v1alpha :streamAssist</code> (allowlisted) &rarr; <code>requiredAuthorizations</code> &rarr; 3LO Popup &rarr; <code>{session}:validateUserAuthorization</code> &rarr; Auto Re-Run Query';
+      }
+      resetSession();
+    }
+
     function resetSession() {
       currentSession = "";
-      document.getElementById("sessionMeta").textContent = "Session: (reset — new session will be created on next query)";
+      document.getElementById("sessionMeta").textContent = "Session: (reset; new session will be created on next query)";
       document.getElementById("authContainer").innerHTML = "";
       document.getElementById("chatResult").style.display = "none";
     }
@@ -262,6 +280,7 @@
     async function sendChat() {
       const btn = document.getElementById("btnChat");
       const authMode = document.getElementById("authMode").value;
+      const transport = document.getElementById("transportMode").value;
       const query = document.getElementById("chatQuery").value.trim();
       const resultEl = document.getElementById("chatResult");
       const authContainer = document.getElementById("authContainer");
@@ -271,7 +290,10 @@
       btn.disabled = true;
       btn.textContent = "Querying ADK Agent...";
       resultEl.style.display = "block";
-      resultEl.textContent = "Waiting for Gemini Enterprise GA A2A Proxy (/a2a/v1/message:send) -> ADK Agent...";
+      resultEl.textContent =
+        transport === "a2a"
+          ? "Waiting for Gemini Enterprise GA A2A Proxy (/a2a/v1/message:send) -> ADK Agent..."
+          : "Waiting for Gemini Enterprise v1alpha :streamAssist -> ADK Agent...";
       authContainer.innerHTML = "";
 
       try {
@@ -280,6 +302,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             auth_mode: authMode,
+            transport,
             query,
             session: currentSession,
           }),
@@ -290,7 +313,7 @@
         if (data.session) {
           currentSession = data.session;
           document.getElementById("sessionMeta").textContent =
-            `Agent ID: ${data.agent_id || "-"} | Session (contextId): ${currentSession}`;
+            `Transport: ${data.transport || transport} | Agent ID: ${data.agent_id || "-"} | Session: ${currentSession}`;
         }
 
         if (res.ok && data.status_code === 200) {
@@ -300,7 +323,7 @@
               "🔒 The ADK sub-agent tool emitted `adk_request_credential` (`requiredAuthorizations`). Authorize below to continue:";
             renderAuthCards(data.required_authorizations);
           } else {
-            resultEl.textContent = data.reply_text || "(No text returned — see raw response in log below)";
+            resultEl.textContent = data.reply_text || "(No text returned; see raw response in log below)";
           }
         } else {
           resultEl.textContent = `Error (HTTP ${data.status_code || res.status}):\n` + JSON.stringify(data.raw_response || data, null, 2);

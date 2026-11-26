@@ -1,17 +1,21 @@
-"""Part 3: Querying & Authorizing a Registered ADK Agent with On-Demand Tool 3LO via GA A2A Proxy.
+"""Part 3: Querying & Authorizing a Registered ADK Agent with On-Demand Tool 3LO.
 
 How the Gemini Enterprise + ADK + Google Cloud Auth Manager 3LO flow works from a Custom UI:
 
-  1. User sends a query to the registered ADK agent via the GA v1 A2A proxy endpoint:
-       POST https://discoveryengine.googleapis.com/v1/projects/{project}/locations/{loc}/collections/default_collection/engines/{engine}/assistants/default_assistant/agents/{agent_id}/a2a/v1/message:send
-       {
-         "message": {
-           "messageId": "msg-1",
-           "role": "ROLE_USER",
-           "contextId": "<optional_session_resource_name>",
-           "content": [{"text": "..."}]
+  1. User sends a query to the registered ADK agent:
+     - Default (`--transport streamassist`, required for interactive custom-UI 3LO popups):
+         POST https://discoveryengine.googleapis.com/v1alpha/projects/{project}/locations/{loc}/collections/default_collection/engines/{engine}/assistants/default_assistant:streamAssist
+         {
+           "query": {"text": "..."},
+           "answerGenerationMode": "AGENT",
+           "agentsSpec": {"agentSpecs": [{"agentId": "<AGENT_ID>"}]},
+           "session": "<optional_session_resource_name>"
          }
-       }
+       Note: Interactive custom-UI 3LO via `v1alpha :streamAssist` currently
+       requires project allowlisting.
+     - Optional (`--transport a2a`, zero allowlisting, for non-3LO tools or users who
+       already pre-authorized in the Gemini Enterprise web app):
+         POST https://discoveryengine.googleapis.com/v1/projects/{project}/locations/{loc}/collections/default_collection/engines/{engine}/assistants/default_assistant/agents/{agent_id}/a2a/v1/message:send
 
   2. Inside the ADK agent on Vertex AI Agent Runtime (`AGENT_IDENTITY`):
      - Non-3LO tools (`PolicySubAgent` -> `get_company_sla_policy`) execute immediately
@@ -22,8 +26,8 @@ How the Gemini Enterprise + ADK + Google Cloud Auth Manager 3LO flow works from 
        Manager Vault, ADK emits the native `adk_request_credential` event.
 
   3. Gemini Enterprise intercepts `adk_request_credential`, persists `(consent_nonce, agent_user_id)`
-     keyed by `(session, displayName)`, and returns `message.metadata.answer.requiredAuthorizations[]`
-     plus `message.contextId` (`session`) in the A2A response:
+     keyed by `(session, displayName)`, and returns `answer.requiredAuthorizations[]`
+     plus `sessionInfo.session` in the `v1alpha :streamAssist` response:
        "requiredAuthorizations": [
          {
            "authorization": "projects/.../locations/us-central1/authProviders/sharepoint-provider",
@@ -39,7 +43,7 @@ How the Gemini Enterprise + ADK + Google Cloud Auth Manager 3LO flow works from 
 
   5. The Custom Backend finalizes the 3LO flow by calling Gemini Enterprise's
      `AuthorizationService.ValidateUserAuthorization` endpoint:
-       POST https://discoveryengine.googleapis.com/v1alpha/{contextId}:validateUserAuthorization
+       POST https://discoveryengine.googleapis.com/v1alpha/{session}:validateUserAuthorization
        {
          "session": "projects/.../sessions/{session_id}",
          "userIdValidationState": "<user_id_validation_state_from_redirect>",
@@ -48,7 +52,7 @@ How the Gemini Enterprise + ADK + Google Cloud Auth Manager 3LO flow works from 
      Gemini Enterprise recovers `(consent_nonce, agent_user_id)` and calls
      Auth Manager's `FinalizeCredentials`, storing the user's OAuth token in Auth Manager Vault.
 
-  6. The Custom UI automatically re-sends the original query on the same `contextId` (`session`),
+  6. The Custom UI automatically re-sends the original query on the same `session`,
      and the ADK agent executes the tool using the newly vaulted token!
 
 Usage:
@@ -56,7 +60,11 @@ Usage:
   .venv/bin/python 03_adk_agent_oauth/query_registered_agent.py --step query \\
     --query "What are our Grid Operations SLA policies?"
 
-  # Step 2: Query a 3LO-protected sub-agent (returns answer if authorized, or requiredAuthorizations)
+  # Step 1b: Query via zero-allowlist GA v1 A2A proxy (for non-3LO or pre-authorized users)
+  .venv/bin/python 03_adk_agent_oauth/query_registered_agent.py --step query \\
+    --transport a2a --query "What are our Grid Operations SLA policies?"
+
+  # Step 2: Query a 3LO-protected sub-agent via allowlisted v1alpha :streamAssist
   .venv/bin/python 03_adk_agent_oauth/query_registered_agent.py --step query \\
     --query "What is my Google profile and email?"
 
@@ -100,8 +108,102 @@ def discovery_host(location: str) -> str:
   )
 
 
+def extract_agent_reply_and_oauth(chunks: Any) -> Dict[str, Any]:
+  """Extracts assistant reply text, session name, and requiredAuthorizations from v1alpha :streamAssist."""
+  if not isinstance(chunks, list):
+    return {
+        "reply_text": json.dumps(chunks, indent=2),
+        "session": "",
+        "required_authorizations": [],
+        "requires_3lo": False,
+    }
+
+  texts: List[str] = []
+  session_name = ""
+  required_auths: List[Dict[str, Any]] = []
+
+  for chunk in chunks:
+    if not isinstance(chunk, dict):
+      continue
+    sess = chunk.get("sessionInfo", {}).get("session", "")
+    if sess:
+      session_name = sess
+
+    answer = chunk.get("answer", {})
+    for reply in answer.get("replies", []):
+      content = reply.get("groundedContent", {}).get("content", {})
+      if content.get("thought"):
+        continue
+      text = content.get("text")
+      if text:
+        texts.append(text)
+
+    for req_auth in answer.get("requiredAuthorizations", []):
+      if req_auth not in required_auths:
+        required_auths.append(req_auth)
+
+  return {
+      "reply_text": "".join(texts).strip(),
+      "session": session_name,
+      "required_authorizations": required_auths,
+      "requires_3lo": bool(required_auths),
+  }
+
+
+def query_adk_agent_stream_assist(
+    project_id: str,
+    location: str,
+    engine_id: str,
+    agent_id: str,
+    user_bearer_token: str,
+    query_text: str,
+    session_name: Optional[str] = None,
+) -> Dict[str, Any]:
+  """Calls allowlisted v1alpha :streamAssist targeting a registered ADK agent (`agentId`).
+
+  Requires project allowlisting for interactive custom-UI 3LO prompts.
+  """
+  endpoint = (
+      f"{discovery_host(location)}/v1alpha/projects/{project_id}/locations/{location}/"
+      f"collections/default_collection/engines/{engine_id}/"
+      f"assistants/default_assistant:streamAssist"
+  )
+  payload: Dict[str, Any] = {
+      "query": {"text": query_text},
+      "answerGenerationMode": "AGENT",
+      "agentsSpec": {"agentSpecs": [{"agentId": agent_id}]},
+  }
+  if session_name:
+    payload["session"] = session_name
+
+  headers = {
+      "Authorization": f"Bearer {user_bearer_token}",
+      "Content-Type": "application/json",
+      "X-Goog-User-Project": project_id,
+  }
+  resp = requests.post(endpoint, headers=headers, json=payload, timeout=90)
+  try:
+    body = resp.json()
+  except ValueError:
+    body = {"raw": resp.text}
+
+  parsed = extract_agent_reply_and_oauth(body) if resp.status_code == 200 else {
+      "reply_text": "",
+      "session": session_name or "",
+      "required_authorizations": [],
+      "requires_3lo": False,
+  }
+  return {
+      "status_code": resp.status_code,
+      "transport": "streamassist",
+      "endpoint": endpoint,
+      "raw_response": body,
+      **parsed,
+  }
+
+
 def extract_a2a_reply_and_oauth(body: Any) -> Dict[str, Any]:
-  """Extracts reply text, contextId (session), and requiredAuthorizations from `/a2a/v1/message:send`."""
+  """Extracts reply text and contextId (session) from GA `/v1/.../a2a/v1/message:send`."""
   if not isinstance(body, dict):
     return {
         "reply_text": json.dumps(body, indent=2),
@@ -146,7 +248,11 @@ def query_adk_agent_a2a(
     query_text: str,
     session_name: Optional[str] = None,
 ) -> Dict[str, Any]:
-  """Calls the GA v1 A2A proxy (`POST /v1/.../agents/{agent_id}/a2a/v1/message:send`)."""
+  """Calls the public GA v1 A2A proxy (`POST /v1/.../agents/{agent_id}/a2a/v1/message:send`).
+
+  Zero allowlisting required. Use for non-3LO tools or users who already pre-authorized
+  in the Gemini Enterprise web app.
+  """
   endpoint = (
       f"{discovery_host(location)}/v1/projects/{project_id}/locations/{location}/"
       f"collections/default_collection/engines/{engine_id}/"
@@ -180,6 +286,7 @@ def query_adk_agent_a2a(
   }
   return {
       "status_code": resp.status_code,
+      "transport": "a2a",
       "endpoint": endpoint,
       "raw_response": body,
       **parsed,
@@ -316,13 +423,24 @@ def resolve_context_and_token(args: argparse.Namespace) -> tuple[str, str, str, 
 
 def main() -> None:
   parser = argparse.ArgumentParser(
-      description="Part 3: Query & Authorize a Registered ADK Agent via GA A2A Proxy and :validateUserAuthorization."
+      description="Part 3: Query & Authorize a Registered ADK Agent via v1alpha :streamAssist (allowlisted 3LO) or GA v1 A2A Proxy."
   )
   parser.add_argument(
       "--step",
       choices=["query", "validate", "revoke"],
       default="query",
-      help="'query' calls /a2a/v1/message:send; 'validate' calls :validateUserAuthorization; 'revoke' clears stored 3LO tokens",
+      help="'query' calls the registered ADK agent; 'validate' calls :validateUserAuthorization; 'revoke' clears stored 3LO tokens",
+  )
+  parser.add_argument(
+      "--transport",
+      choices=["streamassist", "a2a"],
+      default="streamassist",
+      help=(
+          "'streamassist' (default) calls v1alpha :streamAssist (for interactive "
+          "custom-UI 3LO popups; requires project allowlisting); "
+          "'a2a' calls GA /v1/.../a2a/v1/message:send (zero allowlisting; for non-3LO "
+          "tools or users already pre-authorized in the Gemini Enterprise web app)."
+      ),
   )
   parser.add_argument(
       "--auth-mode",
@@ -396,7 +514,7 @@ def main() -> None:
 
     print("=== Part 3 (Validate): POST {session}:validateUserAuthorization ===")
     print(f"Auth Mode            : {args.auth_mode.upper()}")
-    print(f"Session (contextId)  : {args.session}")
+    print(f"Session              : {args.session}")
     print(f"Downstream Connector : {downstream_connector}\n")
 
     val_res = validate_user_authorization(
@@ -412,24 +530,35 @@ def main() -> None:
     if val_res["status_code"] == 200:
       print(
           "\n✓ 3LO credential finalized in Google Cloud Auth Manager Vault!\n"
-          "Re-run your query on the same contextId (session):\n"
+          "Re-run your query on the same session:\n"
           f'  .venv/bin/python 03_adk_agent_oauth/query_registered_agent.py --step query '
-          f'--session "{args.session}" --query "{args.query}"'
+          f'--transport {args.transport} --session "{args.session}" --query "{args.query}"'
       )
     return
 
   if not agent_id:
     sys.exit("Error: Set GE_GOOGLE_ID_AGENT_ID / GE_WIF_AGENT_ID in .env or pass --agent-id.")
 
-  print("=== Part 3 (Query): Querying Registered ADK Agent via GA v1 A2A Proxy (/a2a/v1/message:send) ===")
+  transport_label = (
+      "v1alpha :streamAssist (allowlisted interactive 3LO)"
+      if args.transport == "streamassist"
+      else "GA v1 A2A Proxy (/a2a/v1/message:send, zero allowlist)"
+  )
+  print(f"=== Part 3 (Query): Querying Registered ADK Agent via {transport_label} ===")
   print(f"Auth Mode         : {args.auth_mode.upper()}")
+  print(f"Transport         : {args.transport}")
   print(f"Engine ID         : {engine_id} ({location})")
   print(f"Registered Agent  : {agent_id}")
   if args.session:
-    print(f"Session/contextId : {args.session}")
+    print(f"Session           : {args.session}")
   print(f"Query             : {args.query}\n")
 
-  res = query_adk_agent_a2a(
+  query_fn = (
+      query_adk_agent_stream_assist
+      if args.transport == "streamassist"
+      else query_adk_agent_a2a
+  )
+  res = query_fn(
       project_id=project_id,
       location=location,
       engine_id=engine_id,
@@ -444,7 +573,7 @@ def main() -> None:
     sys.exit(1)
 
   if res["session"]:
-    print(f"Session/contextId : {res['session']}")
+    print(f"Session           : {res['session']}")
 
   print("\n--- High-Code ADK Agent Reply ---")
   print(res["reply_text"] or "(Paused awaiting 3LO user authorization)")

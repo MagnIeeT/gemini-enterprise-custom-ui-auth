@@ -1,9 +1,13 @@
-"""Local Web Server & Test UI for Part 3: ADK Agent On-Demand 3LO via :streamAssist & :validateUserAuthorization.
+"""Local Web Server & Test UI for Part 3: ADK Agent On-Demand 3LO via v1alpha :streamAssist (or GA v1 A2A).
 
-Serves `03_adk_agent_oauth/test_ui.html` at http://localhost:8502 and exposes:
-  1. POST /api/chat     -> Calls `assistants/default_assistant:streamAssist` targeting `agentId`
-  2. POST /api/validate -> Calls `{session}:validateUserAuthorization` with `userIdValidationState`
-                           and `downstreamConnector`, finalizing the credential in Auth Manager Vault.
+Serves `03_adk_agent_oauth/test_ui.html` at http://localhost:8503 and exposes:
+  1. POST /api/chat     -> Defaults to `v1alpha .../assistants/default_assistant:streamAssist`
+                           (allowlisted interactive 3LO), with optional `transport: "a2a"`
+                           for public GA `/v1/.../a2a/v1/message:send` (zero allowlist;
+                           non-3LO tools or users pre-authorized in the 1P GE web app).
+  2. POST /api/validate -> Calls `v1alpha {session}:validateUserAuthorization` with
+                           `userIdValidationState` and `downstreamConnector`, finalizing the
+                           credential in Auth Manager Vault.
 
 Usage:
   .venv/bin/python 03_adk_agent_oauth/test_ui.py
@@ -33,6 +37,7 @@ from pattern_b_workforce_sts import (  # pylint: disable=wrong-import-position
 from query_registered_agent import (  # pylint: disable=wrong-import-position
     parse_validation_redirect_uri,
     query_adk_agent_a2a,
+    query_adk_agent_stream_assist,
     revoke_stored_authorizations,
     validate_user_authorization,
 )
@@ -145,12 +150,18 @@ class Part3TestUIHandler(BaseHTTPRequestHandler):
 
     if parsed.path == "/api/chat":
       auth_mode = body.get("auth_mode", "google")
+      transport = body.get("transport", "streamassist")
       query_text = body.get("query", "")
       session_name = body.get("session", "") or None
       try:
         project_id, engine_id, location, agent_id = resolve_engine_location_agent(auth_mode)
         user_token = get_cached_user_token(auth_mode)
-        res = query_adk_agent_a2a(
+        query_fn = (
+            query_adk_agent_a2a
+            if transport == "a2a"
+            else query_adk_agent_stream_assist
+        )
+        res = query_fn(
             project_id=project_id,
             location=location,
             engine_id=engine_id,
@@ -253,7 +264,7 @@ def main() -> None:
 
   server = DualStackServer(("::", args.port), Part3TestUIHandler)
   print("======================================================================")
-  print(" Gemini Enterprise — Part 3: ADK Agent 3LO & GA A2A Proxy Test UI")
+  print(" Gemini Enterprise - Part 3: ADK Agent 3LO (v1alpha :streamAssist / GA A2A)")
   print(f" Open in your browser: http://localhost:{args.port}")
   print("======================================================================")
   try:

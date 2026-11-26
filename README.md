@@ -9,7 +9,7 @@ Companion code, local Test UIs, and CLI reference for authenticating a custom en
 2. **Part 2 (`02_federated_connector_oauth/`): Authenticating Federated Connectors through a Custom UI**
    - Discovering engine connectors via `widgetConfigs/default_search_widget_config`, checking and storing per-user 3-legged OAuth (3LO) tokens in Gemini Enterprise's managed **Keystore** via `dataConnector:acquireAccessToken` and `dataConnector:acquireAndStoreRefreshToken`, and running grounded `:streamAssist` queries (`toolsSpec.vertexAiSearchSpec.dataStoreSpecs`).
 3. **Part 3 (`03_adk_agent_oauth/`): Authenticating Custom ADK Agents with Individual Tool OAuth**
-   - Deploying a high-code ADK agent (`EnterpriseRouterAgent`) to Vertex AI Agent Runtime with cryptographic **`AGENT_IDENTITY`** (SPIFFE ID), wrapping protected sub-agent tools with ADK's built-in **`AuthenticatedFunctionTool`** + **Google Cloud Auth Manager (`GcpAuthProvider`)**, and completing on-demand 3LO from a Custom UI via Gemini Enterprise's GA **`/a2a/v1/message:send`** proxy (`requiredAuthorizations`) and **`{contextId}:validateUserAuthorization`**.
+   - Deploying a high-code ADK agent (`EnterpriseRouterAgent`) to Vertex AI Agent Runtime with cryptographic **`AGENT_IDENTITY`** (SPIFFE ID), wrapping protected sub-agent tools with ADK's built-in **`AuthenticatedFunctionTool`** + **Google Cloud Auth Manager (`GcpAuthProvider`)**, and completing on-demand 3LO from a Custom UI via allowlisted **`v1alpha :streamAssist`** (`answerGenerationMode: "AGENT"`, `requiredAuthorizations`) and **`{session}:validateUserAuthorization`** (with an optional zero-allowlist **`--transport a2a`** mode using public GA `/v1/.../a2a/v1/message:send` for non-3LO tools or users pre-authorized in the built-in Gemini Enterprise web app).
 
 ![End-to-End Identity Architecture](docs/diagrams/fig1-end-to-end-identity-architecture.png)
 
@@ -265,15 +265,21 @@ To trigger 3-Legged OAuth **on demand per tool** and let Gemini Enterprise and G
    - Tools that don't need user OAuth (`get_company_sla_policy`) run as normal functions with zero OAuth prompts.
    - Tools that call protected third-party APIs (`get_google_user_info`, `get_sharepoint_sites`) are wrapped in `AuthenticatedFunctionTool` + `GcpAuthProvider` pointing to your Auth Provider ID (`projects/${GCP_PROJECT_ID}/locations/us-central1/authProviders/{provider_id}`).
 2. **Deploy the ADK agent to Vertex AI Agent Engine with `AGENT_IDENTITY` enabled (`03_adk_agent_oauth/deploy_agent_runtime.py`):**
-   - Deploy `EnterpriseRouterAgent` and its sub-agents with `identity_type=AGENT_IDENTITY`. This gives your agent a built-in SPIFFE identity (`principal://agents.global.org-...`). Grant that identity `roles/agentidentity.ServiceAgent` on your project so the agent can read tokens from the GCP Auth Manager Token Vault.
+   - Deploy `EnterpriseRouterAgent` and its sub-agents with `identity_type=AGENT_IDENTITY`. This gives your agent a built-in SPIFFE identity (`principal://agents.global.org-...`). Grant that identity `roles/agentidentity.user` on your Auth Providers so the agent can read tokens from the GCP Auth Manager Token Vault.
 3. **Add your 3LO Auth Providers in Google Cloud Console (Auth Manager) with Default Continue URI set to `<your-custom-ui-url>/validateUserId`:**
    - In Google Cloud Auth Manager (`authProviders`), register your third-party OAuth Client ID and Client Secret (e.g., `google-workspace-provider` and `sharepoint-provider`).
    - Set **Default Continue URI** (`defaultContinueUri`) to your Custom UI's `/validateUserId` page (for example, `http://localhost:8503/validateUserId` locally or `https://your-custom-ui.company.com/validateUserId` in production). Because the third-party IdP (Entra ID / Google) always redirects to Google's managed `https://agentidentitycredentials.googleapis.com/v1/.../oauthcallback` URL first, you never need to register your Custom UI URL in Entra ID or Google OAuth Console.
-4. **Invoke the agent via Gemini Enterprise's GA `v1` A2A Proxy and finalize 3LO via `{contextId}:validateUserAuthorization` (`03_adk_agent_oauth/query_registered_agent.py`):**
-   - Every custom ADK agent registered in Gemini Enterprise automatically exposes a built-in **`v1` A2A proxy endpoint** (`POST /v1/.../agents/{AGENT_ID}/a2a/v1/message:send`) with **zero project allowlisting** and no `A2aAgent` wrapper needed in your ADK code.
-   - On a first-time query, the sub-agent checks the Token Vault (`RetrieveCredentials`), sees a cache miss, and returns `message.metadata.answer.requiredAuthorizations[]` (`authorizationUri`) alongside `message.contextId` (`session`).
+4. **Invoke the agent via allowlisted `v1alpha :streamAssist` (for interactive custom-UI 3LO) and finalize 3LO via `{session}:validateUserAuthorization` (`03_adk_agent_oauth/query_registered_agent.py`):**
+   - Call `POST /v1alpha/.../assistants/default_assistant:streamAssist` with `answerGenerationMode: "AGENT"` and `agentsSpec.agentSpecs[].agentId`.
+   - On a first-time query, the sub-agent checks the Token Vault (`RetrieveCredentials`), sees a cache miss, and returns `answer.requiredAuthorizations[]` (`authorizationUri`) alongside `sessionInfo.session`.
    - When the user approves consent in the popup, `/oauthcallback` exchanges the code and redirects the popup to `<your-custom-ui-url>/validateUserId?user_id_validation_state=...` (relayed to the parent window via `BroadcastChannel` / `postMessage`).
-   - Your Custom Backend calls `POST /v1alpha/{contextId}:validateUserAuthorization` so Gemini Enterprise finalizes and saves the token in the Token Vault (`FinalizeCredentials`), and then automatically retries `message:send` with the same `contextId` to return the grounded answer.
+   - Your Custom Backend calls `POST /v1alpha/{session}:validateUserAuthorization` so Gemini Enterprise finalizes and saves the token in the Token Vault (`FinalizeCredentials`), and then automatically retries `:streamAssist` on the same `session` to return the grounded answer.
+
+> **Note on Project Allowlisting for Interactive Custom-UI 3LO:**
+> - **Interactive 3LO popups from a Custom UI via Gemini Enterprise (`v1alpha :streamAssist`):** Triggering interactive on-demand 3LO prompts (`requiredAuthorizations`) from a Custom UI via `v1alpha :streamAssist` currently requires project allowlisting. Contact your Google Cloud account team to allowlist your Google Cloud project before testing interactive custom-UI 3LO popups in Part 3.
+> - **Zero-allowlisting options available today:**
+>   1. **Pre-authorize in the Gemini Enterprise web app, then call the GA `v1` A2A endpoint (`--transport a2a`):** Once a user completes 3LO once in the Gemini Enterprise web app (which stores their token in Auth Manager Vault), your Custom UI can invoke the agent over `/v1/.../a2a/v1/message:send` with **zero allowlisting** and full Gemini Enterprise governance. Non-3LO tools (such as `PolicySubAgent`) also work over `--transport a2a` with zero allowlisting.
+>   2. **Call Vertex AI Agent Runtime directly:** If you need interactive in-app 3LO with zero allowlisting, call your deployed ADK agent directly on Vertex AI Agent Runtime and handle ADK's `adk_request_credential` flow in your client.
 
 ---
 
@@ -287,9 +293,12 @@ python 03_adk_agent_oauth/deploy_agent_runtime.py
 python 03_adk_agent_oauth/test_ui.py
 # Open http://localhost:8503 in your browser
 ```
+- Select **Transport** in the top bar:
+  - **`v1alpha :streamAssist (Interactive 3LO, allowlisted)`** *(default)*: Full interactive on-demand 3LO flow (`requiredAuthorizations` -> popup -> `{session}:validateUserAuthorization` -> auto re-run).
+  - **`GA v1 A2A Proxy (Zero allowlist, non-3LO / pre-auth)`**: Calls public `/v1/.../a2a/v1/message:send` with zero allowlisting for non-3LO tools or already-authorized users.
 - Click **"1. PolicySubAgent (No Auth)"** $\rightarrow$ Returns internal SLA policy immediately without any OAuth prompt.
 - Click **"2. GoogleWorkspaceSubAgent (Google 3LO)"** or **"3. SharePointSubAgent (Microsoft 3LO)"** $\rightarrow$ Renders the **On-Demand 3LO Authorization Required** card.
-- Click **"Authorize in Popup (3LO)"** $\rightarrow$ Approving access in the popup redirects to `http://localhost:8503/validateUserId`, automatically closes the popup, calls `{contextId}:validateUserAuthorization`, and **automatically re-runs your query**!
+- Click **"Authorize in Popup (3LO)"** $\rightarrow$ Approving access in the popup redirects to `http://localhost:8503/validateUserId`, automatically closes the popup, calls `{session}:validateUserAuthorization`, and **automatically re-runs your query**!
 - Click **"Clear Stored 3LO Tokens (Reset Auth Vault)"** anytime to delete your cached user tokens from Google Cloud Auth Manager Vault and re-test the 3LO popup from scratch.
 
 ---
@@ -297,12 +306,18 @@ python 03_adk_agent_oauth/test_ui.py
 ### Step 3: Run via CLI (`query_registered_agent.py`)
 
 ```bash
-# 1. Query internal policy sub-agent (no 3LO required)
+# 1. Query internal policy sub-agent via allowlisted v1alpha :streamAssist (default)
 python 03_adk_agent_oauth/query_registered_agent.py \
   --step query \
   --query "What are our Grid Operations SLA policies?"
 
-# 2. Query 3LO-protected sub-agent (returns answer if vaulted, or requiredAuthorizations[])
+# 1b. Query via zero-allowlist public GA v1 A2A proxy (non-3LO or pre-authorized users)
+python 03_adk_agent_oauth/query_registered_agent.py \
+  --step query \
+  --transport a2a \
+  --query "What are our Grid Operations SLA policies?"
+
+# 2. Query 3LO-protected sub-agent via allowlisted v1alpha :streamAssist (returns requiredAuthorizations[])
 python 03_adk_agent_oauth/query_registered_agent.py \
   --step query \
   --query "Search my SharePoint sites"
@@ -318,9 +333,33 @@ python 03_adk_agent_oauth/query_registered_agent.py \
 python 03_adk_agent_oauth/query_registered_agent.py --step revoke
 ```
 
-**Equivalent `curl` commands (Step 1: GA `/a2a/v1/message:send` $\rightarrow$ Step 2: `{contextId}:validateUserAuthorization`):**
+**Equivalent `curl` commands (Interactive 3LO via allowlisted `v1alpha :streamAssist` $\rightarrow$ `v1alpha {session}:validateUserAuthorization`):**
 ```bash
-# 1. Query the registered ADK agent via the GA v1 A2A proxy (no allowlisting needed)
+# 1. Query the registered ADK agent via allowlisted v1alpha :streamAssist (required for interactive 3LO)
+curl -s -X POST \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
+  "https://discoveryengine.googleapis.com/v1alpha/projects/${GCP_PROJECT_ID}/locations/${GE_GOOGLE_ID_LOCATION}/collections/default_collection/engines/${GE_GOOGLE_ID_ENGINE_ID}/assistants/default_assistant:streamAssist" \
+  -d "{
+    \"query\": {\"text\": \"Search my SharePoint sites\"},
+    \"answerGenerationMode\": \"AGENT\",
+    \"agentsSpec\": {\"agentSpecs\": [{\"agentId\": \"${GE_GOOGLE_ID_AGENT_ID}\"}]}
+  }"
+
+# 2. Finalize 3LO authorization on the returned session (:validateUserAuthorization)
+curl -s -X POST \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
+  "https://discoveryengine.googleapis.com/v1alpha/${SESSION_NAME}:validateUserAuthorization" \
+  -d "{
+    \"session\": \"${SESSION_NAME}\",
+    \"userIdValidationState\": \"${USER_ID_VALIDATION_STATE}\",
+    \"downstreamConnector\": \"projects/${GCP_PROJECT_ID}/locations/${AUTH_PROVIDER_LOCATION}/authProviders/${SHAREPOINT_AUTH_PROVIDER_ID}\"
+  }"
+
+# Optional (Zero allowlisting): Call non-3LO or pre-authorized ADK agents via public GA v1 A2A proxy
 curl -s -X POST \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "Content-Type: application/json" \
@@ -330,19 +369,7 @@ curl -s -X POST \
     \"message\": {
       \"messageId\": \"msg-1\",
       \"role\": \"ROLE_USER\",
-      \"content\": [{\"text\": \"Search my SharePoint sites\"}]
+      \"content\": [{\"text\": \"What are our Grid Operations SLA policies?\"}]
     }
-  }"
-
-# 2. Finalize 3LO authorization on the returned contextId (:validateUserAuthorization)
-curl -s -X POST \
-  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  -H "Content-Type: application/json" \
-  -H "X-Goog-User-Project: ${GCP_PROJECT_ID}" \
-  "https://discoveryengine.googleapis.com/v1alpha/${CONTEXT_ID}:validateUserAuthorization" \
-  -d "{
-    \"session\": \"${CONTEXT_ID}\",
-    \"userIdValidationState\": \"${USER_ID_VALIDATION_STATE}\",
-    \"downstreamConnector\": \"projects/${GCP_PROJECT_ID}/locations/${AUTH_PROVIDER_LOCATION}/authProviders/${SHAREPOINT_AUTH_PROVIDER_ID}\"
   }"
 ```
